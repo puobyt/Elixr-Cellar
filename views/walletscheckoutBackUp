@@ -1,0 +1,48 @@
+   <div class="form-check h-100 border rounded-3">
+                                                        <div class="p-3">
+                                                            <% if(wallets){%>
+
+                                                                <% if( wallets.balance>= totalPrice){%>
+                                                                    <input class="form-check-input" type="radio"
+                                                                        name="paymentMethod" id="flexRadioDefault3"
+                                                                        value="Wallet" <%=wallets.balance>=
+                                                                    totalPrice ? '' : 'disabled' %> />
+                                                                    <label class="form-check-label"
+                                                                        for="flexRadioDefault3">
+                                                                        Wallet <br />
+                                                                        <small class="text">Balance:₹
+                                                                            <%=wallets.balance?wallets.balance:0%>
+                                                                        </small><br>
+                                                                        <small class="text-muted"></small>
+                                                                    </label>
+                                                                    <%}else{%>
+                                                                        <input class="form-check-input" type="radio"
+                                                                            name="paymentMethod" id="flexRadioDefault3"
+                                                                            <%=wallets.balance>= totalPrice ? '' :
+                                                                        'disabled' %> />
+                                                                        <label class="form-check-label"
+                                                                            for="flexRadioDefault3">
+                                                                            Wallet <br />
+                                                                            <small class="text">Balance:
+                                                                                <%=wallets.balance%>
+                                                                            </small><br>
+                                                                            <small class="text-danger">Insufficient
+                                                                                balance</small>
+                                                                        </label>
+                                                                        <%}%>
+                                                                            <%}else{%>
+                                                                                <input class="form-check-input"
+                                                                                    type="radio" name="paymentMethod"
+                                                                                    id="flexRadioDefault3" disabled />
+                                                                                <label class="form-check-label"
+                                                                                    for="flexRadioDefault3">
+                                                                                    Wallet <br />
+                                                                                    <small class="text">Balance:
+                                                                                        0</small><br>
+                                                                                    <small
+                                                                                        class="text-danger">Insufficient
+                                                                                        balance</small>
+                                                                                </label>
+                                                                                <%}%>
+                                                        </div>
+                                                    </div>

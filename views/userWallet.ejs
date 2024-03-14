@@ -1,0 +1,195 @@
+<%- include('userHeader') %>
+    <div class="container">
+
+        <body style="margin-top: 5px;">
+            <div class="container">
+
+                <div class="row d-flex justify-content-center mt-5">
+
+                    <div class="col-md-8">
+                        <div class="card">
+
+                            <div class="invoice p-5">
+
+                                <center>
+                                    <p style="font-size: 30px;">WALLET BALANCE</p>
+                                </center>
+                                <center>
+                                    <p style="font-size: 20px;">₹<%=userWallet?userWallet.balance:0%>
+                                    </p>
+                                </center>
+
+                                <div class="payment border-top mt-3 mb-3 border-bottom table-responsive">
+
+                                    <table class="table table-borderless">
+
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center">
+
+                                                    <div class="inner-circle"></div>
+                                </div>
+                                </th>
+                                <th>Transaction Id</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                </tr>
+                                </thead>
+                                <% if(userWallet){%>
+
+
+                                    <% if (userWallet.transactionHistory.length> 0) { %>
+
+                                        <% userWallet.transactionHistory.forEach(data=>{%>
+
+
+                                            <tbody class="table-body">
+                                                <tr class="cell-1">
+                                                    <td class="text-center">
+
+                                                        <div class="inner-circle"></div>
+                            </div>
+                            </td>
+
+                            <td>
+                                <%=data._id%>
+                            </td>
+                            <td>
+                                <%=data.transaction%>
+                            </td>
+                            <td>
+                                ₹<%=data.amount%>
+                            </td>
+
+
+
+
+
+                            </tr>
+                            <%})%>
+                                <%}else{%>
+                                    <p class="text-center bg-danger">No records found.</p>
+                                    <%}%>
+                                        <%}else{%>
+                                            <p class="text-center bg-danger">No records found.</p>
+                                            <%}%>
+                                                </tbody>
+                                                </table>
+                                                </table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </div>
+
+
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+    </div>
+    <div class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <div class="social-icons">
+                        <a href="#"><span class="icon-facebook"></span></a>
+                        <a href="#"><span class="icon-twitter"></span></a>
+                        <a href="#"><span class="icon-youtube"></span></a>
+                        <a href="#"><span class="icon-instagram"></span></a>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="copyright">
+                        <p>
+
+                            Copyright &copy;
+                            <script>document.write(new Date().getFullYear());</script> All rights reserved | This
+                            template is
+                            Designed <i class="icon-heart text-danger" aria-hidden="true"></i> by Paul Boby T</a>
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+    <div id="loader" class="show fullscreen"><svg class="circular" width="48px" height="48px">
+            <circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee" />
+            <circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10"
+                stroke="#ff5e15" />
+        </svg></div>
+    <style>
+        .add-to-cart-btn {
+            background-color: #34db98;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-to-cart-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        /* Hover effect */
+        .add-to-cart-btn:hover {
+            background-color: #ed8984;
+        }
+    </style>
+    <script src="/js/jquery-3.3.1.min.js"></script>
+    <script src="/js/jquery-migrate-3.0.1.min.js"></script>
+    <script src="/js/jquery-ui.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/owl.carousel.min.js"></script>
+    <script src="/js/jquery.stellar.min.js"></script>
+    <script src="/js/jquery.countdown.min.js"></script>
+    <script src="/js/bootstrap-datepicker.min.js"></script>
+    <script src="/js/jquery.easing.1.3.js"></script>
+    <script src="/js/aos.js"></script>
+    <script src="/js/jquery.fancybox.min.js"></script>
+    <script src="/js/jquery.sticky.js"></script>
+    <script src="/js/jquery.mb.YTPlayer.min.js"></script>
+    <script src="/js/main.js"></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-23581568-13"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-23581568-13');
+    </script>
+    <script defer
+        src="https://static.cloudflareinsights.com/beacon.min.js/v84a3a4012de94ce1a686ba8c167c359c1696973893317"
+        integrity="sha512-euoFGowhlaLqXsPWQ48qSkBSCFs3DPRyiwVu3FjR96cMPx+Fr+gpWRhIafcHwqwCqWS42RZhIudOvEI+Ckf6MA=="
+        data-cf-beacon='{"rayId":"831badf908aba3da","b":1,"version":"2023.10.0","token":"cd0b4b3a733644fc843ef0b185f98241"}'
+        crossorigin="anonymous"></script>
+    </body>
+
+    </html>

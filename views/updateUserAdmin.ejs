@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/User/usersignup.css">
+    <style>
+        .add-btn {
+            margin-left: auto;
+
+            width: 100px;
+        }
+
+        .add-btn {
+            margin-left: auto;
+            margin-right: auto;
+            width: 120px;
+        }
+
+        .home-btn {
+            margin-top: 11px;
+            margin-left: 330px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="register-photo">
+        <div class="form-container">
+            <!-- <div></div> -->
+            <form method="POST" action="/editUser">
+                <h2 class="text-center"><strong>EDIT</strong> User</h2>
+                <!-- <p><%=//wrong%> </p> -->
+                <div class="form-group"><input class="form-control" type="hidden" name="id" value="<%=User._id %>"
+                        required></div>
+                <div class="form-group"><input class="form-control" type="text" name="name" placeholder="username"
+                        value="<%=User.name %>" required></div>
+                <div class="form-group"><input class="form-control" type="email" name="email" placeholder="email"
+                        value="<%=User.email %>" required></div>
+                <div class="form-group"><input class="form-control" type="password" name="password"
+                        value="<%=User.password %>" placeholder="Password" id="myInput" required></div>
+                <br>
+                <div class="form-group"> <input type="checkbox" onclick="myFunction()">Show</div>
+
+                <div class="form-group "><button class="btn btn-primary btn-block text-center add-btn"
+                        type="submit">Update User</button></div>
+                <div class="home-btn "><a class=" home-btn" href="/adminhome">Back to home</a></div>
+
+
+
+
+            </form>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>function myFunction() {
+            let pass = document.getElementById("myInput");
+            if (pass.type === "password") {
+                pass.type = "text";
+            } else {
+                pass.type = "password";
+            }
+        }</script>
+
+    <script>
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    </script>
+
+</body>
+
+</html>
