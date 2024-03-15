@@ -83,7 +83,7 @@ admin_router.get('/addCoupons',adminController.addCoupons)
 admin_router.post('/addCoupons',adminController.addCoupons)
 
 
-admin_router.get('/adminlogout',adminController.adminLogout)
+
 
 admin_router.get('/addUser',adminController.addUser)
 
@@ -94,6 +94,10 @@ admin_router.get('/editUser',adminController.editUser)
  admin_router.post('/editUser',adminController.editUserFunction)
 
  admin_router.get('/deleteUser',adminController.userDelete)
+
+ admin_router.get('/adminlogout',adminController.adminLogout)
+
+
 
  
 
