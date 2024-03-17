@@ -106,28 +106,54 @@
 
   <script>
     function validation() {
+      let mobile = document.getElementById("mobile").value.trim();
+      let house = document.getElementById("houseName").value.trim();
+      let street = document.getElementById("street").value.trim();
+      let city = document.getElementById("city").value.trim();
+      let pincode = document.getElementById("pinCode").value.trim();
+      let state = document.getElementById("state").value.trim();
 
-      let mobile = document.getElementById("mobile").value;
-      let house = document.getElementById("houseName").value;
-      let street = document.getElementById("street").value;
-      let city = document.getElementById("city").value;
-      let pincode = document.getElementById("pinCode").value;
-      let state = document.getElementById("state").value;
-
+      // Check if any of the fields are empty or contain only spaces
       if (!mobile || !house || !street || !city || !pincode || !state) {
         alert("Please fill out all fields!");
         return false;
       }
 
-      if (isNaN(mobile) || mobile.length < 10) {
-        alert("Enter a valid number");
+      // Validate mobile number
+      if (isNaN(mobile) || mobile.length !== 10) {
+        alert("Enter a valid Mobile number");
         return false;
       }
 
+      // Validate house name length
+      if (house.length < 3) {
+        alert("House Name should be more than 3 characters");
+        return false;
+      }
+
+      // Validate street name length
+      if (street.length < 3) {
+        alert("Street Name should be more than 3 characters");
+        return false;
+      }
+
+      if (city.length < 3) {
+        alert("City Name should be more than 3 characters");
+        return false;
+      }
+
+      // Validate state length
+      if (state.length < 3) {
+        alert("State should be more than 3 characters");
+        return false;
+      }
+
+      // Validate pincode
       if (isNaN(pincode) || pincode.length !== 6) {
         alert("Enter a valid Pincode");
         return false;
       }
+
       return true;
     }
   </script>

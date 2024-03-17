@@ -195,7 +195,7 @@ const userShop = async (req, res) => {
 
         const filter = { ...categoryQuery }; // Combine category filter with others
         const products = await Product.find(filter).sort(sortQuery);
-       
+
         // const category = req.query.category;
         // if (category) {
         //     categoryQuery = { productCategory: category };
@@ -203,12 +203,12 @@ const userShop = async (req, res) => {
 
         // const products = await Product.find().sort(sortQuery);
 
-        
-            res.render('userShop', { products });
-        
-       
+
+        res.render('userShop', { products });
+
+
     } catch (error) {
-      
+
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
@@ -228,7 +228,7 @@ const searchProduct = async (req, res) => {
         const query = req.query.query || '';
         const category = req.query.category || '';
 
-       
+
         const filter = {
             productName: { $regex: new RegExp(`^${query}`, 'i') },
         };
@@ -243,9 +243,9 @@ const searchProduct = async (req, res) => {
             products = await Product.find();
         }
 
-        
-            res.render('userShop', { products });
-        
+
+        res.render('userShop', { products });
+
     } catch (error) {
         console.log(error);
     }
@@ -253,23 +253,23 @@ const searchProduct = async (req, res) => {
 
 const userContact = (req, res) => {
     try {
-        
-            res.render('userContact')
-        
+
+        res.render('userContact')
+
     } catch (error) {
         console.log(error)
     }
 }
 
-const userWallet = async(req, res) => {
+const userWallet = async (req, res) => {
     try {
-        const userId= req.session.userId;
+        const userId = req.session.userId;
 
-        const userWallet= await wallet.findOne({userId})
-        console.log("userWallet",userWallet.transactionHistory);
-        
-            res.render('userWallet',{userWallet})
-        
+        const userWallet = await wallet.findOne({ userId })
+        console.log("userWallet", userWallet.transactionHistory);
+
+        res.render('userWallet', { userWallet })
+
     } catch (error) {
         console.log(error)
     }
@@ -278,7 +278,7 @@ const userWallet = async(req, res) => {
 
 const calculateTotalPrice = (items) => {
     const totalPrice = items.reduce((total, item) => {
-        if (item.productId.totalQuantity > 0) {
+        if (item.productId && item.productId.totalQuantity > 0) {
             return total + item.productId.price * item.quantity;
         }
         return total;
@@ -303,7 +303,7 @@ const userCart = async (req, res) => {
         }
         const items = userCart.items || [];
         const totalPrice = calculateTotalPrice(items);
-        
+        console.log("user cart", userCart.items)
 
         res.render('userCart', { cartItems: userCart.items, totalPrice });
     } catch (error) {
@@ -375,13 +375,13 @@ const handleCheckOut = async (req, res) => {
     const userCart = await Cart.findOne({ userId }).populate('items.productId');
     const items = userCart.items;
     let addressIndex = req.body.selectedAddress;
-  
-    
+
+
     const userAddresses = user.address[addressIndex];
     const { paymentMethod, totalPrice } = req.body;
 
     try {
-        
+
 
         const newOrder = new orders({
             customer: userId,
@@ -432,13 +432,14 @@ const userOrderPlaced = async (req, res) => {
 
         if (req.session.user) {
             const userId = req.session.userId;
+            const userCart = await Cart.findOne({ userId }).populate('items.productId');
+            const items = userCart.items;
+
+            const userOrders = await orders.find({ customer: userId }).populate('items.product').sort({ orderDate: -1 });
 
 
-            const userOrders = await orders.find({ customer: userId }).populate('items.product')
 
-
-
-            res.render('userOrderPlaced', { userOrders, userId })
+            res.render('userOrderPlaced', { items, userOrders, userId });
         } else {
             res.redirect('/')
         }
@@ -447,14 +448,18 @@ const userOrderPlaced = async (req, res) => {
     }
 }
 
-const orderDetails = async(req,res)=>{
+const orderDetails = async (req, res) => {
     try {
-        
-        res.render('userOrderDetails')
-    
-} catch (error) {
-    console.log(error)
-}
+        const userId = req.session.userId;
+        const userOrders = await orders.find().populate('items.product')
+        const userCart = await Cart.findOne({ userId }).populate('items.productId');
+        const items = userCart.items;
+
+        res.render('userOrderDetails', { items, userOrders, userId })
+
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 const cancelOrder = async (req, res) => {
@@ -465,22 +470,37 @@ const cancelOrder = async (req, res) => {
 
         const order = await orders.findById(orderId);
 
+        // // Check if the order exists and if it's associated with the current user
+        // if (!order || order.customer !== userId) {
+        //     return res.status(404).send("Order not found");
+        // }
+
+        // // Restore product stock for each item in the canceled order
+        // for (const item of order.items) {
+        //     const product = await Product.findById(item.product);
+        //     if (product) {
+        //         // Increment the product stock by the quantity canceled
+        //         product.stock += item.quantity;
+        //         await product.save();
+        //     }
+        // }
+
 
         order.OrderStatus = 'Cancelled';
 
 
         await order.save();
-        let userWallet = await wallet.findOne({userId:userId})
-        if(!userWallet){
+        let userWallet = await wallet.findOne({ userId: userId })
+        if (!userWallet) {
             userWallet = new wallet({
-                userId:order.customer,
-                balance:0,
-                transactionHistory:[]
+                userId: order.customer,
+                balance: 0,
+                transactionHistory: []
             })
             await userWallet.save();
         }
 
-    
+
         userWallet.balance += order.totalAmount;
         userWallet.transactionHistory.push({
             transaction: 'Money Added',
@@ -492,7 +512,7 @@ const cancelOrder = async (req, res) => {
         res.redirect('/userOrderPlaced');
     } catch (error) {
         console.log(error);
-      
+
         res.status(500).send("Internal Server Error");
     }
 };
@@ -612,7 +632,7 @@ const userProfile = async (req, res) => {
     try {
         const userId = req.session.userId;
 
-        
+
         const userToken = randomstring.generate();
 
         await UserCollection.findByIdAndUpdate(userId, { userToken });
@@ -620,7 +640,7 @@ const userProfile = async (req, res) => {
         const Usercollection = await UserCollection.findById(userId);
 
         if (req.session.user) {
-           
+
             res.render('userProfile', { Usercollection, userToken });
         } else {
             res.redirect('/');
@@ -633,8 +653,8 @@ const userProfile = async (req, res) => {
 
 const showChangePassword = async (req, res) => {
     try {
-       
-    
+
+
         res.render("resetPassword", { message: "", });
     } catch (error) {
         console.error(error);
@@ -652,26 +672,26 @@ const handleResetPassword = async (req, res) => {
         const { currentPassword, newPassword, confirmPassword } = req.body;
         const user = await UserCollection.findById(userId);
 
-     
+
         if (newPassword !== confirmPassword) {
             return res.render("resetPassword", {
                 message: "Passwords do not match",
             });
         }
         if (user.password !== currentPassword) {
-        
-        
-        
+
+
+
             return res.render("resetPassword", {
                 message: "Current password is incorrect",
             });
         }
 
-       
+
         user.password = newPassword;
         await user.save();
 
-    
+
         res.redirect('/userProfile?message=Successfully%20Changed%20Password');
     } catch (error) {
         console.error(error);
@@ -683,7 +703,7 @@ const handleResetPassword = async (req, res) => {
 
 
 
-    
+
 const registerPass = (req, res) => {
     if (req.session.user) {
         res.redirect('/home');
@@ -881,7 +901,7 @@ const saveEditAddress = async (req, res) => {
     }
 }
 
-const wishlistCart  = async (req, res) => {
+const wishlistCart = async (req, res) => {
     try {
 
         const userId = req.session.userId;
@@ -897,7 +917,7 @@ const wishlistCart  = async (req, res) => {
         }
         const items = userCart.items || [];
         const totalPrice = calculateTotalPrice(items);
-        
+
 
         res.render('wishlist', { cartItems: userCart.items, totalPrice });
     } catch (error) {
@@ -951,7 +971,7 @@ module.exports = {
     userCheckout,
     userProfile,
     showChangePassword,
-    handleResetPassword ,
+    handleResetPassword,
     registerPass,
     addAddressPage,
     addAddress,
@@ -977,7 +997,7 @@ module.exports = {
     userSuccess,
     cancelOrder,
     userWallet,
-    wishlistCart ,
+    wishlistCart,
 };
 
 

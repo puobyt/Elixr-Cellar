@@ -7,11 +7,14 @@
 
 
           <form action="/search" method="GET" class="form-inline my-2 my-lg-0">
-            <input class="form-control mr-sm-2" type="text" placeholder="Search" name="query">
+            <input id="searchInput" class="form-control mr-sm-2" type="text" placeholder="Search" name="query">
+
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
             <select class="form-control mr-sm-2" name="category">
               <option value="">
                 All Categories </option>
+
+
 
 
             </select>
@@ -162,6 +165,18 @@
       background-color: #ed8984;
     }
   </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const query = urlParams.get('query');
+      const searchInput = document.getElementById('searchInput');
+      if (query) {
+        searchInput.value = query;
+      }
+    });
+  </script>
+
   <script src="/js/jquery-3.3.1.min.js"></script>
   <script src="/js/jquery-migrate-3.0.1.min.js"></script>
   <script src="/js/jquery-ui.js"></script>

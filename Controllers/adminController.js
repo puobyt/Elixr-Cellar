@@ -8,7 +8,7 @@ const categories = require('../Model/categoryModel')
 const products = require('../Model/productsModel')
 const users = require('../Model/userModel')
 const orders = require('../Model/orderModel')
-const coupon = require('../Model/couponModel')
+const Coupon = require('../Model/couponModel')
 
 const multer = require('multer');
 
@@ -410,7 +410,7 @@ const adminEditProductPost = async (req, res) => {
 
         const prodId = req.params.id;
         console.log('Product ID:', prodId);
-       
+
 
 
 
@@ -432,14 +432,14 @@ const adminEditProductPost = async (req, res) => {
             const combinedImages = [...remainingImages, ...newImagePaths].slice(0, 3);
             console.log('Combined Images:', combinedImages);
 
-       
+
 
         }
-      
-        
+
+
         const { productName, productDes, productCat, productDate, stock, price } = req.body;
 
-      
+
         const updatedProduct = await products.findByIdAndUpdate(
             prodId,
             {
@@ -463,13 +463,13 @@ const adminEditProductPost = async (req, res) => {
         for (const deletedImageIndex of deletedImages) {
             const index = parseInt(deletedImageIndex, 10);
             if (!isNaN(index) && index >= 0 && index < updatedProduct.image.length) {
-               
-               
+
+
                 updatedProduct.image.splice(index, 1);
             }
         }
 
-      
+
         await updatedProduct.save();
 
         console.log("Product details updated successfully:", updatedProduct);
@@ -594,7 +594,7 @@ const unblockUser = async (req, res) => {
 const adminOrdersDash = async (req, res) => {
     try {
         const userId = req.session.userId;
-        const userOrders = await orders.find().populate('items.product')
+        const userOrders = await orders.find().populate('items.product').sort({ orderDate: -1 });
 
 
 
@@ -607,44 +607,66 @@ const adminOrdersDash = async (req, res) => {
 
 // admin Coupons & Discounts
 const adminCouponsDiscounts = async (req, res) => {
-    res.render('adminCouponsDiscounts')
+    try {
+        const coupons = await Coupon.find();
+        res.render('adminCouponsDiscounts', {
+            coupons: coupons
+        })
+    } catch (error) {
+        console.log("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+
+
 }
+
+const addCouponsGet = (req, res) => {
+    try {
+
+        res.render('addCoupons', {
+
+        })
+    } catch (error) {
+        console.log("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+}
+
+
 const addCoupons = async (req, res) => {
-    res.render('addCoupons')
-}
+    try {
 
-// const addCoupons = async (req, res) => {
-//     try {
-//         var coupon = req.body.coupon;
+        const { code, discountValue, discountType, expiry, minimumCartAmount } = req.body;
 
+        // Check if the coupon code already exists
+        const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
+        if (existingCoupon) {
+            return res.render('addCoupons', { mess: "Coupon already exists" });
+        }
 
-//         const existingCoupon = await coupon.findOne({ coupon: code.toUpperCase() });
+        // Create a new coupon object
+        const newCoupon = new Coupon({
+            code: code.toUpperCase(),
+            discountValue: discountValue,
+            discountType: discountType,
+            expiry: expiry,
+            minimumCartAmount: minimumCartAmount,
+            status: 'Active', // Assuming default status is 'Active'
+        });
 
-//         if (existingCoupon) {
+        // Save the new coupon to the database
+        await newCoupon.save();
 
+        // Fetch all coupons from the database
+        const coupons = await Coupon.find();
 
-//             return res.render('addCoupons', { mess: "Coupon already exists" })
-
-
-//         }
-
-//         const { coupon,discountValue,isListed } = req.body;
-//         const newCoupon = new coupon({
-//             coupon: code.toUpperCase(),
-//             products: products,
-//             discountValue: discountValue,  
-//             isListed: isListed,
-//         });
-
-//         await newCoupon.save();
-//         console.log("Coupon added successfully");
-//         res.redirect('/adminCouponsDiscounts');
-//     } catch (error) {
-//         console.log("Error", error);
-//         res.status(500).send("Internal Server Error");
-//     }
-// };
-
+        // Render the addCoupons page with the updated list of coupons
+        res.render('addCoupons', { coupons: coupons, mess: "Coupon added successfully" });
+    } catch (error) {
+        console.log("Error", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
 
 
 // Admin Logout
@@ -686,5 +708,5 @@ module.exports = {
     adminOrdersDash,
     adminCouponsDiscounts,
     addCoupons,
+    addCouponsGet,
 };
-

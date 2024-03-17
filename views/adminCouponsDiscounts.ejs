@@ -170,32 +170,24 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td><img src="img/products/img-5.png" alt height="52">
-                                                    <p class="d-inline-block align-middle mb-0"><a href
-                                                            class="d-inline-block align-middle mb-0 f_s_16 f_w_600 color_theme2">XMAS10
-                                                        </a></p>
-                                                </td>
-                                                <td>10%</td>
-                                                <td>DEC- 31 -2023</td>
-
-                                                <td><a href class="text-dark"><i
-                                                            class="far fa-times-circle font_s_18"></i></a></td>
-                                            </tr>
-                                            <tr>
-                                                <td><img src="img/products/img-1.png" alt height="52">
-                                                    <p class="d-inline-block align-middle mb-0"><a href
-                                                            class="d-inline-block align-middle mb-0 f_s_16 f_w_600 color_theme2">NEWYR24
-                                                        </a></p>
-                                                </td>
-                                                <td>24%</td>
-                                                <td>JAN- 31- 2024</td>
-
-                                                <td><a href class="text-dark"><i
-                                                            class="far fa-times-circle font_s_18"></i></a></td>
-                                            </tr>
-
+                                            <% coupons.forEach(coupon=> { %>
+                                                <tr>
+                                                    <td>
+                                                        <%= coupon.code %>
+                                                    </td>
+                                                    <td>
+                                                        <%= coupon.discountValue %>%
+                                                    </td>
+                                                    <td>
+                                                        <%= coupon.expiry.toDateString() %>
+                                                    </td>
+                                                    <td>
+                                                        <%= coupon.status %>
+                                                    </td>
+                                                </tr>
+                                                <% }) %>
                                         </tbody>
+
                                     </table>
                                 </div>
 
