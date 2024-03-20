@@ -1,173 +1,158 @@
 <%- include('userHeader') %>
 
-
     <section class="bg-light">
-        <div class="container">
+        <div class="container" style="margin-top: 60px;">
             <h2>Checkout</h2>
 
-
-
-
-            <form action="/userCheckout" method="post" onsubmit="return validateCheckout()">
-                <div class="col-sm-4 py-2">
-                    <div class="card">
+            <!-- Address Section -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
                         <div class="card-body">
-                            <% Usercollections.address.forEach((address, index)=> { %>
-                                <div data-aos="fade-up" data-aos-delay style="flex: 0 0 auto; margin-right: 20px;">
-                                    <div class="card border-primary" style="width: 200px; height: 250px;">
-                                        <div class="card-body">
-                                            <div class="icon mr-4 align-self-start">
-                                                <span class="icon-truck text-primary"></span>
-                                            </div>
-                                            <div class="text">
-                                                <input type="checkbox" id="selectedAddress<%= index %>"
-                                                    name="selectedAddress" value="<%= index %>"
-                                                    onchange="handleCheckboxChange(this)">
-                                                <h2 class="font-heading-serif">Address <%= index + 1 %>
-                                                </h2>
-                                                <%= address.houseName %>,<br>
-                                                    <%= address.street %>,<br>
-                                                        <%= address.city %>,<br>
-                                                            <%= address.pincode %>,<br>
-                                                                <%= address.state %>
-                                                                    <br>
+                            <h5 class="card-title mb-4">Select Address</h5>
+                            <div class="row">
+                                <form action="/userCheckout" method="post" id="checkOut"
+                                    onsubmit="return validateCheckout()">
 
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <% }) %>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <a href="/userAddressEdit" class="btn btn-outline-primary" id="addAddressBtn"
-                                onclick="window.location='addAddress.html'">Add Address</a>
-                        </div>
-
-                    </div>
-                </div>
-
-
-
-
-
-
-
-                <div class="row">
-                    <div class="col-xl-8 col-lg-8 mb-4">
-
-
-
-
-                        <!-- Checkout -->
-                        <div class="card shadow-0 border">
-                            <div class="p-4">
-
-
-                                <hr class="my-4" />
-
-                                <h5 class="card-title mb-3">Payment Method</h5>
-
-                                <form action="/checkout" method="post" id="checkOut" onsubmit="return validateForm()">
-                                    <div class="row mb-3">
-                                        <div class="col-lg-4 mb-3">
-
-                                            <div class="form-check h-100 border rounded-3">
-                                                <div class="p-3">
-                                                    <input class="form-check-input" type="radio" name="paymentMethod"
-                                                        id="COD" value="COD" checked />
-                                                    <label class="form-check-label" for="flexRadioDefault1">
-                                                        Cash On Delivery<br />
-                                                        <small class="text-muted">
-                                                        </small>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-4 mb-3">
-                                            <!-- Default radio -->
-                                            <div class="form-check h-100 border rounded-3">
-                                                <div class="p-3">
-                                                    <input class="form-check-input" type="radio" name="paymentMethod"
-                                                        value="onlinePayment" id="flexRadioDefault2" />
-                                                    <label class="form-check-label" for="flexRadioDefault2">
-                                                        Online Payment <br />
-                                                        <small class="text-muted"></small>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-
-
-
-                                    </div>
-                                    <div class="row">
-                                        <% userCart.items.forEach(item=> { %>
-                                            <div class="col-md-3">
-                                                <div class="white_card position-relative mb_20 ">
+                                    <% Usercollections.address.forEach((address, index)=> { %>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="address-card" data-aos="fade-up"
+                                                data-aos-delay="<%= index * 100 %>">
+                                                <div class="card border-primary">
                                                     <div class="card-body">
-                                                        <img src="<%= item.productId.image[0] %>" alt="Product Image"
-                                                            class="d-block mx-auto my-4" height="150">
-                                                        <div class="row my-4">
-                                                            <div class="col">
-                                                                <span class="badge_btn_3  mb-1">
-                                                                    <%= item.productId.productName %>
-                                                                </span>
-                                                            </div>
-                                                            <div class="col-auto">
-                                                                <h4 class="text-dark mt-0">$<%= item.productId.price %>
-                                                                </h4>
-                                                            </div>
-                                                        </div>
+                                                        
+
+                                                            <input type="radio" class="addressSelecter" id="selectedAddress<%= index %>" name="selectedAddress" value="<%= index %>" onchange="handleCheckboxChange(this)"
+                                    data-mobile="<%= address.mobile %>"
+                                    data-houseName="<%= address.houseName %>"
+                                    data-street="<%= address.street %>"
+                                    data-city="<%= address.city %>"
+                                    data-pincode="<%= address.pincode %>"
+                                    data-state="<%= address.state %>">
+
+
+                                                        <label for="selectedAddress<%= index %>"
+                                                            class="font-weight-bold mb-0">
+                                                            Address <%= index + 1 %>
+                                                        </label>
+                                                        <p class="mb-0">
+                                                            <%= address.houseName %>, <%= address.street %>,
+                                                        </p>
+                                                        <p class="mb-0">
+                                                            <%= address.city %>, <%= address.pincode %>,
+                                                        </p>
+                                                        <p class="mb-0">
+                                                            <%= address.state %>
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <% }) %>
+                                        </div>
+
+
+                                        <% }) %>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                    <div class="mt-3">
+                        <a href="/userAddressEdit" class="btn btn-outline-primary" id="addAddressBtn">
+                            Add Address
+                        </a>
+                    </div>
+
+
+                </div>
+
+                <!-- Checkout Section -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">Payment Method</h5>
+                            <form action="/checkout" method="post" id="checkOut" onsubmit="return validateForm()">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="COD"
+                                        value="COD" checked>
+                                    <label class="form-check-label" for="COD">
+                                        Cash On Delivery
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="onlinePayment"
+                                        value="onlinePayment">
+                                    <label class="form-check-label" for="onlinePayment">
+                                        Online Payment
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="walletPayment"
+                                        value="walletPayment">
+                                    <label class="form-check-label" for="walletPayment">
+                                        Wallet Payment
+                                    </label>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <% userCart.items.forEach(item=> { %>
+                                        <div class="col-md-12 mb-3">
+                                            <div class="white_card">
+                                                <div class="card-body">
+                                                    <img src="<%= item.productId.image[0] %>" alt="Product Image"
+                                                        class="img-fluid mb-3">
+                                                    <p class="font-weight-bold mb-1">
+                                                        <%= item.productId.productName %>
+                                                    </p>
+                                                    <p class="text-muted mb-0">$<%= item.productId.price %>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <% }) %>
+                                </div>
+                                <div></div>
+                                <div class="row mb-5">
+                                    <div class="col-md-6">
+                                        <span class="text-black">Total</span>
                                     </div>
-
-
-
-
-
-                                    </tbody>
-                            </div>
-
-
-
-
-
-
-
-
-                            <div class="row mb-5">
-                                <div class="col-md-6">
-                                    <span class="text-black">Total</span>
+                                    <div class="col-md-6 text-right">
+                                        <strong class="text-black">$<%=totalPrice%></strong>
+                                        <input id="checkout-total" type="hidden" value="<%=totalPrice%>"
+                                            name="totalPrice">
+                                    </div>
                                 </div>
-                                <div class="col-md-6 text-right">
-                                    <strong class="text-black">$<%=totalPrice%></strong>
-                                    <input type="hidden" value="<%=totalPrice%>" name="totalPrice">
+
+                                <!-- Checkout Button -->
+                                <div class="col-md-12">
+                                    <button onclick="handleButtonClick()" class="btn btn-primary btn-lg btn-block"
+                                        type="button">
+                                        Checkout
+                                    </button>
                                 </div>
-                            </div>
-
-                            <!-- Checkout Button -->
-                            <div class="col-md-12">
-                                <button class="btn btn-primary btn-lg btn-block" type="submit">
-                                    Checkout
-                                </button>
-                            </div>
-
-
-            </form>
-
+                                <input type="hidden" id="selectedMobile" name="selectedMobile">
+                        <input type="hidden" id="selectedHouseName" name="selectedHouseName">
+                        <input type="hidden" id="selectedStreet" name="selectedStreet">
+                        <input type="hidden" id="selectedCity" name="selectedCity">
+                        <input type="hidden" id="selectedPincode" name="selectedPincode">
+                        <input type="hidden" id="selectedState" name="selectedState">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </form>
     </section>
 
-
-
-
-    <div id="loader" class="show fullscreen"><svg class="circular" width="48px" height="48px">
+    <div id="loader" class="show fullscreen">
+        <svg class="circular" width="48px" height="48px">
             <circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee" />
             <circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10"
                 stroke="#ff5e15" />
-        </svg></div>
+        </svg>
+    </div>
 
     <script>
         function validateCheckout() {
@@ -182,6 +167,7 @@
         }
     </script>
 
+    <!-- Your JavaScript Imports -->
     <script src="js/jquery-3.3.1.min.js"></script>
     <script src="js/jquery-migrate-3.0.1.min.js"></script>
     <script src="js/jquery-ui.js"></script>
@@ -203,24 +189,188 @@
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
-
         gtag('config', 'UA-23581568-13');
 
-
-
-        let lastChecked;
+        let lastChecked = null;
 
         function handleCheckboxChange(checkbox) {
-            if (checkbox.checked) {
-                if (lastChecked) {
-                    lastChecked.checked = false;
-                }
-                lastChecked = checkbox;
+            if (lastChecked && lastChecked !== checkbox && lastChecked.checked) {
+                lastChecked.checked = false;
+            }
+            lastChecked = checkbox.checked ? checkbox : null;
+        }
+
+
+
+
+
+
+
+
+        function handleButtonClick() {
+            const paymentOption = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+            console.log("data checking", paymentOption, selectedAddress)
+            if (!validateCheckout()) {
+                return; // Stop further execution if the form is not valid
+            }
+            if (paymentOption === 'onlinePayment' && validateCheckout()) {
+                btnClick();
             } else {
-                lastChecked = null;
+                const form = document.getElementById('checkOut');
+                if (form) {
+                    form.submit();
+                }
             }
         }
-    </script>
-    </body>
 
-    </html>
+
+
+
+        async function btnClick() {
+            var paymentOption = document.querySelector('input[name="paymentMethod"]:checked').value;
+            if (paymentOption == "onlinePayment" && validateCheckout()) {
+
+
+                try {
+
+                    const totalAmountText = document.getElementById('checkout-total').value;
+                    console.log("got it money", totalAmountText)
+                    const totalAmount = totalAmountText
+
+
+
+                    const response = await fetch('/createOrder', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            paymentOption: paymentOption,
+                            totalAmount: totalAmount,
+                            currency: 'INR',
+                        }),
+                    });
+                    const data = await response.json();
+                    console.log('DATA : ', data.order);
+                    console.log('DATA : ', data.amount);
+                    console.log('DATA : ', data.currency);
+                    console.log('signature:', data.signature);
+
+                    if (data.paymentOption == 'onlinePayment') {
+                        console.log("working")
+                        const order = data.order;
+                        const orderId = order.id;
+                        console.log("order",order)
+                        console.log("orderId",orderId)
+                        // If it's for online payment, proceed with Razorpay
+                        const options = {
+                            key: 'rzp_test_pHTxdeMnlEh2z8',
+                            amount: data.amount,
+                            currency: data.currency,
+                            name: 'Pro Players',
+                            description: 'Test Transaction',
+                            order_id: orderId,
+                            handler: function (response) {
+                                console.log("Handler response data", response);
+                                verifyPayment(response, data)
+                            },
+                            "modal": {
+                                "ondismiss": function () {
+                                    console.log('Payment window closed');
+                                    paymentFailed(data);
+                                }
+                            },
+                            prefill: {
+                                name: 'John Doe',
+                                email: 'john@example.com',
+                                contact: '9000090000',
+                            },
+                            theme: {
+                                color: '#fb7b24',
+                            },
+                        };
+
+                        const rzp = new Razorpay(options);
+                        rzp.open();
+                    }
+                } catch (error) {
+                    console.error('Error initiating payment:', error);
+                    console.error('Full error object:', error);
+                    alert('Error during payment. Please try again.');
+                }
+            }
+        }
+
+
+
+        async function verifyPayment(payment, order) {
+      try {
+        var selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+        
+        var mobile = selectedAddress.getAttribute('data-mobile');
+        var houseName = selectedAddress.getAttribute('data-houseName');
+        var street = selectedAddress.getAttribute('data-street');
+        var city = selectedAddress.getAttribute('data-city');
+        var pincode = selectedAddress.getAttribute('data-pincode');
+        var state = selectedAddress.getAttribute('data-state');
+
+        document.getElementById('selectedMobile').value = mobile;
+        document.getElementById('selectedHouseName').value = houseName;
+        document.getElementById('selectedStreet').value = street;
+        document.getElementById('selectedCity').value = city;
+        document.getElementById('selectedPincode').value = pincode;
+        document.getElementById('selectedState').value = state;
+
+
+
+
+        const paymentOption = document.querySelector('input[name="paymentMethod"]:checked').value;
+        const response = await fetch('/verifyPayment',{
+          method:"POST",
+          headers:{
+            'Content-Type':'application/json'
+          },
+          body:JSON.stringify({
+            payment,
+            order,
+            paymentOption,
+            selectedMobile: mobile,
+                selectedHouseName: houseName,
+                selectedStreet: street,
+                selectedCity: city,
+                selectedPincode: pincode,
+                selectedState: state,
+          })
+        })
+        const responseData = await response.json();
+        console.log(responseData)
+      if (responseData.status) {
+          console.log("response is trrue")
+          window.location.href = '/userSuccess';
+          
+      }else{
+        alert('Payment Failed. Try again later.');
+      }
+      } catch (error) {
+        console.error('Error verifying payment:', error);
+        alert('Error verifying payment. Please try again.');
+      }
+    
+    }
+    
+
+
+    async function paymentFailed(data) {
+  try {
+    console.log('Payment failed or window closed:', data);
+    alert('Payment failed. Please try again.');
+    window.location.href = '/userCheckout';  } catch (error) {
+    console.error('Error handling payment failure:', error);
+  }
+}
+
+
+
+
+    </script>

@@ -7,7 +7,14 @@ const Product = require('../Model/productsModel')
 const Cart = require('../Model/cartModel');
 const orders = require('../Model/orderModel')
 const wallet = require('../Model/walletModel')
-const category = require('../Model/categoryModel');
+const Category = require('../Model/categoryModel');
+const Razorpay = require('razorpay');
+const crypto = require("crypto");
+require('dotenv').config();
+const instance = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
 
 
 const userLogin = async (req, res) => {
@@ -164,6 +171,7 @@ const userShop = async (req, res) => {
         console.log("Try working")
         let sortQuery = {};
         let categoryQuery = {};
+        const categories = await Category.find();
 
 
         const sortBy = req.query.sortBy;
@@ -190,7 +198,7 @@ const userShop = async (req, res) => {
         }
         const category = req.query.category;
         if (category) {
-            categoryQuery = { productCategory: category };
+            categoryQuery = { products: { $in: [mongoose.Types.ObjectId(category)] } };
         }
 
         const filter = { ...categoryQuery }; // Combine category filter with others
@@ -204,7 +212,7 @@ const userShop = async (req, res) => {
         // const products = await Product.find().sort(sortQuery);
 
 
-        res.render('userShop', { products });
+        res.render('userShop', { products , categories });
 
 
     } catch (error) {
@@ -243,7 +251,7 @@ const searchProduct = async (req, res) => {
             products = await Product.find();
         }
 
-
+        const categories = await Category.find();
         res.render('userShop', { products });
 
     } catch (error) {
@@ -261,6 +269,21 @@ const userContact = (req, res) => {
     }
 }
 
+// const userWallet = async (req, res) => {
+//     try {
+//         const userId = req.session.userId;
+
+//         const userWallet = await wallet.findOne({ userId })
+//         console.log("userWallet", userWallet.transactionHistory);
+
+//         res.render('userWallet', { userWallet })
+
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
+
+
 const userWallet = async (req, res) => {
     try {
         const userId = req.session.userId;
@@ -274,6 +297,40 @@ const userWallet = async (req, res) => {
         console.log(error)
     }
 }
+
+const processPayment = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        const { paymentMethod, totalPrice } = req.body;
+
+        // Assuming you have the payment logic here...
+        // Deduct the total price from the user's wallet balance
+        const userWallet = await wallet.findOneAndUpdate(
+            { userId },
+            { $inc: { balance: -totalPrice } },
+            { new: true }
+        );
+
+        // Add a new transaction entry to the wallet's transaction history
+        const newTransaction = {
+            transaction: "Money Deducted",
+            amount: totalPrice
+        };
+
+        userWallet.transactionHistory.push(newTransaction);
+        await userWallet.save();
+
+        // Redirect or respond based on the success of payment process
+        res.redirect('/checkout/success'); // Assuming you have a success page
+    } catch (error) {
+        console.log(error);
+        // Handle error response
+        res.status(500).send("Internal Server Error");
+    }
+}
+
+
+
 
 
 const calculateTotalPrice = (items) => {
@@ -369,54 +426,170 @@ const userCheckout = async (req, res) => {
     }
 }
 
+
+
+// const handleCheckOut = async (req, res) => {
+//     let userId = req.session.userId;
+//     const user = await UserCollection.findById(userId);
+//     const userCart = await Cart.findOne({ userId }).populate('items.productId');
+//     const items = userCart.items;
+//     let addressIndex = req.body.selectedAddress;
+
+
+//     const userAddresses = user.address[addressIndex];
+//     const { paymentMethod, totalPrice } = req.body;
+
+//     try {
+
+
+//         const newOrder = new orders({
+//             customer: userId,
+//             address: {
+//                 mobile: userAddresses.mobile,
+//                 houseName: userAddresses.houseName,
+//                 street: userAddresses.street,
+//                 city: userAddresses.city,
+//                 pincode: userAddresses.pincode,
+//                 state: userAddresses.state,
+//             },
+//             items: items
+//                 .filter(item => item.productId.totalQuantity > 0)
+//                 .map(item => ({
+//                     product: item.productId._id,
+//                     quantity: item.quantity
+//                 })),
+//             totalAmount: totalPrice,
+//             OrderStatus: 'Order Placed',
+//             paymentMethod: paymentMethod,
+//             orderId: generateOrderId(),
+//         });
+
+
+//         await newOrder.save();
+
+
+//         for (const item of items) {
+//             if (item.productId.totalQuantity > 0) {
+//                 item.productId.totalQuantity -= item.quantity;
+//                 await item.productId.save();
+//             }
+//         }
+
+
+//         res.redirect('/userSuccess');
+//     } catch (error) {
+//         console.log(error);
+//         // Handle the error as needed
+//         res.status(500).send("Internal Server Error");
+//     }
+// };
+
+
+
 const handleCheckOut = async (req, res) => {
-    let userId = req.session.userId;
-    const user = await UserCollection.findById(userId);
-    const userCart = await Cart.findOne({ userId }).populate('items.productId');
-    const items = userCart.items;
-    let addressIndex = req.body.selectedAddress;
-
-
-    const userAddresses = user.address[addressIndex];
-    const { paymentMethod, totalPrice } = req.body;
-
     try {
+        const userId = req.session.userId;
+        const user = await UserCollection.findById(userId);
+        const userCart = await Cart.findOne({ userId }).populate('items.productId');
+        const items = userCart.items;
+        const addressIndex = req.body.selectedAddress;
 
+        const userAddresses = user.address[addressIndex];
+        const { paymentMethod, totalPrice } = req.body;
 
-        const newOrder = new orders({
-            customer: userId,
-            address: {
-                mobile: userAddresses.mobile,
-                houseName: userAddresses.houseName,
-                street: userAddresses.street,
-                city: userAddresses.city,
-                pincode: userAddresses.pincode,
-                state: userAddresses.state,
-            },
-            items: items
-                .filter(item => item.productId.totalQuantity > 0)
-                .map(item => ({
-                    product: item.productId._id,
-                    quantity: item.quantity
-                })),
-            totalAmount: totalPrice,
-            OrderStatus: 'Order Placed',
-            paymentMethod: paymentMethod,
-            orderId: generateOrderId(),
-        });
-
-
-        await newOrder.save();
-
-
-        for (const item of items) {
-            if (item.productId.totalQuantity > 0) {
-                item.productId.totalQuantity -= item.quantity;
-                await item.productId.save();
+        if (paymentMethod === 'walletPayment') {
+            // Check if user has sufficient balance
+            const userWallet = await wallet.findOne({ userId });
+            if (userWallet.balance < totalPrice) {
+                return res.status(400).send("Insufficient balance in wallet.");
             }
+
+            // Deduct the total price from user's wallet balance
+            userWallet.balance -= totalPrice;
+
+            // Add transaction history for money deduction
+            userWallet.transactionHistory.push({
+                transaction: "Money Deducted",
+                amount: totalPrice
+            });
+            // Save the updated wallet
+            await userWallet.save();
+
+
+
+            const newOrder = new orders({
+                            customer: userId,
+                            address: {
+                                mobile: userAddresses.mobile,
+                                houseName: userAddresses.houseName,
+                                street: userAddresses.street,
+                                city: userAddresses.city,
+                                pincode: userAddresses.pincode,
+                                state: userAddresses.state,
+                            },
+                            items: items
+                                .filter(item => item.productId.totalQuantity > 0)
+                                .map(item => ({
+                                    product: item.productId._id,
+                                    quantity: item.quantity
+                                })),
+                            totalAmount: totalPrice,
+                            OrderStatus: 'Order Placed',
+                            paymentMethod: paymentMethod,
+                            orderId: generateOrderId(),
+                        });
+                
+                
+                        await newOrder.save();
+                
+                
+                        for (const item of items) {
+                            if (item.productId.totalQuantity > 0) {
+                                item.productId.totalQuantity -= item.quantity;
+                                await item.productId.save();
+                            }
+                        }
+
+        }
+        if (paymentMethod === 'COD'){
+            const newOrder = new orders({
+                customer: userId,
+                address: {
+                    mobile: userAddresses.mobile,
+                    houseName: userAddresses.houseName,
+                    street: userAddresses.street,
+                    city: userAddresses.city,
+                    pincode: userAddresses.pincode,
+                    state: userAddresses.state,
+                },
+                items: items
+                    .filter(item => item.productId.totalQuantity > 0)
+                    .map(item => ({
+                        product: item.productId._id,
+                        quantity: item.quantity
+                    })),
+                totalAmount: totalPrice,
+                OrderStatus: 'Order Placed',
+                paymentMethod: paymentMethod,
+                orderId: generateOrderId(),
+            });
+    
+    
+            await newOrder.save();
+    
+    
+            for (const item of items) {
+                if (item.productId.totalQuantity > 0) {
+                    item.productId.totalQuantity -= item.quantity;
+                    await item.productId.save();
+                }
+            }
+
         }
 
+        // Proceed with creating order and other steps...
 
+        // Redirect to success page
         res.redirect('/userSuccess');
     } catch (error) {
         console.log(error);
@@ -424,6 +597,103 @@ const handleCheckOut = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 };
+
+
+
+
+
+const createOrder = async(req,res)=>{
+    const userId = req.session.userId;
+    let { paymentOption, totalAmount, currency,razorpay_order_id, razorpay_signature } = req.body;
+    try {
+        
+        const amount = totalAmount*100
+        if(paymentOption==="onlinePayment"){
+            const options = {
+                amount: totalAmount * 100, // Amount in paise
+                currency: currency || 'INR',
+                receipt: 'receipt_order_1',
+                notes: {},
+              };
+            const order = await instance.orders.create(options);
+            return res.json({order,paymentOption,amount,currency}); 
+        }
+    } catch (error) {
+        console.error('Error creating order:', error);
+    res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+const verifyPayment = async(req,res)=>{
+    try {
+        console.log("verify");
+    const userId = req.session.userId;
+      const {payment,order,paymentOption, selectedMobile, selectedHouseName, selectedStreet, selectedCity, selectedPincode, selectedState, paymentMethod } = req.body;
+      const userCart = await Cart.findOne({ userId }).populate('items.productId');
+      const items = userCart.items;
+      let userWallet = await wallet.findOne({userId})
+    const user = await UserCollection.findById(userId);
+    const userAddresses = user.address;
+    const inStockItems = items.filter(item => item.productId.totalQuantity > 0);
+    const updatedTotalPrice = req.session.updatedTotalPrice;
+    const categories = await Category.find()
+    const hasItemWithQuantity = items.some(item => item.productId.totalQuantity > 0);
+    console.log("req.body",req.body)
+    const hmac = crypto
+      .createHmac("sha256", "CAsjacYIhSgXaOzUGy1nlZXN")
+      .update(payment.razorpay_order_id + "|" + payment.razorpay_payment_id)
+      .digest("hex");
+      console.log("hmac",hmac)
+      console.log("signature",payment.razorpay_signature)
+      if(hmac===payment.razorpay_signature){
+        console.log("hmac true")
+        const userId = req.session.userId;
+        let totalAmount=order.amount
+        if (!hasItemWithQuantity) {
+            console.log("hmac false")
+            return res.render('checkOutPage', { user, userAddresses, totalPrice, items, categories, errorMessage: 'Selected item must be in available' });
+          }
+        for (const item of inStockItems) {
+            const productId = item.productId._id;
+            const quantityToReduce = item.quantity;
+      
+            // Update product quantity in the database
+            await Product.updateOne({ _id: productId }, { $inc: { totalQuantity: -quantityToReduce } });
+        }
+        console.log("before save")
+        const newOrder = new orders({
+            customer: userId,
+            address: {
+              mobile: selectedMobile,
+              houseName: selectedHouseName,
+              street: selectedStreet,
+              city: selectedCity,
+              pincode: selectedPincode,
+              state: selectedState,
+        },
+            items: items
+            .filter(item => item.productId.totalQuantity > 0)
+            .map(item => ({
+              product: item.productId._id,
+              quantity: item.quantity
+            })),
+            totalAmount: updatedTotalPrice,
+            OrderStatus: 'Order Placed',
+            paymentMethod: paymentOption,
+            orderId: generateOrderId(),
+          });
+          console.log("new order",newOrder)
+          await newOrder.save();
+          console.log("verify end");
+        return res.json({ status: true})
+      }
+
+
+    } catch (error) {
+        console.log(error);
+    res.status(500).json({ error: "Internal server on verifying" });
+    }
+}
 
 
 
@@ -451,11 +721,27 @@ const userOrderPlaced = async (req, res) => {
 const orderDetails = async (req, res) => {
     try {
         const userId = req.session.userId;
-        const userOrders = await orders.find().populate('items.product')
+        const orderId = req.params.orderId;
+        const userOrders = await orders.findOne({orderId}).populate('items.product')
         const userCart = await Cart.findOne({ userId }).populate('items.productId');
-        const items = userCart.items;
+        const items = userCart ? userCart.items : [];
 
-        res.render('userOrderDetails', { items, userOrders, userId })
+         if (!userOrders) {
+          
+            return res.status(404).send('Order not found');
+        }
+
+       
+        const firstOrder = userOrders; 
+        const totalPrice = calculateTotalPrice(items);
+
+        const customerName = firstOrder.customer.name; 
+        const deliveryAddress = `${firstOrder.address.houseName}, ${firstOrder.address.street}, ${firstOrder.address.city}, ${firstOrder.address.state}, ${firstOrder.address.pincode}`;
+        const paymentMethod = firstOrder.paymentMethod;
+        const totalAmount=firstOrder.totalPrice
+
+        res.render('userOrderDetails', { items, userOrders, userId, customerName, deliveryAddress, totalAmount, paymentMethod });
+
 
     } catch (error) {
         console.log(error)
@@ -799,6 +1085,58 @@ const addAddress = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+const addAddressToCart= async (req, res) => {
+
+        try {
+            console.log("Inside the address save");
+            const userId = req.session.userId;
+            const { mobile, houseName, street, city, pinCode, state } = req.body;
+            console.log(req.body)
+    
+            const mobileNumber = parseInt(mobile, 10);
+    
+            const updatedUser = await UserCollection.findByIdAndUpdate(
+                userId,
+                {
+                    $push: {
+                        address: {
+                            mobile: mobile,
+                            houseName: houseName,
+                            street: street,
+                            city: city,
+                            pincode: pinCode,
+                            state: state,
+                        },
+                    },
+                },
+                { new: true }
+            );
+    
+            res.redirect('/userProfile');
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('Internal Server Error');
+        }
+    };
+
+   const  addAddressToCartPage= async (req, res) => {
+    console.log(req.session.userId)
+    let userId = req.session.userId;
+
+    const Usercollections = await UserCollection.findById(userId)
+    try {
+        if (req.session.user) {
+            res.render("userAddressEdit", { Usercollections })
+
+        } else {
+            res.redirect('/')
+        }
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
 
 
 
@@ -966,9 +1304,13 @@ module.exports = {
     userLoginData,
     userContact,
     userCart,
+    addAddressToCart,
+    addAddressToCartPage,
     updateQuantity,
     removeFromCart,
     userCheckout,
+    createOrder,
+    verifyPayment,
     userProfile,
     showChangePassword,
     handleResetPassword,
@@ -997,21 +1339,6 @@ module.exports = {
     userSuccess,
     cancelOrder,
     userWallet,
+    processPayment,
     wishlistCart,
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

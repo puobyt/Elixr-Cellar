@@ -58,33 +58,11 @@
                                             </td>
 
                                             <td>
-                                                <a href="/userOrderDetails" type="submit" class="btn btn-primary">View
+                                                <a href="/userOrderDetails/<%= order.orderId %>" type="submit" class="btn btn-primary">View
                                                     more</a>
                                             </td>
                                         </tr>
-                                        <tr class="order-details" id="order-details-<%= order.orderId %>"
-                                            style="display: none;">
-                                            <td colspan="4">
-
-                                                <% order.items.forEach((items)=> { %>
-                                                    <img width="50px" height="50px"
-                                                        src="<%=items.product?items.product.image[0]:" no img"%>"
-                                                    alt="">
-                                                    <p>Quantity: <%= items.quantity %>
-                                                    </p>
-                                                    <p>Shipping Address: <%= order.address.mobile %>,<%=
-                                                                order.address.houseName %>,<%= order.address.street %>,
-                                                                    <%= order.address.city %>,<%= order.address.pincode
-                                                                            %>,<%= order.address.state %>
-                                                    </p>
-                                                    <p>Payment Method: <%= order.paymentMethod %>
-                                                    </p>
-                                                    <%})%>
-
-                                                        <button class="hide-btn"
-                                                            data-order-id="<%= order.orderId %>">Hide</button>
-                                            </td>
-                                        </tr>
+                                        
                                         </tr>
                                         <% }); %>
 

@@ -16,38 +16,37 @@
                             <hr class="my-4" />
 
                             <div>
-
-                            </div>
-                            <div class="container">
-                                <div class="row justify-content-center g-3">
-
-                                    <div class="card mr-3 border-0 " style="width: auto; margin-left: 45px;">
-
-                                        <p class="card-text fw-bold">
-                                            Product name
-                                        </p>
-                                        <p class="card-text">Quantity:
-                                        </p>
+                                <!-- Loop through each item in the cart -->
+                                <% items.forEach(item=> { %>
+                                    <div class="container">
+                                        <div class="row justify-content-center g-3">
+                                            <% if (item.productId) { %> <!-- Checking if productId exists -->
+                                                <div class="card mr-3 border-0" style="width: auto; margin-left: 45px;">
+                                                    <p class="card-text fw-bold">
+                                                        <% userOrders.items.forEach(Product=>{%>
+                                                            <%=Product.product.productName%>
+                                                                <%}) %>
+                                                                    <!-- Accessing product name via productId -->
+                                                    </p>
+                                                    <p class="card-text">Quantity: <%= item.quantity %>
+                                                    </p>
+                                                </div>
+                                                <% } %>
+                                        </div>
                                     </div>
+                                    <% }); %>
 
-                                </div>
+
                             </div>
 
                             <div class="container mt-5 mb-5">
-                                <div class="row justify-content-center align-items-center">
-
-
-
-
-
-
-                                </div>
+                                <!-- Additional content -->
                             </div>
 
                             <div class="container">
                                 <div class="row">
                                     <div class="col-lg-6 mb-3">
-
+                                        <!-- Delivery address -->
                                         <div class="row">
                                             <div class="form-check h-100 border rounded-3">
                                                 <div class="p-3">
@@ -55,14 +54,12 @@
                                                         <h3>Delivery Address</h3>
                                                     </div>
                                                     <div class="d-flex justify-content-between">
-                                                        <p class="mb-2">
-                                                            Customer Name
-                                                        </p>
+                                                        <p class="mb-2">Customer Name: <%= customerName %>
+                                                        </p> <!-- Display customer name -->
                                                     </div>
                                                     <div class="d-flex justify-content-between">
-                                                        <p class="mb-2">
-                                                            Address
-                                                        </p>
+                                                        <p class="mb-2">Address: <%= deliveryAddress %>
+                                                        </p> <!-- Display delivery address -->
                                                     </div>
                                                     <hr />
                                                 </div>
@@ -71,27 +68,24 @@
                                     </div>
 
                                     <div class="col-lg-6 mb-3">
-                                        <!-- Default radio -->
+                                        <!-- Total order price -->
                                         <div class="row">
                                             <div class="form-check h-100 border rounded-3">
                                                 <div class="p-3">
                                                     <div class="d-flex justify-content-center">
-                                                        <h3>Total Order
-                                                            Price</h3>
+                                                        <h3>Total Order Price</h3>
                                                     </div>
                                                     <div class="d-flex justify-content-between">
-                                                        <p class="mb-2">Total
-
-
+                                                        <p class="mb-2">Total: <%= totalAmount%>
+                                                                <!-- Display total order price -->
+                                                        </p>
                                                     </div>
                                                     <div class="d-flex justify-content-between">
                                                         <p class="mb-2 bg-secondary text-white" style="width: 100%;">
                                                             Payment
-                                                            Method :
-                                                        </p>
+                                                            Method: <%= paymentMethod %>
+                                                        </p> <!-- Display payment method -->
                                                     </div>
-
-
                                                 </div>
                                             </div>
                                         </div>
@@ -100,9 +94,9 @@
                             </div>
 
                         </div>
-
-
                     </div>
 
                 </div>
             </div>
+        </div>
+    </div>

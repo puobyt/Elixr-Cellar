@@ -196,13 +196,13 @@
       const input = $('input[data-product-id="' + productId + '"]');
       const newQuantity = parseInt(input.val()) + 1;
 
-      if (newQuantity <= 5) {
+      if (newQuantity <= 15) {
         updateQuantity(productId, newQuantity);
       }
 
       else {
 
-        alert("The maximum quantity for this product is 5.");
+        alert("The maximum quantity for this product is 15.");
       }
     }
 

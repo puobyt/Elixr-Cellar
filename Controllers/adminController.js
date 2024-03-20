@@ -406,16 +406,10 @@ const adminEditProduct = async (req, res) => {
 
 const adminEditProductPost = async (req, res) => {
     try {
-        console.log('Received POST request to /adminEditProduct/:id');
-
         const prodId = req.params.id;
-        console.log('Product ID:', prodId);
-
-
-
-
-        const files = req.files.image;
+        const files = req.files; // Access uploaded files
         const deletedImages = req.body.deletedImages ? req.body.deletedImages.split(",") : [];
+        let combinedImages = [];
 
         if (files && Array.isArray(files)) {
             console.log('Received files:', files);
@@ -429,17 +423,14 @@ const adminEditProductPost = async (req, res) => {
             const newImagePaths = files.map((file) => 'productImg/' + file.filename);
             console.log('New Image Paths:', newImagePaths);
 
-            const combinedImages = [...remainingImages, ...newImagePaths].slice(0, 3);
+            combinedImages = [...remainingImages, ...newImagePaths].slice(0, 3);
             console.log('Combined Images:', combinedImages);
-
-
-
         }
 
-
+        // Fetch other form data
         const { productName, productDes, productCat, productDate, stock, price } = req.body;
 
-
+        // Update the product in the database with the new information and images
         const updatedProduct = await products.findByIdAndUpdate(
             prodId,
             {
@@ -463,12 +454,9 @@ const adminEditProductPost = async (req, res) => {
         for (const deletedImageIndex of deletedImages) {
             const index = parseInt(deletedImageIndex, 10);
             if (!isNaN(index) && index >= 0 && index < updatedProduct.image.length) {
-
-
                 updatedProduct.image.splice(index, 1);
             }
         }
-
 
         await updatedProduct.save();
 

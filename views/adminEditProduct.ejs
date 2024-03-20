@@ -179,11 +179,9 @@
                                                         placeholder="Enter your Category(dropdown)">
                                                 </div>
 
-                                                <div class>
+                                                <div class="form-group">
                                                     <p class="text">Enter your Manufactured Date</p>
-                                                    <input type="text" class="form-control"
-                                                        value="<%= productIn.ManufactureDate%>" name="productDate"
-                                                        placeholder="Enter your Manufactured Date">
+                                                    <input type="text" class="form-control" id="manufactureDateInput" name="productDate" placeholder="Enter your Manufactured Date">
                                                 </div>
                                                 <div class>
                                                     <input type="number" class="form-control" value="<%= productIn.
@@ -196,6 +194,8 @@
                                                         value="<%= productIn.price%>" name="price" placeholder="Price">
                                                 </div>
                                                 <div>
+                                                    <input type="file" class="form-control" name="images" multiple
+                                                    id="image">
                                                     <p class="text">Selected Images:</p>
                                                     <% productIn.image.forEach((img, index)=> { %>
                                                         <div class="image-item">
@@ -370,6 +370,23 @@
             <i class="ti-angle-up"></i>
         </a>
     </div>
+
+    <script>
+        // Get the input element
+        var inputElement = document.getElementById('manufactureDateInput');
+    
+        // Get the value of the ManufactureDate attribute
+        var manufactureDateValue = '<%= productIn.ManufactureDate %>';
+    
+        // Convert the ManufactureDate value to a Date object
+        var manufactureDate = new Date(manufactureDateValue);
+    
+        // Format the date in short format (MM/DD/YYYY)
+        var formattedDate = (manufactureDate.getMonth() + 1) + '/' + manufactureDate.getDate() + '/' + manufactureDate.getFullYear();
+    
+        // Set the formatted date value to the input field
+        inputElement.value = formattedDate;
+    </script>
 
     <script>
         function deleteImage(index) {

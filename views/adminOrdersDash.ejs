@@ -184,8 +184,10 @@
                                                         </p>
                                                     </td>
                                                     <td>
-                                                        <%= order.orderDate %>
+                                                        <% var orderDate = new Date(order.orderDate); %>
+                                                        <%= (orderDate.getMonth() + 1) + '/' + orderDate.getDate() + '/' + orderDate.getFullYear() %>
                                                     </td>
+                                                    
                                                     <td>
                                                         <a href="#" class="badge_btn_2 order-status">
                                                             <%= order.OrderStatus %>
