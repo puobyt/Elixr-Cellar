@@ -348,21 +348,28 @@ const userCart = async (req, res) => {
     try {
 
         const userId = req.session.userId;
+        
 
         if (!userId) {
             return res.status(401).redirect('/');
         }
 
+        const products = await Product.find({});
+        let totalQuantity = 0;
+        products.forEach(product => {
+            totalQuantity += product.totalQuantity;
+        });
 
         const userCart = await Cart.findOne({ userId }).populate('items.productId');
         if (!userCart) {
-            return res.render('userCart', { cartItems: [], totalPrice });
+            return res.render('userCart', { cartItems: [], totalPrice: 0, totalQuantity ,products });
         }
         const items = userCart.items || [];
+        
         const totalPrice = calculateTotalPrice(items);
         console.log("user cart", userCart.items)
 
-        res.render('userCart', { cartItems: userCart.items, totalPrice });
+        res.render('userCart', { cartItems: userCart.items, totalPrice,totalQuantity,products});
     } catch (error) {
         console.error('Error fetching user cart:', error);
         return res.status(500).json({ error: 'Internal Server Error' });
@@ -428,61 +435,6 @@ const userCheckout = async (req, res) => {
 
 
 
-// const handleCheckOut = async (req, res) => {
-//     let userId = req.session.userId;
-//     const user = await UserCollection.findById(userId);
-//     const userCart = await Cart.findOne({ userId }).populate('items.productId');
-//     const items = userCart.items;
-//     let addressIndex = req.body.selectedAddress;
-
-
-//     const userAddresses = user.address[addressIndex];
-//     const { paymentMethod, totalPrice } = req.body;
-
-//     try {
-
-
-//         const newOrder = new orders({
-//             customer: userId,
-//             address: {
-//                 mobile: userAddresses.mobile,
-//                 houseName: userAddresses.houseName,
-//                 street: userAddresses.street,
-//                 city: userAddresses.city,
-//                 pincode: userAddresses.pincode,
-//                 state: userAddresses.state,
-//             },
-//             items: items
-//                 .filter(item => item.productId.totalQuantity > 0)
-//                 .map(item => ({
-//                     product: item.productId._id,
-//                     quantity: item.quantity
-//                 })),
-//             totalAmount: totalPrice,
-//             OrderStatus: 'Order Placed',
-//             paymentMethod: paymentMethod,
-//             orderId: generateOrderId(),
-//         });
-
-
-//         await newOrder.save();
-
-
-//         for (const item of items) {
-//             if (item.productId.totalQuantity > 0) {
-//                 item.productId.totalQuantity -= item.quantity;
-//                 await item.productId.save();
-//             }
-//         }
-
-
-//         res.redirect('/userSuccess');
-//     } catch (error) {
-//         console.log(error);
-//         // Handle the error as needed
-//         res.status(500).send("Internal Server Error");
-//     }
-// };
 
 
 
@@ -587,7 +539,7 @@ const handleCheckOut = async (req, res) => {
 
         }
 
-        // Proceed with creating order and other steps...
+        
 
         // Redirect to success page
         res.redirect('/userSuccess');
@@ -733,12 +685,12 @@ const orderDetails = async (req, res) => {
 
        
         const firstOrder = userOrders; 
-        const totalPrice = calculateTotalPrice(items);
+       
 
         const customerName = firstOrder.customer.name; 
         const deliveryAddress = `${firstOrder.address.houseName}, ${firstOrder.address.street}, ${firstOrder.address.city}, ${firstOrder.address.state}, ${firstOrder.address.pincode}`;
         const paymentMethod = firstOrder.paymentMethod;
-        const totalAmount=firstOrder.totalPrice
+        const totalAmount=userOrders.totalAmount
 
         res.render('userOrderDetails', { items, userOrders, userId, customerName, deliveryAddress, totalAmount, paymentMethod });
 

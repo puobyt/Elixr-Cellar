@@ -18,9 +18,11 @@
             <select class="form-control mr-sm-2" name="category">
               <option value="">
                 All Categories </option>
-                <% categories.forEach(category => { %>
-                  <option value="<%= category._id %>"><%= category.category %></option>
-              <% }); %>
+              <% categories.forEach(category=> { %>
+                <option value="<%= category._id %>">
+                  <%= category.category %>
+                </option>
+                <% }); %>
             </select>
             <button type="submit" class="btn btn-primary" style="margin-top: 5px;">Apply</button>
           </form>
@@ -71,7 +73,7 @@
                 <h3 class="heading mb-1"><a href="#">
                     <%=product.productName%>
                   </a></h3>
-                <span class="price">
+                <span class="price">₹
                   <%=product.price%>
                 </span>
               </div>
@@ -79,7 +81,7 @@
                 <h3 class="heading-2"><a href="#">
                     <%=product.productName%>
                   </a></h3>
-                <span class="price d-block">
+                <span class="price d-block">₹
                   <%=product.price%>
                 </span>
                 <div class="rating">

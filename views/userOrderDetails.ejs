@@ -53,10 +53,7 @@
                                                     <div class="d-flex justify-content-center">
                                                         <h3>Delivery Address</h3>
                                                     </div>
-                                                    <div class="d-flex justify-content-between">
-                                                        <p class="mb-2">Customer Name: <%= customerName %>
-                                                        </p> <!-- Display customer name -->
-                                                    </div>
+
                                                     <div class="d-flex justify-content-between">
                                                         <p class="mb-2">Address: <%= deliveryAddress %>
                                                         </p> <!-- Display delivery address -->
@@ -73,18 +70,19 @@
                                             <div class="form-check h-100 border rounded-3">
                                                 <div class="p-3">
                                                     <div class="d-flex justify-content-center">
-                                                        <h3>Total Order Price</h3>
+                                                        <h3>Total Order Details</h3>
                                                     </div>
                                                     <div class="d-flex justify-content-between">
-                                                        <p class="mb-2">Total: <%= totalAmount%>
-                                                                <!-- Display total order price -->
-                                                        </p>
+                                                        <% console.log("Total Amount:", totalAmount); %>
+                                                            <p class="mb-2">Total: ₹<%= totalAmount %>
+                                                                    <!-- Display total order price -->
+                                                            </p>
                                                     </div>
                                                     <div class="d-flex justify-content-between">
                                                         <p class="mb-2 bg-secondary text-white" style="width: 100%;">
                                                             Payment
                                                             Method: <%= paymentMethod %>
-                                                        </p> <!-- Display payment method -->
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>

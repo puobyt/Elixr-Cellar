@@ -32,7 +32,7 @@
                         <%= item.productId.productName %>
                       </h2>
                     </td>
-                    <td class="product-price">$<%= item.productId.price %>
+                    <td class="product-price">₹<%= item.productId.price %>
                     </td>
 
 
@@ -47,14 +47,14 @@
                           aria-label="Example text with button addon" aria-describedby="button-addon1">
                         <div class="input-group-append">
                           <button class="btn btn-outline-primary js-btn-plus" type="button"
-                            onclick="incrementQuantity('<%= item.quantity %>', '<%= item.productId._id %>')">&plus;</button>
+                            onclick="incrementQuantity('<%= item.tottalQuantity %>', '<%= item.productId._id %>')">&plus;</button>
                         </div>
                       </div>
                     </td>
 
 
 
-                    <td class="total-productPrice" data-product-id="<%= item.productId._id %>">$<%= item.productId.price
+                    <td class="total-productPrice" data-product-id="<%= item.productId._id %>">₹<%= item.productId.price
                         * item.quantity %>
                     </td>
                     <td><a href="/removeFromCart/<%= item.productId._id %>"
@@ -105,7 +105,7 @@
                   <span class="text-black">Total</span>
                 </div>
                 <div class="col-md-6 text-right">
-                  <strong class="totalPrice text-black">$<%=totalPrice?totalPrice:0%></strong>
+                  <strong class="totalPrice text-black">₹<%=totalPrice?totalPrice:0%></strong>
                 </div>
               </div>
               <div class="row">
@@ -191,20 +191,23 @@
 
 
   <script>
-    function incrementQuantity(currentQuantity, productId) {
-      const maxQuantity = 5;
-      const input = $('input[data-product-id="' + productId + '"]');
-      const newQuantity = parseInt(input.val()) + 1;
+   function incrementQuantity(currentQuantity, productId) {
+    const maxQuantity = 15; // Maximum allowed quantity
+    const input = $('input[data-product-id="' + productId + '"]');
+    const newQuantity = parseInt(input.val()) + 1;
 
-      if (newQuantity <= 15) {
+    const stockQuantity = parseInt('<%= products.totalQuantity %>'); // Get the stock quantity from the server-side template
+
+    if (newQuantity <= maxQuantity && newQuantity <= stockQuantity) {
         updateQuantity(productId, newQuantity);
-      }
-
-      else {
-
-        alert("The maximum quantity for this product is 15.");
-      }
+    } else if (newQuantity > maxQuantity) {
+        alert("The maximum quantity for this product is " + maxQuantity + ".");
+    } else if (newQuantity > stockQuantity) {
+        alert("There is not enough stock for this product.");
     }
+}
+
+
 
     function decrementQuantity(productId) {
 

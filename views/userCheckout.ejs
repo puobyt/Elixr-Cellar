@@ -20,15 +20,17 @@
                                                 data-aos-delay="<%= index * 100 %>">
                                                 <div class="card border-primary">
                                                     <div class="card-body">
-                                                        
 
-                                                            <input type="radio" class="addressSelecter" id="selectedAddress<%= index %>" name="selectedAddress" value="<%= index %>" onchange="handleCheckboxChange(this)"
-                                    data-mobile="<%= address.mobile %>"
-                                    data-houseName="<%= address.houseName %>"
-                                    data-street="<%= address.street %>"
-                                    data-city="<%= address.city %>"
-                                    data-pincode="<%= address.pincode %>"
-                                    data-state="<%= address.state %>">
+
+                                                        <input type="radio" class="addressSelecter"
+                                                            id="selectedAddress<%= index %>" name="selectedAddress"
+                                                            value="<%= index %>" onchange="handleCheckboxChange(this)"
+                                                            data-mobile="<%= address.mobile %>"
+                                                            data-houseName="<%= address.houseName %>"
+                                                            data-street="<%= address.street %>"
+                                                            data-city="<%= address.city %>"
+                                                            data-pincode="<%= address.pincode %>"
+                                                            data-state="<%= address.state %>">
 
 
                                                         <label for="selectedAddress<%= index %>"
@@ -105,7 +107,7 @@
                                                     <p class="font-weight-bold mb-1">
                                                         <%= item.productId.productName %>
                                                     </p>
-                                                    <p class="text-muted mb-0">$<%= item.productId.price %>
+                                                    <p class="text-muted mb-0">₹<%= item.productId.price %>
                                                     </p>
                                                 </div>
                                             </div>
@@ -118,7 +120,7 @@
                                         <span class="text-black">Total</span>
                                     </div>
                                     <div class="col-md-6 text-right">
-                                        <strong class="text-black">$<%=totalPrice%></strong>
+                                        <strong class="text-black">₹<%=totalPrice%></strong>
                                         <input id="checkout-total" type="hidden" value="<%=totalPrice%>"
                                             name="totalPrice">
                                     </div>
@@ -132,11 +134,11 @@
                                     </button>
                                 </div>
                                 <input type="hidden" id="selectedMobile" name="selectedMobile">
-                        <input type="hidden" id="selectedHouseName" name="selectedHouseName">
-                        <input type="hidden" id="selectedStreet" name="selectedStreet">
-                        <input type="hidden" id="selectedCity" name="selectedCity">
-                        <input type="hidden" id="selectedPincode" name="selectedPincode">
-                        <input type="hidden" id="selectedState" name="selectedState">
+                                <input type="hidden" id="selectedHouseName" name="selectedHouseName">
+                                <input type="hidden" id="selectedStreet" name="selectedStreet">
+                                <input type="hidden" id="selectedCity" name="selectedCity">
+                                <input type="hidden" id="selectedPincode" name="selectedPincode">
+                                <input type="hidden" id="selectedState" name="selectedState">
                             </form>
                         </div>
                     </div>
@@ -261,8 +263,8 @@
                         console.log("working")
                         const order = data.order;
                         const orderId = order.id;
-                        console.log("order",order)
-                        console.log("orderId",orderId)
+                        console.log("order", order)
+                        console.log("orderId", orderId)
                         // If it's for online payment, proceed with Razorpay
                         const options = {
                             key: 'rzp_test_pHTxdeMnlEh2z8',
@@ -305,70 +307,71 @@
 
 
         async function verifyPayment(payment, order) {
-      try {
-        var selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
-        
-        var mobile = selectedAddress.getAttribute('data-mobile');
-        var houseName = selectedAddress.getAttribute('data-houseName');
-        var street = selectedAddress.getAttribute('data-street');
-        var city = selectedAddress.getAttribute('data-city');
-        var pincode = selectedAddress.getAttribute('data-pincode');
-        var state = selectedAddress.getAttribute('data-state');
+            try {
+                var selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
 
-        document.getElementById('selectedMobile').value = mobile;
-        document.getElementById('selectedHouseName').value = houseName;
-        document.getElementById('selectedStreet').value = street;
-        document.getElementById('selectedCity').value = city;
-        document.getElementById('selectedPincode').value = pincode;
-        document.getElementById('selectedState').value = state;
+                var mobile = selectedAddress.getAttribute('data-mobile');
+                var houseName = selectedAddress.getAttribute('data-houseName');
+                var street = selectedAddress.getAttribute('data-street');
+                var city = selectedAddress.getAttribute('data-city');
+                var pincode = selectedAddress.getAttribute('data-pincode');
+                var state = selectedAddress.getAttribute('data-state');
 
-
+                document.getElementById('selectedMobile').value = mobile;
+                document.getElementById('selectedHouseName').value = houseName;
+                document.getElementById('selectedStreet').value = street;
+                document.getElementById('selectedCity').value = city;
+                document.getElementById('selectedPincode').value = pincode;
+                document.getElementById('selectedState').value = state;
 
 
-        const paymentOption = document.querySelector('input[name="paymentMethod"]:checked').value;
-        const response = await fetch('/verifyPayment',{
-          method:"POST",
-          headers:{
-            'Content-Type':'application/json'
-          },
-          body:JSON.stringify({
-            payment,
-            order,
-            paymentOption,
-            selectedMobile: mobile,
-                selectedHouseName: houseName,
-                selectedStreet: street,
-                selectedCity: city,
-                selectedPincode: pincode,
-                selectedState: state,
-          })
-        })
-        const responseData = await response.json();
-        console.log(responseData)
-      if (responseData.status) {
-          console.log("response is trrue")
-          window.location.href = '/userSuccess';
-          
-      }else{
-        alert('Payment Failed. Try again later.');
-      }
-      } catch (error) {
-        console.error('Error verifying payment:', error);
-        alert('Error verifying payment. Please try again.');
-      }
-    
-    }
-    
 
 
-    async function paymentFailed(data) {
-  try {
-    console.log('Payment failed or window closed:', data);
-    alert('Payment failed. Please try again.');
-    window.location.href = '/userCheckout';  } catch (error) {
-    console.error('Error handling payment failure:', error);
-  }
-}
+                const paymentOption = document.querySelector('input[name="paymentMethod"]:checked').value;
+                const response = await fetch('/verifyPayment', {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        payment,
+                        order,
+                        paymentOption,
+                        selectedMobile: mobile,
+                        selectedHouseName: houseName,
+                        selectedStreet: street,
+                        selectedCity: city,
+                        selectedPincode: pincode,
+                        selectedState: state,
+                    })
+                })
+                const responseData = await response.json();
+                console.log(responseData)
+                if (responseData.status) {
+                    console.log("response is trrue")
+                    window.location.href = '/userSuccess';
+
+                } else {
+                    alert('Payment Failed. Try again later.');
+                }
+            } catch (error) {
+                console.error('Error verifying payment:', error);
+                alert('Error verifying payment. Please try again.');
+            }
+
+        }
+
+
+
+        async function paymentFailed(data) {
+            try {
+                console.log('Payment failed or window closed:', data);
+                alert('Payment failed. Please try again.');
+                window.location.href = '/userCheckout';
+            } catch (error) {
+                console.error('Error handling payment failure:', error);
+            }
+        }
 
 
 

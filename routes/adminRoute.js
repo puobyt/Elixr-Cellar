@@ -23,13 +23,6 @@ const upload = multer({ storage: storage });
 
 // ...
 
-admin_router.route('/adminEditProduct/:id')
-    .get(adminController.adminEditProduct)
-    .post(upload.array([
-        { name: 'replaceImage0', maxCount: 1 },
-        { name: 'replaceImage1', maxCount: 1 },
-        { name: 'replaceImage2', maxCount: 1 },
-    ]), adminController.adminEditProductPost);
 
 
 
@@ -62,7 +55,14 @@ admin_router.get('/listUnlistProduct/:productId', adminController.listUnlistProd
 admin_router.get('/adminProductDetails/:id', adminController.adminProductDetails)
 
 admin_router.get('/adminEditProduct/:id', adminController.adminEditProduct)
-admin_router.post('/adminEditProduct/:id',upload.array('images',3), adminController.adminEditProduct)
+admin_router.post('/adminEditProduct/:id',adminController.upload.fields([
+    { name: 'gameImages1', maxCount: 1 },
+    { name: 'gameImages2', maxCount: 1 },
+    { name: 'gameImages3', maxCount: 1 },
+    { name: 'gameImages4', maxCount: 1 },
+]), adminController.adminEditProductPost)
+
+admin_router.post('/remove-image',adminController.removeImage)
 
 // admin_router.post('/adminEditProduct/:id',adminController.upload.array('images', 3),adminController.adminEditProductPost)
 

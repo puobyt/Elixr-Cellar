@@ -9,6 +9,8 @@ const products = require('../Model/productsModel')
 const users = require('../Model/userModel')
 const orders = require('../Model/orderModel')
 const Coupon = require('../Model/couponModel')
+const path = require('path')
+const fs = require('fs')
 
 const multer = require('multer');
 
@@ -404,69 +406,197 @@ const adminEditProduct = async (req, res) => {
 }
 
 
+// const adminEditProductPost = async (req, res) => {
+//     try {
+//         const prodId = req.params.id;
+//         const files = req.files; // Access uploaded files
+//         const deletedImages = req.body.deletedImages ? req.body.deletedImages.split(",") : [];
+//         let combinedImages = [];
+
+//         if (files && Array.isArray(files)) {
+//             console.log('Received files:', files);
+
+//             const existingImages = req.body.existingImages ? req.body.existingImages.split(",") : [];
+//             console.log('Existing Images:', existingImages);
+
+//             const remainingImages = existingImages.filter((img, index) => !deletedImages.includes(index.toString()));
+//             console.log('Remaining Images:', remainingImages);
+
+//             const newImagePaths = files.map((file) => 'productImg/' + file.filename);
+//             console.log('New Image Paths:', newImagePaths);
+
+//             combinedImages = [...remainingImages, ...newImagePaths].slice(0, 3);
+//             console.log('Combined Images:', combinedImages);
+//         }
+
+//         // Fetch other form data
+//         const { productName, productDes, productCat, productDate, stock, price } = req.body;
+
+//         // Update the product in the database with the new information and images
+//         const updatedProduct = await products.findByIdAndUpdate(
+//             prodId,
+//             {
+//                 productName: productName,
+//                 description: productDes,
+//                 productCategory: productCat,
+//                 ManufactureDate: productDate,
+//                 totalQuantity: stock,
+//                 price: price,
+//                 image: combinedImages,
+//             },
+//             { new: true }
+//         );
+
+//         if (!updatedProduct) {
+//             console.log("Product not found or not updated");
+//             return res.status(404).send("Product not found or not updated");
+//         }
+
+//         // Delete selected images
+//         for (const deletedImageIndex of deletedImages) {
+//             const index = parseInt(deletedImageIndex, 10);
+//             if (!isNaN(index) && index >= 0 && index < updatedProduct.image.length) {
+//                 updatedProduct.image.splice(index, 1);
+//             }
+//         }
+
+//         await updatedProduct.save();
+
+//         console.log("Product details updated successfully:", updatedProduct);
+//         res.redirect(`/adminProductDetails/${prodId}`);
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send("Internal Server Error");
+//     }
+// };
+
+
+
+
 const adminEditProductPost = async (req, res) => {
-    try {
-        const prodId = req.params.id;
-        const files = req.files; // Access uploaded files
-        const deletedImages = req.body.deletedImages ? req.body.deletedImages.split(",") : [];
-        let combinedImages = [];
 
-        if (files && Array.isArray(files)) {
-            console.log('Received files:', files);
+    const prodId = req.params.id;
+   const files = req.files; // Access uploaded files
+   const { productName, productDes, productCat, productDate, stock, price } = req.body
+   let product = await products.findById(prodId);
 
-            const existingImages = req.body.existingImages ? req.body.existingImages.split(",") : [];
-            console.log('Existing Images:', existingImages);
+   console.log(files)
 
-            const remainingImages = existingImages.filter((img, index) => !deletedImages.includes(index.toString()));
-            console.log('Remaining Images:', remainingImages);
 
-            const newImagePaths = files.map((file) => 'productImg/' + file.filename);
-            console.log('New Image Paths:', newImagePaths);
+    
 
-            combinedImages = [...remainingImages, ...newImagePaths].slice(0, 3);
-            console.log('Combined Images:', combinedImages);
-        }
+let gameImages = [];
+    let existingImages = [];
 
-        // Fetch other form data
-        const { productName, productDes, productCat, productDate, stock, price } = req.body;
+    for (let i = 1; i <= 4; i++) {
+      const fileKey = `gameImages${i}`;
+      if (req.files[fileKey] && req.files[fileKey].length > 0) {
+        gameImages[i - 1] = `/productImg/${req.files[fileKey][0].filename}`;
+        existingImages.push(product.image[i - 1]);
 
-        // Update the product in the database with the new information and images
-        const updatedProduct = await products.findByIdAndUpdate(
-            prodId,
-            {
-                productName: productName,
-                description: productDes,
-                productCategory: productCat,
-                ManufactureDate: productDate,
-                totalQuantity: stock,
-                price: price,
-                image: combinedImages,
-            },
-            { new: true }
-        );
-
-        if (!updatedProduct) {
-            console.log("Product not found or not updated");
-            return res.status(404).send("Product not found or not updated");
-        }
-
-        // Delete selected images
-        for (const deletedImageIndex of deletedImages) {
-            const index = parseInt(deletedImageIndex, 10);
-            if (!isNaN(index) && index >= 0 && index < updatedProduct.image.length) {
-                updatedProduct.image.splice(index, 1);
-            }
-        }
-
-        await updatedProduct.save();
-
-        console.log("Product details updated successfully:", updatedProduct);
-        res.redirect(`/adminProductDetails/${prodId}`);
-    } catch (error) {
-        console.log(error);
-        res.status(500).send("Internal Server Error");
+      } else {
+        gameImages[i - 1] = product.image[i - 1];
+      }
     }
-};
+
+
+    existingImages.forEach((existingImagePath) => {
+        console.log("Stuck in deleting existing image")
+        console.log(existingImagePath)
+        const fullPath = path.join('C:\\Users\\puoby\\OneDrive\\Wine .Co First week project\\public\\', existingImagePath);
+
+        if (typeof existingImagePath === 'string') {
+          try {
+            if (fs.existsSync(fullPath)) {
+              fs.unlinkSync(fullPath);
+              console.log(`Deleted file: ${fullPath}`);
+            } else {
+              console.log(`File not found: ${fullPath}`);
+            }
+          } catch (err) {
+            console.error(`Error deleting file: ${fullPath}`, err);
+          }
+        } else {
+          console.error('Image path is not a string. Unable to remove image.');
+          res.status(400).json({ error: 'Image removal failed. Image path is not a string.' });
+        }
+      });
+
+
+      const updatedProduct = await products.findByIdAndUpdate(
+                    prodId,
+                    {
+                        productName: productName,
+                        description: productDes,
+                        productCategory: productCat,
+                        ManufactureDate: productDate,
+                        totalQuantity: stock,
+                        price: price,
+                        image: gameImages,
+                    },
+                    { new: true }
+                );
+        
+                if (!updatedProduct) {
+                    console.log("Product not found or not updated");
+                }
+
+                res.redirect(`/adminProductDetails/${prodId}`);
+
+
+
+}
+
+
+
+const removeImage = async(req,res)=>{
+    const filePath = "C:\\Users\\puoby\\OneDrive\\Wine .Co First week project\\public\\"
+    const productId = req.body.productId
+    const product = await products.findById(productId);
+    try {
+      const imageIndexToRemove = parseInt(req.body.imageIndexToRemove);
+      console.log("Before 1st if")
+      if (!isNaN(imageIndexToRemove) && imageIndexToRemove >= 0 && imageIndexToRemove < product.image.length) {
+        console.log("stucked in remove image",filePath)
+        console.log(product.image[imageIndexToRemove])
+        const replacedImagePath = product.image[imageIndexToRemove].replace(/\//g, '\\');
+
+        console.log("Replaced Image Path:", replacedImagePath);
+        const imagePathToRemove = path.join(filePath, replacedImagePath);
+        
+
+  
+        console.log("Before second if")
+        try {
+          await fs.promises.access(imagePathToRemove);
+        
+          await fs.promises.unlink(imagePathToRemove);
+          product.image[imageIndexToRemove] = '';
+        
+          await product.save();
+        
+          res.status(200).json({ message: 'Image removed successfully.' });
+          return;
+        } catch (err) {
+          console.error(`Error removing image: ${err.message}`);
+          res.status(500).json({ error: 'Internal Server Error' });
+          return;
+        }
+        
+      } else {
+        console.log('Invalid image index provided.');
+      }
+  
+      res.status(400).json({ error: 'Image removal failed. Invalid index or file not found.' });
+    } catch (err) {
+      console.error('Error removing image:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+
+
+
+
 
 
 
@@ -685,6 +815,7 @@ module.exports = {
     listUnlistProduct,
     adminProductDetails,
     adminEditProduct,
+    removeImage,
     adminEditProductPost,
     addProductPage,
     addProduct,

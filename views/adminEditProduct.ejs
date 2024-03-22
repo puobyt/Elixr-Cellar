@@ -161,64 +161,119 @@
                                             <h5 class="modal-title text_white">Edit Product</h5>
                                         </div>
                                         <div class="modal-body">
-                                            <form method="post" action="/adminEditProduct/<%= productIn._id %>"
+                                            <form id="productForm" method="post"
+                                                action="/adminEditProduct/<%= productIn._id %>"
                                                 enctype="multipart/form-data">
-                                                <div class>
+                                                <div class="form-group">
                                                     <input type="text" class="form-control"
                                                         value="<%= productIn.productName%>" name="productName"
-                                                        placeholder="Enter your Product Name">
+                                                        placeholder="Enter your Product Name" required>
                                                 </div>
-                                                <div class>
+                                                <div class="form-group">
                                                     <input type="text" class="form-control"
                                                         value="<%= productIn.description%>" name="productDes"
-                                                        placeholder="Enter your Product Description">
+                                                        placeholder="Enter your Product Description" required>
                                                 </div>
-                                                <div class>
+                                                <div class="form-group">
                                                     <input type="text" class="form-control"
                                                         value="<%= productIn.productCategory%>" name="productCat"
-                                                        placeholder="Enter your Category(dropdown)">
+                                                        placeholder="Enter your Category(dropdown)" required>
                                                 </div>
-
                                                 <div class="form-group">
                                                     <p class="text">Enter your Manufactured Date</p>
-                                                    <input type="text" class="form-control" id="manufactureDateInput" name="productDate" placeholder="Enter your Manufactured Date">
+                                                    <input type="text" class="form-control" id="manufactureDateInput"
+                                                        name="productDate" placeholder="Enter your Manufactured Date"
+                                                        required>
                                                 </div>
-                                                <div class>
-                                                    <input type="number" class="form-control" value="<%= productIn.
-                                                    totalQuantity%>" name="stock"
-                                                        placeholder="Enter your Units In Stock">
-                                                </div>
-
-                                                <div class>
+                                                <div class="form-group">
                                                     <input type="number" class="form-control"
-                                                        value="<%= productIn.price%>" name="price" placeholder="Price">
+                                                        value="<%= productIn.totalQuantity%>" name="stock"
+                                                        placeholder="Enter your Units In Stock" required>
                                                 </div>
-                                                <div>
-                                                    <input type="file" class="form-control" name="images" multiple
-                                                    id="image">
-                                                    <p class="text">Selected Images:</p>
-                                                    <% productIn.image.forEach((img, index)=> { %>
-                                                        <div class="image-item">
-                                                            <img style="width: 100px; height: 100px;"
-                                                                src="../<%= img %>" alt="" name"image">
-
-                                                            <button class="btn btn-danger"
-                                                                onclick="deleteImage(<%= index %>)">Delete</button>
-
-                                                            <input type="file" name="replaceImage<%= index %>"
-                                                                accept="image/*">
-                                                        </div>
-                                                        <% }) %>
+                                                <div class="form-group">
+                                                    <input type="number" class="form-control"
+                                                        value="<%= productIn.price%>" name="price" placeholder="Price"
+                                                        required>
                                                 </div>
+                                                <div class="form-group">
 
+
+
+
+                                                    <input type="hidden" id="existingImageData" name="existingImage"
+                                                        value="">
+
+
+                                                    <!-- Image 1 -->
+                                                    <div class="form-group">
+                                                        <label class="col-md-4 control-label">Image 1</label>
+                                                        <input type="hidden" name="imageIndex0" value="1" />
+                                                        <input class="input-file" type="file" name="gameImages1"
+                                                            id="imageInput1" onchange="previewImage(this, 0)" />
+                                                        <img id="imagePreview0" src="../<%= productIn.image[0]%>"
+                                                            style="width: 200px; height: 150px;" />
+                                                        <button type="button" onclick="removeImage(0)">Remove this
+                                                            image</button>
+                                                        <div id="errorImage" style="color: red;"></div>
+                                                    </div>
+
+                                                    <!-- Image 2 -->
+                                                    <div class="form-group">
+                                                        <label class="col-md-4 control-label">Image 2</label>
+                                                        <input type="hidden" name="imageIndex1" value="2" />
+                                                        <input class="input-file" type="file" name="gameImages2"
+                                                            id="imageInput2" onchange="previewImage(this, 1)" />
+                                                        <img id="imagePreview1" src="../<%= productIn.image[1]%>"
+                                                            style="width: 200px; height: 150px;" />
+                                                        <button type="button" onclick="removeImage(1)">Remove this
+                                                            image</button>
+                                                        <div id="errorImage" style="color: red;"></div>
+                                                    </div>
+
+                                                    <!-- Image 3 -->
+                                                    <div class="form-group">
+                                                        <label class="col-md-4 control-label">Image 3</label>
+                                                        <input type="hidden" name="imageIndex2" value="3" />
+                                                        <input class="input-file" type="file" name="gameImages3"
+                                                            id="imageInput3" value="<%=productIn.image[2]%>"
+                                                            onchange="previewImage(this, 2)" />
+                                                        <img id="imagePreview2" src="../<%= productIn.image[2]%>"
+                                                            style="width: 200px; height: 150px;" />
+                                                        <button type="button" onclick="removeImage(2)">Remove this
+                                                            image</button>
+                                                        <div id="errorImage" style="color: red;"></div>
+                                                    </div>
+
+                                                    <!-- Image 4 -->
+                                                    <div class="form-group">
+                                                        <label class="col-md-4 control-label">Image 4</label>
+                                                        <input type="hidden" name="imageIndex3" value="4" />
+                                                        <input class="input-file" type="file" name="gameImages4"
+                                                            id="imageInput4" value="<%=productIn.image[3]%>"
+                                                            onchange="previewImage(this, 3)" />
+                                                        <img id="imagePreview3" src="../<%= productIn.image[3]%>"
+                                                            style="width: 200px; height: 150px;" />
+                                                        <button type="button" onclick="removeImage(3)">Remove this
+                                                            image</button>
+                                                        <div id="errorImage" style="color: red;"></div>
+                                                    </div>
+
+
+
+                                                    <input type="text" name="productId" id="productId"
+                                                        value="<%=productIn._id%>" placeholder="<%=productIn._id%>">
+
+
+
+                                                </div>
                                                 <input type="hidden" name="deletedImages" id="deletedImages" value="">
-
-
                                                 <button type="submit"
                                                     class="btn_1 full_width text-center">Submit</button>
-
                                             </form>
                                         </div>
+
+
+
                                     </div>
                                 </div>
                             </div>
@@ -226,6 +281,8 @@
                     </div>
                 </div>
             </div>
+
+
         </div>
 
 
@@ -374,16 +431,16 @@
     <script>
         // Get the input element
         var inputElement = document.getElementById('manufactureDateInput');
-    
+
         // Get the value of the ManufactureDate attribute
         var manufactureDateValue = '<%= productIn.ManufactureDate %>';
-    
+
         // Convert the ManufactureDate value to a Date object
         var manufactureDate = new Date(manufactureDateValue);
-    
+
         // Format the date in short format (MM/DD/YYYY)
         var formattedDate = (manufactureDate.getMonth() + 1) + '/' + manufactureDate.getDate() + '/' + manufactureDate.getFullYear();
-    
+
         // Set the formatted date value to the input field
         inputElement.value = formattedDate;
     </script>
@@ -404,6 +461,114 @@
             const imageItem = document.querySelector(`.image-item:nth-child(${index + 1})`);
             imageItem.style.display = 'none';
         }
+    </script>
+    <script>
+        document.getElementById("productForm").addEventListener("submit", function (event) {
+            const stock = document.getElementsByName("stock")[0].value;
+            const price = document.getElementsByName("price")[0].value;
+            if (stock < 0 || price < 0) {
+                alert("Stock and price cannot be negative.");
+                event.preventDefault();
+            }
+        });
+
+
+
+        async function removeImage(imageIndex) {
+            const imageInputId = `#imageInput${imageIndex + 1}`;
+            const imagePreviewId = `#imagePreview${imageIndex}`;
+
+            console.log('Attempting to remove image with IDs:', imageInputId, imagePreviewId);
+
+            const imageInput = document.querySelector(imageInputId);
+            if (imageInput) {
+                imageInput.value = '';
+            } else {
+                console.error(`Image input not found: ${imageInputId}`);
+            }
+
+            const imagePreview = document.querySelector(imagePreviewId);
+            if (imagePreview) {
+                imagePreview.src = '';
+            } else {
+                console.error(`Image preview not found: ${imagePreviewId}`);
+            }
+
+            const productId = document.getElementById('productId').value;
+            // const productImagePath = `product.image[${imageIndex}]`;
+            const productImagePath = `gameImages${imageIndex + 1}`;
+
+            console.log(productImagePath)
+            const productImagePathInput = document.querySelector(`input[name="${productImagePath}"]`);
+            console.log(productImagePathInput)
+            if (productImagePathInput) {
+                productImagePathInput.value = '';
+                // console.log('Updated form data:', new FormData(document.getElementById('yourFormId')));
+                console.log('Updated form data:', { imageIndexToRemove: imageIndex, productId: productId });
+
+            } else {
+                console.error(`Product image path input not found: ${productImagePath}`);
+            }
+
+            const formInputId = `#gameImages${imageIndex + 1}`;
+            const formInput = document.querySelector(`input[name="${productImagePath}"]`);
+            console.log(formInput)
+            if (formInput) {
+                formInput.value = '';
+            } else {
+                console.error(`Form input not found: ${productImagePath}`);
+            }
+
+
+            try {
+                const response = await fetch('/remove-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ imageIndexToRemove: imageIndex, productId: productId }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data.message);
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error removing image:', errorData.error);
+                }
+            } catch (error) {
+                console.error('Error removing image:', error);
+            }
+        }
+
+        function previewImage(input, index) {
+            var previewElement = document.getElementById("imagePreview" + index);
+            var errorElement = document.getElementById("errorImage" + index);
+
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    previewElement.src = e.target.result;
+                    // errorElement.innerHTML = ""; // Clear error message
+                };
+
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                previewElement.src = ""; // Clear preview if no file selected
+                errorElement.innerHTML = "No image selected";
+            }
+        }
+
+
+
+
+
+
+
+
+
+
     </script>
 
 
