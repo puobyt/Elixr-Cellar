@@ -23,6 +23,7 @@ user_router.get('/userProductDetails/:id', userController.userProductDetails);
 // About Route
 user_router.get("/userAbout", userController.userAbout);
 user_router.get('/search', userController.searchProduct)
+user_router.get('/categoryfilter', userController.categoryFilter)
 user_router.get('/userContact', userController.userContact)
 
 // Login route

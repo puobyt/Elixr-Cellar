@@ -25,7 +25,11 @@
                 <h6 class="text-muted font_s_13">Stock: <%= product.totalQuantity %>
                 </h6>
                 <form action="/addToCart/<%=product._id%>" method="post" class="icon-shopping-bag mr-3">
-                  <button class="icon-shopping-bag mr-3" type="submit">Add to cart</button>
+                  <button class="icon-shopping-bag mr-3" type="submit"<% if (product.totalQuantity===0)
+                    { %> disabled <% } %>>
+                   <span>Add to cart</span> 
+
+                  </button>
                 </form>
               </div>
             </div>

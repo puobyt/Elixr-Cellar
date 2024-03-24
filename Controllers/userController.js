@@ -8,6 +8,8 @@ const Cart = require('../Model/cartModel');
 const orders = require('../Model/orderModel')
 const wallet = require('../Model/walletModel')
 const Category = require('../Model/categoryModel');
+const mongoose = require('mongoose');
+
 const Razorpay = require('razorpay');
 const crypto = require("crypto");
 require('dotenv').config();
@@ -168,11 +170,9 @@ const otp = (req, res) => {
 
 const userShop = async (req, res) => {
     try {
-        console.log("Try working")
+        console.log("Try working");
         let sortQuery = {};
-        let categoryQuery = {};
         const categories = await Category.find();
-
 
         const sortBy = req.query.sortBy;
         switch (sortBy) {
@@ -191,36 +191,51 @@ const userShop = async (req, res) => {
             case 'popularity_desc':
                 sortQuery = { popularity: -1 };
                 break;
-
             default:
-
                 break;
         }
-        const category = req.query.category;
-        if (category) {
-            categoryQuery = { products: { $in: [mongoose.Types.ObjectId(category)] } };
-        }
 
-        const filter = { ...categoryQuery }; // Combine category filter with others
-        const products = await Product.find(filter).sort(sortQuery);
-
-        // const category = req.query.category;
-        // if (category) {
-        //     categoryQuery = { productCategory: category };
-        // }
-
-        // const products = await Product.find().sort(sortQuery);
-
-
-        res.render('userShop', { products , categories });
-
+        const products = await Product.find().sort(sortQuery);
+        res.render('userShop', { products,categories });
 
     } catch (error) {
-
         console.error(error);
         res.status(500).send('Internal Server Error');
     }
 };
+
+const categoryFilter = async (req, res) => {
+    try {
+        
+        
+
+        
+        const category = req.query.category;
+        console.log(category)
+        const categories = await Category.findById(category).populate('products');
+        console.log(categories.products)
+
+        
+        let categoryQuery = {};
+
+        
+        // if (category) {
+        //     // Assuming your `Category` model has a field named `products`
+        //     // that contains an array of product IDs associated with the category
+        //     categoryQuery = { products: mongoose.Types.ObjectId(category) };
+        // }
+
+        // Fetch products based on the category query
+        // const products = await Product.find(categoryQuery);
+
+        // Render the 'userShop' view with the filtered products and all categories
+        res.render('userShop', { products:categories.products, categories:categories.products });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
 
 
 
@@ -252,7 +267,7 @@ const searchProduct = async (req, res) => {
         }
 
         const categories = await Category.find();
-        res.render('userShop', { products });
+        res.render('userShop', { products, categories });
 
     } catch (error) {
         console.log(error);
@@ -269,19 +284,6 @@ const userContact = (req, res) => {
     }
 }
 
-// const userWallet = async (req, res) => {
-//     try {
-//         const userId = req.session.userId;
-
-//         const userWallet = await wallet.findOne({ userId })
-//         console.log("userWallet", userWallet.transactionHistory);
-
-//         res.render('userWallet', { userWallet })
-
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
 
 
 const userWallet = async (req, res) => {
@@ -303,7 +305,7 @@ const processPayment = async (req, res) => {
         const userId = req.session.userId;
         const { paymentMethod, totalPrice } = req.body;
 
-        // Assuming you have the payment logic here...
+        
         // Deduct the total price from the user's wallet balance
         const userWallet = await wallet.findOneAndUpdate(
             { userId },
@@ -311,7 +313,7 @@ const processPayment = async (req, res) => {
             { new: true }
         );
 
-        // Add a new transaction entry to the wallet's transaction history
+       
         const newTransaction = {
             transaction: "Money Deducted",
             amount: totalPrice
@@ -321,7 +323,7 @@ const processPayment = async (req, res) => {
         await userWallet.save();
 
         // Redirect or respond based on the success of payment process
-        res.redirect('/checkout/success'); // Assuming you have a success page
+        res.redirect('/checkout/success'); 
     } catch (error) {
         console.log(error);
         // Handle error response
@@ -629,6 +631,7 @@ const verifyPayment = async(req,res)=>{
               product: item.productId._id,
               quantity: item.quantity
             })),
+           
             totalAmount: updatedTotalPrice,
             OrderStatus: 'Order Placed',
             paymentMethod: paymentOption,
@@ -1275,6 +1278,7 @@ module.exports = {
     saveEditAddress,
     deleteAddress,
     userShop,
+    categoryFilter,
     userLogin,
     userSignup,
     userHome,

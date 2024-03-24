@@ -47,9 +47,10 @@
                           aria-label="Example text with button addon" aria-describedby="button-addon1">
                         <div class="input-group-append">
                           <button class="btn btn-outline-primary js-btn-plus" type="button"
-                            onclick="incrementQuantity('<%= item.tottalQuantity %>', '<%= item.productId._id %>')">&plus;</button>
+                            onclick="incrementQuantity('<%= item.productId.totalQuantity %>', '<%= item.productId._id %>')">&plus;</button>
                         </div>
                       </div>
+
                     </td>
 
 
@@ -191,55 +192,19 @@
 
 
   <script>
-   function incrementQuantity(currentQuantity, productId) {
-    const maxQuantity = 15; // Maximum allowed quantity
-    const input = $('input[data-product-id="' + productId + '"]');
-    const newQuantity = parseInt(input.val()) + 1;
-
-    const stockQuantity = parseInt('<%= products.totalQuantity %>'); // Get the stock quantity from the server-side template
-
-    if (newQuantity <= maxQuantity && newQuantity <= stockQuantity) {
-        updateQuantity(productId, newQuantity);
-    } else if (newQuantity > maxQuantity) {
-        alert("The maximum quantity for this product is " + maxQuantity + ".");
-    } else if (newQuantity > stockQuantity) {
-        alert("There is not enough stock for this product.");
-    }
-}
+ 
 
 
 
-    function decrementQuantity(productId) {
 
-    }
+
+    // function decrementQuantity(productId) {
+
+    // }
 
     $(document).ready(function () {
-      // Event handler for quantity increment
-      $(".js-btn-plus").on("click", function () {
-        const input = $(this).closest(".input-group").find("input");
-        const productId = input.data("product-id");
-        const newQuantity = parseInt(input.val()) + 1;
-        updateQuantity(productId, newQuantity);
-        if (newQuantity <= 5) {
-          updateQuantity(productId, newQuantity);
-        }
-        else {
-          console.log("Quantity cannot be updated, new quantity is greater than 5.");
-        }
-      });
 
-      // Event handler for quantity decrement
-      $(".js-btn-minus").on("click", function () {
-        const input = $(this).closest(".input-group").find("input");
-        const productId = input.data("product-id");
-        const newQuantity = parseInt(input.val()) - 1;
-        // Ensure quantity does not go below 1
-        if (newQuantity >= 1) {
-          updateQuantity(productId, newQuantity);
-        }
-      });
-
-      // Function to update quantity via AJAX
+       // Function to update quantity via AJAX
       function updateQuantity(productId, newQuantity) {
         $.ajax({
           type: "POST",
@@ -268,6 +233,32 @@
           },
         });
       }
+      // Event handler for quantity increment
+      $(".js-btn-plus").on("click", function () {
+        const input = $(this).closest(".input-group").find("input");
+        const productId = input.data("product-id");
+        const newQuantity = parseInt(input.val()) + 1;
+        updateQuantity(productId, newQuantity);
+        if (newQuantity <= 5) {
+          updateQuantity(productId, newQuantity);
+        }
+        else {
+          console.log("Quantity cannot be updated, new quantity is greater than 5.");
+        }
+      });
+
+      // Event handler for quantity decrement
+      $(".js-btn-minus").on("click", function () {
+        const input = $(this).closest(".input-group").find("input");
+        const productId = input.data("product-id");
+        const newQuantity = parseInt(input.val()) - 1;
+        // Ensure quantity does not go below 1
+        if (newQuantity >= 1) {
+          updateQuantity(productId, newQuantity);
+        }
+      });
+
+     
 
 
       function updateCartTotals(cartItems) {
@@ -284,6 +275,62 @@
         $(".totalPrice").text(`$${subtotal.toFixed(2)}`);
       }
     });
+
+
+
+
+    // function incrementQuantity(currentQuantity, productId) {
+    //   const maxQuantity = 25; // Maximum allowed quantity
+    //   const input = $('input[data-product-id="' + productId + '"]');
+
+    //   const newQuantity = parseInt(input.val()) + 1;
+    //   console.log("newQuantity", newQuantity)
+
+    //   const stockQuantity = currentQuantity; // Get the stock quantity from the server-side template
+    //   console.log("stockQuantity", stockQuantity)
+    //   if (newQuantity <= maxQuantity && newQuantity <= stockQuantity) {
+    //     updateQuantity(productId, newQuantity);
+    //     // Check if the new quantity is equal to stock quantity, then disable the increment button
+    //     if (newQuantity === stockQuantity) {
+    //       input.closest(".input-group").find(".js-btn-plus").prop("disabled", true);
+    //     }
+    //   } else if (newQuantity > maxQuantity) {
+    //     alert("The maximum quantity for this product is " + maxQuantity + ".");
+    //   } else if (newQuantity > stockQuantity) {
+    //     alert("There is not enough stock for this product.");
+
+    //   }
+    // }
+
+    function incrementQuantity(currentQuantity, productId) {
+      console.log("Current Quantity:", currentQuantity);
+  console.log("Product ID:", productId);
+      const maxQuantity = 25; // Maximum allowed quantity
+      const input = $('input[data-product-id="' + productId + '"]');
+      const newQuantity = parseInt(input.val()) + 1;
+
+      const stockQuantity = currentQuantity; // Get the stock quantity from the server-side template
+
+      if (newQuantity <= maxQuantity && newQuantity <= stockQuantity) {
+        // If the new quantity is within allowed range and stock quantity
+        updateQuantity(productId, newQuantity);
+
+        // Check if the new quantity equals the stock quantity and disable the increment button
+        if (newQuantity === stockQuantity) {
+          input.closest(".input-group").find(".js-btn-plus").prop("disabled", true);
+        }
+      } else if (newQuantity > maxQuantity) {
+        // If the new quantity exceeds the maximum allowed quantity
+        alert("The maximum quantity for this product is " + maxQuantity + ".");
+      } else if (newQuantity > stockQuantity) {
+        // If there is not enough stock for this product
+        alert("There is not enough stock for this product.");
+        input.closest(".input-group").find(".js-btn-plus").prop("disabled", true); // Disable the increment button
+        return; // Prevent further execution
+      }
+    }
+
+
   </script>
 
 

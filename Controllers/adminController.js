@@ -17,6 +17,8 @@ const multer = require('multer');
 
 
 
+
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'public/productImg');
@@ -32,7 +34,7 @@ const upload = multer({ storage: storage, field: 'image' });
 
 
 
-//Admin Login
+// Admin Login
 const adminLogin = (req, res) => {
     if (req.session.admin) {
         res.redirect('/adminhome')
@@ -42,6 +44,8 @@ const adminLogin = (req, res) => {
         res.render('adminlogin')
     }
 }
+
+
 
 
 // Admin validation
