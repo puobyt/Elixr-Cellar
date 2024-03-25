@@ -39,6 +39,8 @@ user_router.get('/resetPassword', userController.resetPassword);
 user_router.post('/postResetPassword',userController.postResetPassword)
 user_router.get('/resetOtp', userController.resetOtp);
 user_router.post('/verifyOtp', userController.verifyOtp);
+user_router.get('/changePassword', userController.changePassword);
+user_router.post('/changingPassword', userController.changingPassword);
 
 
 
@@ -62,17 +64,19 @@ user_router.post('/resetPassword', requireLogin, userController.handleResetPassw
 
 
 user_router.post('/userAddress', requireLogin, userController.userAddress);
-user_router.get('/editaddress', requireLogin, userController.editaddress)
-user_router.post('/editaddress', requireLogin, userController.saveEditAddress)
+user_router.get('/userAddressEdit', requireLogin, userController.addAddress)
+user_router.post('/userAddressEdit', requireLogin, userController.saveEditAddress)
 user_router.post('/deleteAddress', requireLogin, userController.deleteAddress)
 // user_router.post('/userAddressEdit', requireLogin, userController.addAddress)
 // user_router.get('/userAddressEdit', requireLogin, userController.addAddressPage)
 user_router.post('/userAddressToCart', requireLogin, userController.addAddressToCart)
-user_router.get('/userAddressToCart', requireLogin, userController.addAddressToCartPage)
+user_router.get('/userAddressEdit', requireLogin, userController.addAddressToCartPage)
 //checkOut
 //checkOut
 
 user_router.get('/userCheckout', requireLogin, userController.userCheckout)
+
+user_router.post('/applyCoupon', requireLogin, userController.applyCoupon)
 user_router.post('/userCheckout', requireLogin, userController.handleCheckOut)
 user_router.post('/createOrder', requireLogin, userController.createOrder)
 user_router.post('/verifyPayment',userController.verifyPayment)

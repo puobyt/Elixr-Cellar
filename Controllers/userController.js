@@ -9,6 +9,7 @@ const orders = require('../Model/orderModel')
 const wallet = require('../Model/walletModel')
 const Category = require('../Model/categoryModel');
 const mongoose = require('mongoose');
+const Coupon = require( '../Model/couponModel' );
 
 const Razorpay = require('razorpay');
 const crypto = require("crypto");
@@ -72,21 +73,64 @@ const resetOtp = async (req, res) => {
 
 };
 const verifyOtp = (req,res)=>{
-    const { otp}= req.body;
+    try{
+
+    
+    const {otp}= req.body;
+    console.log(otp);
   const storedOTP=req.session.resetPasswordOTP;
-  const storedEmail= req.session.resetEmail;
-   if (otp === storedOTP&& email ===storedEmail ) {
+  console.log(storedOTP);
+   if (otp === storedOTP) {
     res.json({success:true,message: "Verified Successfully!" });
 } else{
     res.json({success:false,message: 'Wrong OTP!' })
 }
 
+    }catch (error) {
+        console.error(error);
+        res.json({success:false,message:"Not correct"})
+       
+    }
+
 }
+
+const changePassword = (req, res) => {
+    res.render('changePassword')
+}
+
+const changingPassword = async(req, res) => {
+    try {
+       
+        const email = req.session.resetEmail;
+
+        const password  = req.body.password;
+        const user = await UserCollection.findOne({email});
+
+
+        if (user) {
+            user.password = password;
+            await user.save();
+            res.json({success:true,message: "Verified Successfully!" });  
+        }else{
+            res.json({success:false,message: "Failed!" });
+        }
+      
+
+
+    } catch (error) {
+        console.error(error);
+        res.json({success:false,message: "Failed from cattch!" });
+     
+    }
+   
+}
+
+
 const userLoginData = async (req, res) => {
     try {
 
         const { userEmail, password } = req.body
-        console.log(userEmail) 
+        console.log(userEmail)
         const user = await UserCollection.findOne({ email: userEmail })
         if (user && !user.isBlocked) {
             if (user.email == userEmail && user.password == password) {
@@ -435,6 +479,7 @@ const userCart = async (req, res) => {
 };
 
 
+
 const updateQuantity = async (req, res) => {
     try {
         const userId = req.session.userId;
@@ -467,6 +512,23 @@ const updateQuantity = async (req, res) => {
     } catch (error) {
         console.error("Error updating quantity:", error);
         res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+const applyCoupon = async(req,res)=>{
+    const couponCode= req.body.couponCode;
+    console.log(couponCode);
+    try {
+        const coupon = await Coupon.findOne({code:couponCode});
+        if(coupon){
+            const totalPrice = calculateTotalPrice(req.cartItems, coupon.discountValue);
+             res.json({ success: true, totalPrice });
+        }else{
+            res.json({ success: false });
+        }
+    } catch (error) {
+        console.error('Error applying coupon:', error);
+        res.json({ success: false });
     }
 }
 
@@ -766,7 +828,7 @@ const cancelOrder = async (req, res) => {
         const userId = req.session.userId
 
 
-        const order = await orders.findById(orderId);
+        const order = await orders.findById(orderId).populate('items.product');
 
         // // Check if the order exists and if it's associated with the current user
         // if (!order || order.customer !== userId) {
@@ -782,7 +844,12 @@ const cancelOrder = async (req, res) => {
         //         await product.save();
         //     }
         // }
-
+        for (const item of order.items) {
+            if (item.product.totalQuantity > 0) {
+                item.product.totalQuantity += item.quantity;
+                await item.product.save();
+            }
+        }
 
         order.OrderStatus = 'Cancelled';
 
@@ -1316,6 +1383,7 @@ module.exports = {
     userLoginData,
     userContact,
     userCart,
+    applyCoupon,
     addAddressToCart,
     addAddressToCartPage,
     updateQuantity,
@@ -1358,5 +1426,7 @@ module.exports = {
     userWallet,
     processPayment,
     wishlistCart,
+    changePassword,
+    changingPassword,
 
 };

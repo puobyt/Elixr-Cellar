@@ -1,4 +1,17 @@
-<%- include('userHeader') %>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>USER</title>
+    <link href="https://fonts.googleapis.com/css?family=Karla:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.materialdesignicons.com/4.8.95/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/User/userlogin.css">
+</head>
+<body>
     <div class="container">
         <div class="row justify-content-center mt-5">
             <div class="col-md-6 mt-5">
@@ -11,11 +24,10 @@
                           
                         </p>
 
-                        <form id="otp">
-                            <div class="mb-3">
-                                <label for="ot" class="form-label">OTP</label>
-                                <input type="otp" class="form-control" id="otp"
-                                    placeholder="Enter OTP" >
+                        <form>
+                            <div class="mb-3" id="otp-input">
+                                <label for="otp" class="form-label">OTP</label>
+                                <input type="text" class="form-control" id="otp" placeholder="Enter OTP">
                             </div>
 
 
@@ -36,24 +48,20 @@
         document.getElementById('submitbtn').addEventListener('click',async(e)=>{
 
             e.preventDefault();
-            const email=document.getElementById('email').value;
-            console.log(email);
-            const response=await fetch('/postResetPassword',{
+            const otp=document.getElementById('otp').value;
+            console.log(otp);
+            const response=await fetch('/verifyOtp',{
                 method:'POST',
                 headers:{
                     'Content-Type':'application/json'
                 },
-                body:JSON.stringify({email})
+                body:JSON.stringify({otp})
             })
             try{
                 const data=await response.json();
             console.log(data);
             if (data.success===true){
-                Swal.fire({
-                    Icon:"success",
-                    text:data.message,
-                    title:"Success"
-                })
+                window.location.href='/changePassword'
             }else{
                 Swal.fire({
                     Icon:"error",
@@ -79,3 +87,6 @@
         
     </script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</body>
+   

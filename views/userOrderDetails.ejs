@@ -17,24 +17,28 @@
 
                             <div>
                                 <!-- Loop through each item in the cart -->
-                                <% items.forEach(item=> { %>
-                                    <div class="container">
-                                        <div class="row justify-content-center g-3">
-                                            <% if (item.productId) { %> <!-- Checking if productId exists -->
-                                                <div class="card mr-3 border-0" style="width: auto; margin-left: 45px;">
-                                                    <p class="card-text fw-bold">
-                                                        <% userOrders.items.forEach(Product=>{%>
-                                                            <%=Product.product.productName%>
-                                                                <%}) %>
-                                                                    <!-- Accessing product name via productId -->
+
+                                <div class="container">
+                                    <div class="row justify-content-center g-3">
+                                        <!-- Checking if productId exists -->
+                                        <div class="card mr-3 border-0" style="width: auto; margin-left: 45px;">
+                                            <p class="card-text fw-bold">
+                                                <% userOrders.items.forEach(Product=>{%>
+                                                    <p>
+                                                        <%=Product.product.productName%>
                                                     </p>
-                                                    <p class="card-text">Quantity: <%= item.quantity %>
+                                                    <p>Quantity: <%= Product.quantity %>
                                                     </p>
-                                                </div>
-                                                <% } %>
+                                                    <%}) %>
+                                                        <!-- Accessing product name via productId -->
+
+
+                                            </p>
                                         </div>
+
                                     </div>
-                                    <% }); %>
+                                </div>
+
 
 
                             </div>

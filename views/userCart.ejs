@@ -88,7 +88,7 @@
               <input type="text" class="form-control py-3" id="coupon" placeholder="Coupon Code">
             </div>
             <div class="col-md-4">
-              <button class="btn btn-primary btn-md px-4">Apply Coupon</button>
+              <button class="btn btn-primary btn-md px-4" onclick="applyCoupon()">Apply Coupon</button>
             </div>
           </div>
         </div>
@@ -358,6 +358,35 @@
         updateMinusButtonState(input);
       });
     });
+  </script>
+  <script>
+    function applyCoupon() {
+      const couponCode = document.getElementById('coupons').value;
+      // Send AJAX request to server with the coupon code
+      fetch('/applyCoupon', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ couponCode })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Update the total amount displayed in the cart
+            document.querySelector('.totalPrice').innerText = `₹${data.totalPrice}`;
+            // Display success message or any other feedback
+            alert('Coupon applied successfully!');
+          } else {
+            alert('Failed to apply coupon. Please check the coupon code.');
+          }
+        })
+        .catch(error => {
+          console.error('Error applying coupon:', error);
+          alert('An error occurred while applying the coupon. Please try again later.');
+        });
+    }
+
   </script>
 
 
