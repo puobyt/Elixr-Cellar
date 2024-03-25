@@ -27,6 +27,34 @@ const userLogin = async (req, res) => {
     }
 };
 
+const resetPassword = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+
+        const {email } = req.body;
+        const user = await UserCollection.findById(userId);
+
+        if (user.email !== email) {
+
+
+
+            return res.render("resetPassword", {
+                message: "Email is correct",
+            });
+        }
+
+
+        // user.password = newPassword;
+        // await user.save();
+
+
+        // res.redirect('/userProfile?message=Successfully%20Changed%20Password');
+    } catch (error) {
+        console.error(error);
+        res.render("resetPassword", { message: "Enter an Email" });
+    }
+};
+
 const userLoginData = async (req, res) => {
     try {
 
@@ -583,13 +611,14 @@ const verifyPayment = async(req,res)=>{
         console.log("verify");
     const userId = req.session.userId;
       const {payment,order,paymentOption, selectedMobile, selectedHouseName, selectedStreet, selectedCity, selectedPincode, selectedState, paymentMethod } = req.body;
+      console.log("reqqqq",req.body.order.order.amount)
       const userCart = await Cart.findOne({ userId }).populate('items.productId');
       const items = userCart.items;
       let userWallet = await wallet.findOne({userId})
     const user = await UserCollection.findById(userId);
     const userAddresses = user.address;
     const inStockItems = items.filter(item => item.productId.totalQuantity > 0);
-    const updatedTotalPrice = req.session.updatedTotalPrice;
+    // const updatedTotalPrice = req.session.updatedTotalPrice;
     const categories = await Category.find()
     const hasItemWithQuantity = items.some(item => item.productId.totalQuantity > 0);
     console.log("req.body",req.body)
@@ -632,7 +661,7 @@ const verifyPayment = async(req,res)=>{
               quantity: item.quantity
             })),
            
-            totalAmount: updatedTotalPrice,
+            totalAmount: req.body.order.order.amount/100,
             OrderStatus: 'Order Placed',
             paymentMethod: paymentOption,
             orderId: generateOrderId(),
@@ -1280,6 +1309,7 @@ module.exports = {
     userShop,
     categoryFilter,
     userLogin,
+    resetPassword,
     userSignup,
     userHome,
     userProductDetails,

@@ -165,7 +165,9 @@
 
                                                 <th class="border-top-0">Date of Order</th>
                                                 <th class="border-top-0">Status</th>
+
                                                 <th class="border-top-0">Details</th>
+                                                <th class="border-top-0">Total Price</th>
                                             </tr>
                                         </thead>
 
@@ -173,56 +175,50 @@
 
                                         <tbody>
                                             <% userOrders.forEach((order)=> { %>
-                                                <tr class="order-row">
-                                                    <td>
-                                                        <img src="img/products/img-5.png" alt height="52">
-                                                        <p class="d-inline-block align-middle mb-0">
-                                                            <a href="#"
-                                                                class="d-inline-block align-middle mb-0 f_s_16 f_w_600 color_theme2">
-                                                                <%= order.orderId %>
-                                                            </a>
-                                                        </p>
-                                                    </td>
-                                                    <td>
-                                                        <% var orderDate = new Date(order.orderDate); %>
-                                                        <%= (orderDate.getMonth() + 1) + '/' + orderDate.getDate() + '/' + orderDate.getFullYear() %>
-                                                    </td>
-                                                    
-                                                    <td>
-                                                        <a href="#" class="badge_btn_2 order-status">
-                                                            <%= order.OrderStatus %>
+                                            <tr class="order-row">
+                                                <td>
+                                                    <img src="img/products/img-5.png" alt height="52">
+                                                    <p class="d-inline-block align-middle mb-0">
+                                                        <a href="#" class="d-inline-block align-middle mb-0 f_s_16 f_w_600 color_theme2">
+                                                            <%= order.orderId %>
                                                         </a>
-                                                    </td>
-                                                    <td>
-                                                        <button class="expander-btn"
-                                                            data-order-id="<%= order.orderId %>">Expand</button>
-                                                    </td>
-                                                </tr>
-                                                <tr class="order-details" id="order-details-<%= order.orderId %>"
-                                                    style="display: none;">
-                                                    <td colspan="4">
-                                                        <% order.items.forEach((items)=> { %>
-                                                            <img width="50px" height="50px"
-                                                                src="<%= items.product ? items.product.image[0] : 'no img' %>"
-                                                                alt="">
-                                                            <p>Quantity: <%= items.quantity %>
-                                                            </p>
-                                                            <p>Shipping Address: <%= order.address.mobile %>, <%=
-                                                                        order.address.houseName %>, <%=
-                                                                            order.address.street %>,
-                                                                            <%= order.address.city %>, <%=
-                                                                                    order.address.pincode %>, <%=
-                                                                                        order.address.state %>
-                                                            </p>
-                                                            <p>Payment Method: <%= order.paymentMethod %>
-                                                            </p>
-                                                            <% }) %>
-                                                                <button class="hide-btn"
-                                                                    data-order-id="<%= order.orderId %>">Hide</button>
-                                                    </td>
-                                                </tr>
-                                                <% }) %>
-
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    <% var orderDate=new Date(order.orderDate); %>
+                                                    <%= (orderDate.getMonth() + 1) + '/' + orderDate.getDate() + '/' + orderDate.getFullYear() %>
+                                                </td>
+                                                <td>
+                                                    <a href="#" class="badge_btn_2 order-status">
+                                                        <%= order.OrderStatus %>
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <button class="expander-btn" data-order-id="<%= order.orderId %>">Expand</button>
+                                                </td>
+                                                <!-- Displaying Total Price -->
+                                                <td>
+                                                    ₹<%= order.totalAmount %>
+                                                </td>
+                                            </tr>
+                                            <tr class="order-details" id="order-details-<%= order.orderId %>" style="display: none;">
+                                                <td colspan="4">
+                                                    <% order.items.forEach((items)=> { %>
+                                                    <img width="50px" height="50px"
+                                                        src="<%= items.product ? items.product.image[0] : 'no img' %>"
+                                                        alt="">
+                                                    <p>Quantity: <%= items.quantity %>
+                                                    </p>
+                                                    <p>Shipping Address: <%= order.address.mobile %>, <%= order.address.houseName %>, <%= order.address.street %>,
+                                                        <%= order.address.city %>, <%= order.address.pincode %>, <%= order.address.state %>
+                                                    </p>
+                                                    <p>Payment Method: <%= order.paymentMethod %>
+                                                    </p>
+                                                    <% }) %>
+                                                    <button class="hide-btn" data-order-id="<%= order.orderId %>">Hide</button>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
                                         </tbody>
                                     </table>
                                 </div>

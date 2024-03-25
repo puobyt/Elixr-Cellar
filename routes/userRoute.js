@@ -35,6 +35,7 @@ user_router.get('/signup', userController.registerUser);
 user_router.post('/signup', userController.userSignup);
 user_router.get('/otp', userController.otp);
 user_router.post('/otp', userController.otpVerification);
+user_router.get('/resetPassword', userController.resetPassword);
 
 
 

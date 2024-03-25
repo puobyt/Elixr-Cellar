@@ -192,19 +192,16 @@
 
 
   <script>
- 
 
 
 
 
 
-    // function decrementQuantity(productId) {
 
-    // }
 
     $(document).ready(function () {
 
-       // Function to update quantity via AJAX
+
       function updateQuantity(productId, newQuantity) {
         $.ajax({
           type: "POST",
@@ -212,18 +209,17 @@
           data: { quantity: newQuantity },
           success: function (response) {
 
-            // Update the quantity input value
+
             const input = $(`input[data-product-id="${productId}"]`);
             input.val(newQuantity);
 
-            // Update the total for the product
             const total = newQuantity * response.updatedProduct.price;
             console.log("newQuantity", newQuantity)
             console.log("response.price", response.updatedProduct.price)
             console.log("response.cartItems", response.updatedProduct.cartItems);
             $(`td.total-productPrice[data-product-id="${productId}"]`).text(`$${total.toFixed(2)}`);
 
-            // Update the overall subtotal and total
+
             updateCartTotals(response.updatedProduct.cartItems);
 
 
@@ -233,7 +229,7 @@
           },
         });
       }
-      // Event handler for quantity increment
+
       $(".js-btn-plus").on("click", function () {
         const input = $(this).closest(".input-group").find("input");
         const productId = input.data("product-id");
@@ -247,7 +243,7 @@
         }
       });
 
-      // Event handler for quantity decrement
+
       $(".js-btn-minus").on("click", function () {
         const input = $(this).closest(".input-group").find("input");
         const productId = input.data("product-id");
@@ -258,7 +254,7 @@
         }
       });
 
-     
+
 
 
       function updateCartTotals(cartItems) {
@@ -279,32 +275,10 @@
 
 
 
-    // function incrementQuantity(currentQuantity, productId) {
-    //   const maxQuantity = 25; // Maximum allowed quantity
-    //   const input = $('input[data-product-id="' + productId + '"]');
-
-    //   const newQuantity = parseInt(input.val()) + 1;
-    //   console.log("newQuantity", newQuantity)
-
-    //   const stockQuantity = currentQuantity; // Get the stock quantity from the server-side template
-    //   console.log("stockQuantity", stockQuantity)
-    //   if (newQuantity <= maxQuantity && newQuantity <= stockQuantity) {
-    //     updateQuantity(productId, newQuantity);
-    //     // Check if the new quantity is equal to stock quantity, then disable the increment button
-    //     if (newQuantity === stockQuantity) {
-    //       input.closest(".input-group").find(".js-btn-plus").prop("disabled", true);
-    //     }
-    //   } else if (newQuantity > maxQuantity) {
-    //     alert("The maximum quantity for this product is " + maxQuantity + ".");
-    //   } else if (newQuantity > stockQuantity) {
-    //     alert("There is not enough stock for this product.");
-
-    //   }
-    // }
 
     function incrementQuantity(currentQuantity, productId) {
       console.log("Current Quantity:", currentQuantity);
-  console.log("Product ID:", productId);
+      console.log("Product ID:", productId);
       const maxQuantity = 25; // Maximum allowed quantity
       const input = $('input[data-product-id="' + productId + '"]');
       const newQuantity = parseInt(input.val()) + 1;
