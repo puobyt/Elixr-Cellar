@@ -28,38 +28,65 @@ const userLogin = async (req, res) => {
 };
 
 const resetPassword = async (req, res) => {
-    try {
-        const userId = req.session.userId;
-
-        const {email } = req.body;
-        const user = await UserCollection.findById(userId);
-
-        if (user.email !== email) {
-
-
-
-            return res.render("resetPassword", {
-                message: "Email is correct",
-            });
-        }
-
-
-        // user.password = newPassword;
-        // await user.save();
-
-
-        // res.redirect('/userProfile?message=Successfully%20Changed%20Password');
-    } catch (error) {
-        console.error(error);
-        res.render("resetPassword", { message: "Enter an Email" });
+    req.session.resetpassword=true;
+    if (req.session.resetpassword) {
+        res.render('resetPassword');
+    } else {
+        res.redirect('/');
     }
 };
 
+const postResetPassword=async(req,res)=>{
+    try{
+   
+    const email  = req.body.email; 
+    console.log(email);
+    const data=await UserCollection.findOne({email}) ;
+    console.log(data);
+    if(data.email===email){
+        req.session.resetEmail = email 
+        res.json({success:true,message:"Successfully"})
+    }else{
+        res.json({success:false,message:"error"})
+
+    } 
+}catch (error) {
+        console.error(error);
+        res.json({success:false,message:"Not correct"})
+       
+    }
+    
+
+}
+
+const resetOtp = async (req, res) => {
+    console.log("email from otp");
+    const email = req.session.resetEmail;
+    const otp = generateOTP();
+    req.session.resetPasswordOTP =otp;
+    
+    await sendOTP(email,otp,req)
+    
+
+        res.render('resetOtp' ,{email});
+
+};
+const verifyOtp = (req,res)=>{
+    const { otp}= req.body;
+  const storedOTP=req.session.resetPasswordOTP;
+  const storedEmail= req.session.resetEmail;
+   if (otp === storedOTP&& email ===storedEmail ) {
+    res.json({success:true,message: "Verified Successfully!" });
+} else{
+    res.json({success:false,message: 'Wrong OTP!' })
+}
+
+}
 const userLoginData = async (req, res) => {
     try {
 
         const { userEmail, password } = req.body
-        console.log(userEmail)
+        console.log(userEmail) 
         const user = await UserCollection.findOne({ email: userEmail })
         if (user && !user.isBlocked) {
             if (user.email == userEmail && user.password == password) {
@@ -133,6 +160,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Send OTP via email
+
 const sendOTP = (email, otp, req) => {
     const mailOptions = {
         from: 'puobyt@gmail.com',
@@ -1310,6 +1338,9 @@ module.exports = {
     categoryFilter,
     userLogin,
     resetPassword,
+    resetOtp,
+    verifyOtp,
+    postResetPassword,
     userSignup,
     userHome,
     userProductDetails,
@@ -1327,4 +1358,5 @@ module.exports = {
     userWallet,
     processPayment,
     wishlistCart,
+
 };
