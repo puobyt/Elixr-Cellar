@@ -74,7 +74,7 @@
             </div>
             <div class="row">
               <div class="col-12">
-                <a href="/userAddressEdit" class="btn btn-primary py-3 px-5">Add Address</a>
+                <a href="/editaddress" class="btn btn-primary py-3 px-5">Add Address</a>
                 <a href="/wishlist" class=" btn btn-primary py-3 px-5">Wishlist</a>
                 <a href="/resetPassword" class="btn btn-primary py-3 px-5">Change Password</a>
 
@@ -187,17 +187,17 @@
   <script>
     function editAddress(index) {
       console.log("Event triggered")
-      // Perform actions with the index, for example, redirect to edit page
+      
       window.location.href = `/editaddress?addressIndex=${index}`;
     }
 
     function deleteAddress(index) {
       console.log("Event triggered");
 
-      // Create a data object with the addressIndex
+      
       const data = { addressIndex: index };
 
-      // Perform a POST request using the Fetch API
+      
       fetch('/deleteAddress', {
         method: 'POST',
         headers: {
@@ -213,7 +213,7 @@
 
         })
         .then(responseData => {
-          // Handle the response data if needed
+         
           console.log(responseData);
           window.location.reload();
         })

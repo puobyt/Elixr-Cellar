@@ -48,6 +48,8 @@ const adminLogin = (req, res) => {
 
 
 
+
+
 // Admin validation
 const adminVerification = async (req, res) => {
     try {
@@ -165,7 +167,7 @@ const editUserFunction = async (req, res) => {
 
     try {
 
-        //console.log(id)
+        
         if (req.session.admin) {
 
             const updateUser = await UserCollection.findByIdAndUpdate({ _id: id }, { $set: { name: req.body.name, email: req.body.email, password: req.body.password } })
@@ -211,6 +213,7 @@ const adminDashboard = async (req, res) => {
 // Category
 const adminCategory = async (req, res) => {
     console.log("Inside1")
+    if (req.session.admin)
     try {
 
         const Category = await categories.find()
@@ -224,6 +227,7 @@ const adminCategory = async (req, res) => {
 
 // Add Category
 const addCategoryPage = (req, res) => {
+    if (req.session.admin)
     res.render('addCategory', { mess: "" })
 }
 
@@ -331,6 +335,7 @@ const adminEditCategoryPost = async (req, res) => {
 
 // Inventory
 const adminInventory = async (req, res) => {
+    if (req.session.admin)
     try {
         const Products = await products.find()
         res.render("adminInventory", { Products })
@@ -385,6 +390,7 @@ const listUnlistProduct = async (req, res) => {
 
 // Product Details
 const adminProductDetails = async (req, res) => {
+    if (req.session.admin)
     try {
         let productId = req.params.id
         const product = await products.findById(productId)
@@ -398,6 +404,7 @@ const adminProductDetails = async (req, res) => {
 }
 // Update Product
 const adminEditProduct = async (req, res) => {
+    if (req.session.admin)
     try {
         const prodId = req.params.id
         const productIn = await products.findById(prodId)
@@ -408,72 +415,6 @@ const adminEditProduct = async (req, res) => {
         console.log(error)
     }
 }
-
-
-// const adminEditProductPost = async (req, res) => {
-//     try {
-//         const prodId = req.params.id;
-//         const files = req.files; // Access uploaded files
-//         const deletedImages = req.body.deletedImages ? req.body.deletedImages.split(",") : [];
-//         let combinedImages = [];
-
-//         if (files && Array.isArray(files)) {
-//             console.log('Received files:', files);
-
-//             const existingImages = req.body.existingImages ? req.body.existingImages.split(",") : [];
-//             console.log('Existing Images:', existingImages);
-
-//             const remainingImages = existingImages.filter((img, index) => !deletedImages.includes(index.toString()));
-//             console.log('Remaining Images:', remainingImages);
-
-//             const newImagePaths = files.map((file) => 'productImg/' + file.filename);
-//             console.log('New Image Paths:', newImagePaths);
-
-//             combinedImages = [...remainingImages, ...newImagePaths].slice(0, 3);
-//             console.log('Combined Images:', combinedImages);
-//         }
-
-//         // Fetch other form data
-//         const { productName, productDes, productCat, productDate, stock, price } = req.body;
-
-//         // Update the product in the database with the new information and images
-//         const updatedProduct = await products.findByIdAndUpdate(
-//             prodId,
-//             {
-//                 productName: productName,
-//                 description: productDes,
-//                 productCategory: productCat,
-//                 ManufactureDate: productDate,
-//                 totalQuantity: stock,
-//                 price: price,
-//                 image: combinedImages,
-//             },
-//             { new: true }
-//         );
-
-//         if (!updatedProduct) {
-//             console.log("Product not found or not updated");
-//             return res.status(404).send("Product not found or not updated");
-//         }
-
-//         // Delete selected images
-//         for (const deletedImageIndex of deletedImages) {
-//             const index = parseInt(deletedImageIndex, 10);
-//             if (!isNaN(index) && index >= 0 && index < updatedProduct.image.length) {
-//                 updatedProduct.image.splice(index, 1);
-//             }
-//         }
-
-//         await updatedProduct.save();
-
-//         console.log("Product details updated successfully:", updatedProduct);
-//         res.redirect(`/adminProductDetails/${prodId}`);
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).send("Internal Server Error");
-//     }
-// };
-
 
 
 
@@ -618,6 +559,7 @@ const addProductPage = async (req, res) => {
 }
 
 const addProduct = async (req, res) => {
+    if (req.session.admin)
     try {
         let category = await categories.find();
         const { productName, productDes, productCat, productDate, price, stock } = req.body;
@@ -664,6 +606,7 @@ const addProduct = async (req, res) => {
 
 // Customer Dashboard
 const customerDashBoard = async (req, res) => {
+    if (req.session.admin)
     try {
         let User = await users.find()
         res.render('adminCustomerDash', { User })
@@ -714,6 +657,7 @@ const unblockUser = async (req, res) => {
 
 // admin Orders Dashboard
 const adminOrdersDash = async (req, res) => {
+    if (req.session.admin)
     try {
         const userId = req.session.userId;
         const userOrders = await orders.find().populate('items.product').sort({ orderDate: -1 });
@@ -729,6 +673,7 @@ const adminOrdersDash = async (req, res) => {
 
 // admin Coupons & Discounts
 const adminCouponsDiscounts = async (req, res) => {
+    if (req.session.admin)
     try {
         const coupons = await Coupon.find();
         res.render('adminCouponsDiscounts', {
@@ -743,6 +688,7 @@ const adminCouponsDiscounts = async (req, res) => {
 }
 
 const addCouponsGet = (req, res) => {
+    if (req.session.admin)
     try {
 
         res.render('addCoupons', {
@@ -760,29 +706,29 @@ const addCoupons = async (req, res) => {
 
         const { code, discountValue, discountType, expiry, minimumCartAmount } = req.body;
 
-        // Check if the coupon code already exists
+        
         const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
         if (existingCoupon) {
             return res.render('addCoupons', { mess: "Coupon already exists" });
         }
 
-        // Create a new coupon object
+      
         const newCoupon = new Coupon({
             code: code.toUpperCase(),
             discountValue: discountValue,
             discountType: discountType,
             expiry: expiry,
             minimumCartAmount: minimumCartAmount,
-            status: 'Active', // Assuming default status is 'Active'
+            status: 'Active', 
         });
 
-        // Save the new coupon to the database
+       
         await newCoupon.save();
 
-        // Fetch all coupons from the database
+       
         const coupons = await Coupon.find();
 
-        // Render the addCoupons page with the updated list of coupons
+       
         res.render('addCoupons', { coupons: coupons, mess: "Coupon added successfully" });
     } catch (error) {
         console.log("Error", error);
@@ -798,6 +744,11 @@ const adminLogout = (req, res) => {
     console.log(' Admin session ends')
     res.redirect('/admin');
 }
+
+
+
+
+
 module.exports = {
     upload,
     adminLogin,
@@ -832,4 +783,6 @@ module.exports = {
     adminCouponsDiscounts,
     addCoupons,
     addCouponsGet,
+   
+   
 };

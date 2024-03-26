@@ -279,28 +279,26 @@
     function incrementQuantity(currentQuantity, productId) {
       console.log("Current Quantity:", currentQuantity);
       console.log("Product ID:", productId);
-      const maxQuantity = 25; // Maximum allowed quantity
+      const maxQuantity = 5; // Maximum allowed quantity
       const input = $('input[data-product-id="' + productId + '"]');
       const newQuantity = parseInt(input.val()) + 1;
 
-      const stockQuantity = currentQuantity; // Get the stock quantity from the server-side template
-
+      const stockQuantity = currentQuantity; 
       if (newQuantity <= maxQuantity && newQuantity <= stockQuantity) {
-        // If the new quantity is within allowed range and stock quantity
+       
         updateQuantity(productId, newQuantity);
 
-        // Check if the new quantity equals the stock quantity and disable the increment button
+        
         if (newQuantity === stockQuantity) {
           input.closest(".input-group").find(".js-btn-plus").prop("disabled", true);
         }
       } else if (newQuantity > maxQuantity) {
-        // If the new quantity exceeds the maximum allowed quantity
         alert("The maximum quantity for this product is " + maxQuantity + ".");
       } else if (newQuantity > stockQuantity) {
-        // If there is not enough stock for this product
+     
         alert("There is not enough stock for this product.");
-        input.closest(".input-group").find(".js-btn-plus").prop("disabled", true); // Disable the increment button
-        return; // Prevent further execution
+        input.closest(".input-group").find(".js-btn-plus").prop("disabled", true); 
+        return; 
       }
     }
 
@@ -334,25 +332,25 @@
 
 
 
-        // Enable minus button after incrementing the quantity
+        
         updateMinusButtonState(input);
       });
 
-      // Function to update the state of the minus button
+     
       function updateMinusButtonState(input) {
         var value = parseInt(input.val());
         var minusButton = input.closest('.input-group').find('.js-btn-minus');
 
         if (value === 1) {
-          // Disable minus button if the quantity is 1
+         
           minusButton.prop('disabled', true);
         } else {
-          // Enable minus button otherwise
+       
           minusButton.prop('disabled', false);
         }
       }
 
-      // Initial state setup
+    
       $('.input-group').each(function () {
         var input = $(this).find('input');
         updateMinusButtonState(input);
@@ -362,7 +360,7 @@
   <script>
     function applyCoupon() {
       const couponCode = document.getElementById('coupons').value;
-      // Send AJAX request to server with the coupon code
+      
       fetch('/applyCoupon', {
         method: 'POST',
         headers: {
@@ -373,9 +371,9 @@
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            // Update the total amount displayed in the cart
+            
             document.querySelector('.totalPrice').innerText = `₹${data.totalPrice}`;
-            // Display success message or any other feedback
+            
             alert('Coupon applied successfully!');
           } else {
             alert('Failed to apply coupon. Please check the coupon code.');

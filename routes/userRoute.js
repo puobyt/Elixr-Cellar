@@ -62,16 +62,14 @@ user_router.post("/updateQuantity/:productId", requireLogin, userController.upda
 user_router.get('/resetPassword', requireLogin, userController.showChangePassword);
 user_router.post('/resetPassword', requireLogin, userController.handleResetPassword);
 
+user_router.get('/userAddress', requireLogin, userController.userAddress);
 
 user_router.post('/userAddress', requireLogin, userController.userAddress);
 user_router.get('/userAddressEdit', requireLogin, userController.addAddress)
 user_router.post('/userAddressEdit', requireLogin, userController.saveEditAddress)
 user_router.post('/deleteAddress', requireLogin, userController.deleteAddress)
-// user_router.post('/userAddressEdit', requireLogin, userController.addAddress)
-// user_router.get('/userAddressEdit', requireLogin, userController.addAddressPage)
 user_router.post('/userAddressToCart', requireLogin, userController.addAddressToCart)
-user_router.get('/userAddressEdit', requireLogin, userController.addAddressToCartPage)
-//checkOut
+user_router.get('/editaddress', requireLogin, userController.addAddressToCartPage)
 //checkOut
 
 user_router.get('/userCheckout', requireLogin, userController.userCheckout)
@@ -81,12 +79,11 @@ user_router.post('/userCheckout', requireLogin, userController.handleCheckOut)
 user_router.post('/createOrder', requireLogin, userController.createOrder)
 user_router.post('/verifyPayment',userController.verifyPayment)
 user_router.get('/userOrderPlaced', requireLogin, userController.userOrderPlaced)
-// user_router.post('/userOrderPlaced', requireLogin, userController.userOrderPlaced)
+
 user_router.get('/userOrderDetails/:orderId', requireLogin,userController.orderDetails)
 user_router.post('/cancelOrder', requireLogin, userController.cancelOrder);
 user_router.get('/userWallet', requireLogin, userController.userWallet);
 
-// user_router.post('/addToCart/:id',requireLogin,userController.addToCart)
 user_router.get('/removeFromCart/:productId', requireLogin, userController.removeFromCart);
 
 user_router.get('/userSuccess', requireLogin, userController.userSuccess)

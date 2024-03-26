@@ -25,6 +25,8 @@ const upload = multer({ storage: storage });
 
 
 
+
+
 admin_router.get('/admin', adminController.adminLogin)
 
 admin_router.post('/admin', adminController.adminVerification)
@@ -63,7 +65,7 @@ admin_router.post('/adminEditProduct/:id',adminController.upload.fields([
 
 admin_router.post('/remove-image',adminController.removeImage)
 
-// admin_router.post('/adminEditProduct/:id',adminController.upload.array('images', 3),adminController.adminEditProductPost)
+
 
 admin_router.get('/addProduct',  adminController.addProductPage)
 
