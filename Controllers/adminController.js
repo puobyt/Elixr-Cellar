@@ -703,16 +703,18 @@ const addCouponsGet = (req, res) => {
 
 const addCoupons = async (req, res) => {
     try {
-
         const { code, discountValue, discountType, expiry, minimumCartAmount } = req.body;
 
-        
         const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
         if (existingCoupon) {
             return res.render('addCoupons', { mess: "Coupon already exists" });
         }
 
-      
+        // Form Validation
+        if (isNaN(discountValue) || isNaN(minimumCartAmount) || discountValue >= 100 || minimumCartAmount <= 0 || discountValue < 0 || minimumCartAmount < 0) {
+            return res.render('addCoupons', { mess: "Please enter valid discount value and cart amount." });
+        }
+
         const newCoupon = new Coupon({
             code: code.toUpperCase(),
             discountValue: discountValue,
@@ -722,13 +724,10 @@ const addCoupons = async (req, res) => {
             status: 'Active', 
         });
 
-       
         await newCoupon.save();
 
-       
         const coupons = await Coupon.find();
 
-       
         res.render('addCoupons', { coupons: coupons, mess: "Coupon added successfully" });
     } catch (error) {
         console.log("Error", error);

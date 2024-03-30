@@ -425,11 +425,9 @@ const updateQuantity = async (req, res) => {
     const newQuantity = req.body.quantity;
 
     if (newQuantity < 1 || newQuantity > 5) {
-      return res
-        .status(400)
-        .json({
-          error: "Invalid quantity. Please choose a quantity between 1 and 5.",
-        });
+      return res.status(400).json({
+        error: "Invalid quantity. Please choose a quantity between 1 and 5.",
+      });
     }
 
     const updatedCart = await Cart.findOneAndUpdate(
