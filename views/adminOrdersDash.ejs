@@ -137,17 +137,16 @@
                 </div>
             </div>
         </div>
-
-        <div class="main_content_iner overly_inner ">
-            <div class="container-fluid p-0 ">
-
+       
+        <div class="main_content_iner overly_inner">
+            <div class="container-fluid p-0">
                 <div class="row">
                     <div class="col-12">
                         <div class="page_title_box d-flex align-items-center justify-content-between">
                             <div class="page_title_left">
-                                <h3 class="f_s_30 f_w_700 text_white">Orders Dadshboard</h3>
+                                <h3 class="f_s_30 f_w_700 text_white">Orders Dashboard</h3>
                                 <ol class="breadcrumb page_bradcam mb-0">
-                                    <li class="breadcrumb-item active">Orders Dadshboard</li>
+                                    <li class="breadcrumb-item active">Orders Dashboard</li>
                                 </ol>
                             </div>
                         </div>
@@ -156,23 +155,20 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="card QA_section border-0">
-                            <div class="card-body QA_table ">
-                                <div class="table-responsive shopping-cart ">
+                            <div class="card-body QA_table">
+                                <div class="table-responsive shopping-cart">
                                     <table class="table mb-0">
                                         <thead>
                                             <tr>
                                                 <th class="border-top-0">Order ID</th>
-
                                                 <th class="border-top-0">Date of Order</th>
                                                 <th class="border-top-0">Status</th>
-
                                                 <th class="border-top-0">Details</th>
                                                 <th class="border-top-0">Total Price</th>
+                                                <!-- Add a new column for changing order status -->
+                                                <th class="border-top-0">Change Status</th>
                                             </tr>
                                         </thead>
-
-
-
                                         <tbody>
                                             <% userOrders.forEach((order)=> { %>
                                             <tr class="order-row">
@@ -189,6 +185,7 @@
                                                     <%= (orderDate.getMonth() + 1) + '/' + orderDate.getDate() + '/' + orderDate.getFullYear() %>
                                                 </td>
                                                 <td>
+                                                    <!-- Displaying order status -->
                                                     <a href="#" class="badge_btn_2 order-status">
                                                         <%= order.OrderStatus %>
                                                     </a>
@@ -196,24 +193,26 @@
                                                 <td>
                                                     <button class="expander-btn" data-order-id="<%= order.orderId %>">Expand</button>
                                                 </td>
-                                                <!-- Displaying Total Price -->
                                                 <td>
+                                                    <!-- Displaying Total Price -->
                                                     ₹<%= order.totalAmount %>
+                                                </td>
+                                                <td>
+                                                    <!-- Dropdown menu or buttons to change order status -->
+                                                    <select onchange="changeOrderStatus(this, '<%= order.orderId %>')">
+                                                        <option value="shipped">Shipped</option>
+                                                        <option value="delivered">Delivered</option>
+                                                        <option value="transit">In Transit</option>
+                                                    </select>
                                                 </td>
                                             </tr>
                                             <tr class="order-details" id="order-details-<%= order.orderId %>" style="display: none;">
-                                                <td colspan="4">
+                                                <td colspan="6">
                                                     <% order.items.forEach((items)=> { %>
-                                                    <img width="50px" height="50px"
-                                                        src="<%= items.product ? items.product.image[0] : 'no img' %>"
-                                                        alt="">
-                                                    <p>Quantity: <%= items.quantity %>
-                                                    </p>
-                                                    <p>Shipping Address: <%= order.address.mobile %>, <%= order.address.houseName %>, <%= order.address.street %>,
-                                                        <%= order.address.city %>, <%= order.address.pincode %>, <%= order.address.state %>
-                                                    </p>
-                                                    <p>Payment Method: <%= order.paymentMethod %>
-                                                    </p>
+                                                    <img width="50px" height="50px" src="<%= items.product ? items.product.image[0] : 'no img' %>" alt="">
+                                                    <p>Quantity: <%= items.quantity %></p>
+                                                    <p>Shipping Address: <%= order.address.mobile %>, <%= order.address.houseName %>, <%= order.address.street %>, <%= order.address.city %>, <%= order.address.pincode %>, <%= order.address.state %></p>
+                                                    <p>Payment Method: <%= order.paymentMethod %></p>
                                                     <% }) %>
                                                     <button class="hide-btn" data-order-id="<%= order.orderId %>">Hide</button>
                                                 </td>
@@ -222,15 +221,12 @@
                                         </tbody>
                                     </table>
                                 </div>
-
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
+            </div>
+        </div>
             </div>
         </div>
 
@@ -419,6 +415,27 @@
     <script src="vendors/chart_am/chart-custom.js"></script>
 
     <script src="js/custom.js"></script>
+    <script>
+        function changeOrderStatus(selectElement, orderId) {
+            const newStatus = selectElement.value;
+            // You can send an AJAX request to update the order status
+            // Example:
+            fetch(`/changeOrderStatus?orderId=${orderId}&newStatus=${newStatus}`, {
+                method: 'PUT', // or 'POST'
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle success or display a message
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const expanderBtns = document.querySelectorAll('.expander-btn');

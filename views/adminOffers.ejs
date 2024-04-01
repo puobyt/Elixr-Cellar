@@ -1,4 +1,5 @@
 <%-include('adminHeader.ejs')%>
+
     <section class="main_content dashboard_part large_header_bg">
 
         <div class="container-fluid g-0">
@@ -139,52 +140,60 @@
 
         <div class="main_content_iner overly_inner">
             <div class="container-fluid p-0">
-                <div class="row justify-content-center">
+                <div class="row">
                     <div class="col-12">
-                        <div class="dashboard_header mb_50">
-                            <div class="row">
-                                <div class="col-lg-6">
-                                    <div class="dashboard_header_title">
-                                        <h3 class="f_s_30 f_w_700 text_white">Add Coupons</h3>
-                                    </div>
-                                </div>
+                        <div class="page_title_box d-flex align-items-center justify-content-between">
+                            <div class="page_title_left">
+                                <h3 class="f_s_30 f_w_700 text_white">Offer Module</h3>
+                                <ol class="breadcrumb page_bradcam mb-0">
+                                    <li class="breadcrumb-item active">Offers</li>
+                                </ol>
                             </div>
+                            <a href="/addOffers" class="white_btn3">Add Offers</a>
                         </div>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-lg-12">
-                        <div class="white_box mb_30">
-                            <div class="row justify-content-center">
-                                <div class="col-lg-6">
-                                    <div class="modal-content cs_modal">
-                                        <div class="modal-header theme_bg_1">
-                                            <h5 class="modal-title text_white">Add Coupons</h5>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form id="addCouponForm" action="/addCoupons" method="post">
-                                                <div class="form-group">
-                                                    <input type="text" name="code" class="form-control"
-                                                        placeholder="Enter your Coupon Code" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <input type="number" name="discountValue" class="form-control"
-                                                        placeholder="Enter your Coupon Discount" min="0" max="70" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <input type="text" name="discountType" class="form-control"
-                                                        placeholder="Enter Discount type" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <input type="text" name="expiry" class="form-control"
-                                                        placeholder="Enter the Expiry" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <input type="number" name="minimumCartAmount" class="form-control"
-                                                        placeholder="Enter the Minimum cart amount" min="1000" required>
-                                                </div>
-                                                <button type="submit" class="btn_1 full_width text-center">Submit</button>
-                                            </form>
-                                        </div>
-                                    </div>
+                        <div class="card QA_section border-0">
+                            <div class="card-body QA_table">
+                                <div class="table-responsive shopping-cart">
+                                    <table class="table mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th class="border-top-0">Offer Code</th>
+                                                <th class="border-top-0">Offer/Discount %</th>
+                                                <th class="border-top-0">Expiry Date</th>
+                                                <th class="border-top-0">Status</th>
+                                                <th class="border-top-0">Actions</th> <!-- New column for delete option -->
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% offer.forEach(offers => { %>
+                                            <tr>
+                                                <td>
+                                                    <%= offers.code %>
+                                                </td>
+                                                <td>
+                                                    <%= offers.discountValue %>
+                                                </td>
+                                                <td>
+                                                    <%= offers.expiry.toLocaleDateString() %>
+                                                </td>
+                                                <td>
+                                                    <%= offers.status %>
+                                                </td>
+                                                <td>
+                                                    <!-- Delete button for each coupon -->
+                                                    <form action="/deleteOffers" method="POST">
+                                                        <input type="hidden" name="couponId" value="<%= offer.id %>">
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -192,14 +201,15 @@
                 </div>
             </div>
         </div>
+        
 
         <div class="footer_part">
-            <div class="container">
+            <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="footer_iner text-center">
-                            <p>2024 © Elixr Cellars - Designed by <a href="#"> <i class="ti-heart"></i> </a><a href="#">
-                                    Paul Boby T</a></p>
+                            <p>2024 © Elixir Cellar - Designed by <a href="#"> <i class="ti-heart"></i> </a><a href="#">
+                                    Paul Boby</a></p>
                         </div>
                     </div>
                 </div>
@@ -328,30 +338,54 @@
         </a>
     </div>
 
+    <script src="/js/jquery1-3.4.1.min.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('addCouponForm');
-            form.addEventListener('submit', function (event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-    </script>
+    <script src="/js/popper1.min.js"></script>
 
-    <script src="js/jquery1-3.4.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
 
-    <script src="js/popper1.min.js"></script>
+    <script src="/js/metisMenu.js"></script>
 
-    <script src="js/bootstrap.min.js"></script>
+    <script src="/vendors/count_up/jquery.waypoints.min.js"></script>
 
-    <script src="js/metisMenu.js"></script>
+    <script src="/vendors/chartlist/Chart.min.js"></script>
+
+    <script src="/vendors/count_up/jquery.counterup.min.js"></script>
+
+    <script src="/vendors/niceselect/js/jquery.nice-select.min.js"></script>
+
+    <script src="/vendors/owl_carousel/js/owl.carousel.min.js"></script>
+
+    <script src="vendors/datatable/js/jquery.dataTables.min.js"></script>
+    <script src="vendors/datatable/js/dataTables.responsive.min.js"></script>
+    <script src="vendors/datatable/js/dataTables.buttons.min.js"></script>
+    <script src="vendors/datatable/js/buttons.flash.min.js"></script>
+    <script src="vendors/datatable/js/jszip.min.js"></script>
+    <script src="vendors/datatable/js/pdfmake.min.js"></script>
+    <script src="vendors/datatable/js/vfs_fonts.js"></script>
+    <script src="vendors/datatable/js/buttons.html5.min.js"></script>
+    <script src="vendors/datatable/js/buttons.print.min.js"></script>
+
+    <script src="vendors/datepicker/datepicker.js"></script>
+    <script src="vendors/datepicker/datepicker.en.js"></script>
+    <script src="vendors/datepicker/datepicker.custom.js"></script>
+    <script src="js/chart.min.js"></script>
+    <script src="vendors/chartjs/roundedBar.min.js"></script>
+
+    <script src="vendors/progressbar/jquery.barfiller.js"></script>
+
+    <script src="vendors/tagsinput/tagsinput.js"></script>
+
+    <script src="vendors/text_editor/summernote-bs4.js"></script>
+    <script src="vendors/am_chart/amcharts.js"></script>
 
     <script src="vendors/scroll/perfect-scrollbar.min.js"></script>
     <script src="vendors/scroll/scrollable-custom.js"></script>
+    <script src="vendors/chart_am/core.js"></script>
+    <script src="vendors/chart_am/charts.js"></script>
+    <script src="vendors/chart_am/animated.js"></script>
+    <script src="vendors/chart_am/kelly.js"></script>
+    <script src="vendors/chart_am/chart-custom.js"></script>
 
     <script src="js/custom.js"></script>
     </body>
