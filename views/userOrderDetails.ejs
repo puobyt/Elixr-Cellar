@@ -1,5 +1,28 @@
 <%- include('userHeader') %>
 
+    <style>
+        .product-name {
+            font-weight: bold;
+            color: #333;
+            /* Darker color */
+        }
+
+        .product-quantity, .payment-method {
+            font-weight: bold;
+            color: #333;
+            /* Darker color */
+        }
+
+        .order-details,
+        .address,
+        .total-amount {
+            font-weight: bold;
+            color: #333;
+            /* Darker color */
+        }
+    </style>
+
+
     <div class="container">
         <h2>Checkout</h2>
 
@@ -12,32 +35,32 @@
                     <div class="card shadow-0 border">
                         <div class="p-4">
 
-                            <h5 class="card-title mb-3">Order Details</h5>
+                            <h5 class="order-details card-title mb-3 ">Order Details</h5>
                             <hr class="my-4" />
 
                             <div>
                                 <!-- Loop through each item in the cart -->
 
+
                                 <div class="container">
                                     <div class="row justify-content-center g-3">
                                         <!-- Checking if productId exists -->
                                         <div class="card mr-3 border-0" style="width: auto; margin-left: 45px;">
-                                            <p class="card-text fw-bold">
-                                                <% userOrders.items.forEach(Product=>{%>
-                                                    <p>
+                                            <% userOrders.items.forEach(Product=>{%>
+                                                <p>
+                                                    <span class="product-name">
                                                         <%=Product.product.productName%>
-                                                    </p>
-                                                    <p>Quantity: <%= Product.quantity %>
-                                                    </p>
-                                                    <%}) %>
-                                                        <!-- Accessing product name via productId -->
-
-
-                                            </p>
+                                                    </span>
+                                                </p>
+                                                <p>
+                                                    <span class="product-quantity">Quantity: <%= Product.quantity %>
+                                                    </span>
+                                                </p>
+                                                <%}) %>
                                         </div>
-
                                     </div>
                                 </div>
+
 
 
 
@@ -58,9 +81,9 @@
                                                         <h3>Delivery Address</h3>
                                                     </div>
 
-                                                    <div class="d-flex justify-content-between">
+                                                    <div class="address d-flex justify-content-between">
                                                         <p class="mb-2">Address: <%= deliveryAddress %>
-                                                        </p> <!-- Display delivery address -->
+                                                        </p>
                                                     </div>
                                                     <hr />
                                                 </div>
@@ -69,20 +92,20 @@
                                     </div>
 
                                     <div class="col-lg-6 mb-3">
-                                        <!-- Total order price -->
+
                                         <div class="row">
                                             <div class="form-check h-100 border rounded-3">
                                                 <div class="p-3">
                                                     <div class="d-flex justify-content-center">
                                                         <h3>Total Order Details</h3>
                                                     </div>
-                                                    <div class="d-flex justify-content-between">
+                                                    <div class="total-amount d-flex justify-content-between">
                                                         <% console.log("Total Amount:", totalAmount); %>
                                                             <p class="mb-2">Total: ₹<%= totalAmount %>
-                                                                    <!-- Display total order price -->
+
                                                             </p>
                                                     </div>
-                                                    <div class="d-flex justify-content-between">
+                                                    <div class="payment-method d-flex justify-content-between">
                                                         <p class="mb-2 bg-secondary text-white" style="width: 100%;">
                                                             Payment
                                                             Method: <%= paymentMethod %>

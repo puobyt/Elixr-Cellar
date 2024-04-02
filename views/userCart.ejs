@@ -79,18 +79,7 @@
               <a href="/userShop" class="btn btn-outline-primary btn-md btn-block">Continue Shopping</a>
             </div>
           </div>
-          <div class="row">
-            <div class="col-md-12">
-              <label class="text-black h4" for="coupon">Coupon</label>
-              <p>Enter your coupon code if you have one.</p>
-            </div>
-            <div class="col-md-8 mb-3 mb-md-0">
-              <input type="text" class="form-control py-3" id="coupon" placeholder="Coupon Code">
-            </div>
-            <div class="col-md-4">
-              <button class="btn btn-primary btn-md px-4" onclick="applyCoupon()">Apply Coupon</button>
-            </div>
-          </div>
+
         </div>
         <div class="col-md-6 pl-5">
           <div class="row justify-content-end">
@@ -283,22 +272,22 @@
       const input = $('input[data-product-id="' + productId + '"]');
       const newQuantity = parseInt(input.val()) + 1;
 
-      const stockQuantity = currentQuantity; 
+      const stockQuantity = currentQuantity;
       if (newQuantity <= maxQuantity && newQuantity <= stockQuantity) {
-       
+
         updateQuantity(productId, newQuantity);
 
-        
+
         if (newQuantity === stockQuantity) {
           input.closest(".input-group").find(".js-btn-plus").prop("disabled", true);
         }
       } else if (newQuantity > maxQuantity) {
         alert("The maximum quantity for this product is " + maxQuantity + ".");
       } else if (newQuantity > stockQuantity) {
-     
+
         alert("There is not enough stock for this product.");
-        input.closest(".input-group").find(".js-btn-plus").prop("disabled", true); 
-        return; 
+        input.closest(".input-group").find(".js-btn-plus").prop("disabled", true);
+        return;
       }
     }
 
@@ -332,25 +321,25 @@
 
 
 
-        
+
         updateMinusButtonState(input);
       });
 
-     
+
       function updateMinusButtonState(input) {
         var value = parseInt(input.val());
         var minusButton = input.closest('.input-group').find('.js-btn-minus');
 
         if (value === 1) {
-         
+
           minusButton.prop('disabled', true);
         } else {
-       
+
           minusButton.prop('disabled', false);
         }
       }
 
-    
+
       $('.input-group').each(function () {
         var input = $(this).find('input');
         updateMinusButtonState(input);
@@ -360,7 +349,7 @@
   <script>
     function applyCoupon() {
       const couponCode = document.getElementById('coupons').value;
-      
+
       fetch('/applyCoupon', {
         method: 'POST',
         headers: {
@@ -371,9 +360,9 @@
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            
+
             document.querySelector('.totalPrice').innerText = `₹${data.totalPrice}`;
-            
+
             alert('Coupon applied successfully!');
           } else {
             alert('Failed to apply coupon. Please check the coupon code.');

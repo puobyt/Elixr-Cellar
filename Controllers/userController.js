@@ -7,7 +7,7 @@ const orders = require("../Model/orderModel");
 const wallet = require("../Model/walletModel");
 const Category = require("../Model/categoryModel");
 const mongoose = require("mongoose");
-const Coupon = require("../Model/couponModel");
+const Coupons = require("../Model/couponModel");
 
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
@@ -327,14 +327,41 @@ const userContact = (req, res) => {
   }
 };
 
+// const userWallet = async (req, res) => {
+//   try {
+//     const userId = req.session.userId;
+
+//     const userWallet = await wallet.findOne({ userId });
+//     console.log("userWallet", userWallet.transactionHistory);
+
+//     res.render("userWallet", { userWallet });
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
 const userWallet = async (req, res) => {
   try {
     const userId = req.session.userId;
+    const page = parseInt(req.query.page) || 1; // Get page number from query parameter, default to 1 if not provided
+    const limit = 10; // Number of transactions per page
+    const skip = (page - 1) * limit;
 
-    const userWallet = await wallet.findOne({ userId });
-    console.log("userWallet", userWallet.transactionHistory);
+    const userWalletData = await wallet
+      .findOne({ userId })
+      .populate("transactionHistory");
+    const transactionHistory = userWalletData.transactionHistory.slice(
+      (page - 1) * limit,
+      page * limit
+    );
 
-    res.render("userWallet", { userWallet });
+    const totalTransactions = userWalletData.transactionHistory.length;
+
+    res.render("userWallet", {
+      userWallet: { transactionHistory },
+      currentPage: page,
+      totalPages: Math.ceil(totalTransactions / limit),
+    });
   } catch (error) {
     console.log(error);
   }
@@ -454,36 +481,72 @@ const updateQuantity = async (req, res) => {
   }
 };
 
-const applyCoupon = async (req, res) => {
-  const couponCode = req.body.couponCode;
-  console.log(couponCode);
-  try {
-    const coupon = await Coupon.findOne({ code: couponCode });
-    if (coupon) {
-      const totalPrice = calculateTotalPrice(
-        req.cartItems,
-        coupon.discountValue
-      );
-      res.json({ success: true, totalPrice });
-    } else {
-      res.json({ success: false });
-    }
-  } catch (error) {
-    console.error("Error applying coupon:", error);
-    res.json({ success: false });
-  }
-};
+// const applyCoupon = async (req, res) => {
+//   const couponCode = req.body.couponCode;
+//   console.log(couponCode);
+//   try {
+//     const coupon = await Coupon.findOne({ code: couponCode });
+//     if (coupon) {
+//       const totalPrice = calculateTotalPrice(
+//         req.cartItems,
+//         coupon.discountValue
+//       );
+//       res.json({ success: true, totalPrice });
+//     } else {
+//       res.json({ success: false });
+//     }
+//   } catch (error) {
+//     console.error("Error applying coupon:", error);
+//     res.json({ success: false });
+//   }
+// };
 
 const userCheckout = async (req, res) => {
   let userId = req.session.userId;
   const userCart = await Cart.findOne({ userId }).populate("items.productId");
   const Usercollections = await UserCollection.findById(userId);
+  const coupons = await Coupons.find();
+  const order = await orders.findOne({ customer: userId });
+  const items = userCart.items || [];
+  const totalPrice = calculateTotalPrice(items);
+  let availableCoupons = [];
+  let isCouponAvailable = false;
+
+  for (const coupon of coupons) {
+    if (coupon.expiry < new Date()) {
+      await Coupons.updateOne(
+        { code: coupon.code },
+        { $set: { isExpired: true, isActive: false } }
+      );
+    }
+
+    if (
+      coupon.discountType === "First Purchase" &&
+      coupon.isActive &&
+      !coupon.isExpired
+    ) {
+      if (!order) {
+        availableCoupons.push(coupon);
+      }
+    } else if (
+      coupon.minimumCartAmount <= totalPrice &&
+      coupon.isActive &&
+      !coupon.isExpired
+    ) {
+      availableCoupons.push(coupon);
+    }
+  }
+
   try {
     if (req.session.user) {
-      const items = userCart.items || [];
-      const totalPrice = calculateTotalPrice(items);
-      console.log(userCart);
-      res.render("userCheckout", { Usercollections, totalPrice, userCart });
+      console.log("coupons....", availableCoupons);
+      res.render("userCheckout", {
+        Usercollections,
+        totalPrice,
+        userCart,
+        availableCoupons,
+        isCouponAvailable,
+      });
     } else {
       res.redirect("/");
     }
@@ -491,6 +554,95 @@ const userCheckout = async (req, res) => {
     console.log(error);
   }
 };
+
+const validateCoupon = async (req, res) => {
+  const {
+    couponCode,
+    totalAmount,
+    checkoutTotalInput,
+    // discountedTotal,
+    discountedValue,
+    checkoutTotal,
+  } = req.body;
+  console.log("reqqqq", req.body);
+  try {
+    const userId = req.session.userId;
+    const userCart = await Cart.findOne({ userId }).populate("items.productId");
+    const items = userCart.items;
+
+    const totalPrice = calculateTotalPrice(
+      items.filter((item) => item.productId.totalQuantity > 0)
+    );
+    const coupon = await Coupons.findOne({ code: couponCode });
+
+    if (couponCode === "" || (coupon && coupon.code !== couponCode)) {
+      const discountedValue = 0;
+      const discountedTotal = 0;
+
+      res.status(200).json({
+        isEmpty: true,
+        message: "Coupon is valid. Discount applied successfully",
+        discountedTotal,
+        discountedValue,
+      });
+    } else if (!coupon) {
+      // Coupon not found
+      res.status(404).json({ isValid: false, message: "Coupon not found" });
+    } else {
+      const discountPercentage = coupon.discountValue;
+
+      // If coupon is valid, apply the discount
+      if (!isNaN(discountPercentage) && !isNaN(totalAmount)) {
+        const discountValue = (discountPercentage / 100) * totalAmount;
+        const checkoutTotal = totalAmount - discountValue;
+
+        const discountedTotal = 0;
+
+        req.session.updatedTotalPrice = checkoutTotal;
+        req.session.save();
+        res.status(200).json({
+          isValid: true,
+          message: "Coupon is valid. Discount applied successfully",
+          checkoutTotal,
+          discountValue,
+        });
+
+        const parsedCheckoutTotalInput = parseFloat(discountedTotal).toFixed(2);
+        console.log(parsedCheckoutTotalInput);
+        console.log(discountedTotal);
+
+        if (!isNaN(parsedCheckoutTotalInput)) {
+          req.session.updatedTotalPrice = parsedCheckoutTotalInput;
+          req.session.save();
+        } else {
+          console.error("Invalid checkoutTotalInput value");
+        }
+      } else {
+        // Invalid discount or total amount
+        const discountValue = 0;
+        const discountedTotal = 0;
+        res.status(200).json({
+          isValid: false,
+          message: "Coupon is valid. Discount applied successfully",
+          discountedTotal,
+          discountValue,
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Error handling Coupon data:", error);
+    res.status(500).json({ isValid: false, message: "Internal Server Error" });
+  }
+};
+
+const cancelCoupon = async(req,res)=>{
+  const {totalAmount}=req.body
+  req.session.updatedTotalPrice = totalAmount
+  res.status(200).json({
+      success:true
+  });
+}
+
 
 const handleCheckOut = async (req, res) => {
   try {
@@ -1243,7 +1395,7 @@ module.exports = {
   userLoginData,
   userContact,
   userCart,
-  applyCoupon,
+
   addAddressToCart,
   addAddressToCartPage,
   updateQuantity,
@@ -1288,4 +1440,6 @@ module.exports = {
   wishlistCart,
   changePassword,
   changingPassword,
+  validateCoupon,
+  cancelCoupon
 };

@@ -66,8 +66,28 @@
                         </a>
                     </div>
 
-
+                    <div class="row mt-5">
+                        <div class="col-md-12">
+                            <label class="text-black h4" for="coupon">Coupon</label>
+                            <p>Select a coupon code if you have one.</p>
+                        </div>
+                        <div class="col-md-8 mb-3 mb-md-0">
+                            <select name="couponCode" id="couponCode">
+                                <option value="">Select Coupon</option>
+                                <% availableCoupons.forEach(coupon => { %>
+                                    <option value="<%= coupon.code %>"><%= coupon.code %> - <%= coupon.discountType %> (<%= coupon.discountValue %>% off)</option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" id="submit-btn" class="btn shadow-0">Apply</button>
+                            <div id="couponMessage"></div>
+                        </div>
+                    </div>
+                    
                 </div>
+
+
 
                 <!-- Checkout Section -->
                 <div class="col-md-4">
@@ -123,7 +143,28 @@
                                         <strong class="text-black">₹<%=totalPrice%></strong>
                                         <input id="checkout-total" type="hidden" value="<%=totalPrice%>"
                                             name="totalPrice">
+                                        <p id="checkout-total-amt" name="totalPrice">
+                                            <%=totalPrice%>
+                                        </p>
+                                        <input type="hidden" id="checkout-total-input" name="checkoutTotalInput">
                                     </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-2">Discount:</p>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+
+                                        <p class="mb-2 text-danger" id="discountValue">-₹0</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-2 h-100" id="couponApplied" style="display: none;">Coupon Applied
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+
+                                        <button type="button" style="display: none;" id="cancel-btn"
+                                            class="btn  shadow-0">Cancel</button>
+                                    </div>
+
                                 </div>
 
                                 <!-- Checkout Button -->
@@ -225,6 +266,7 @@
                 }
             }
         }
+        let totalAmount = document.getElementById('checkout-total').value;
 
 
 
@@ -303,7 +345,7 @@
                 }
             }
         }
-
+        document.getElementById('submit-btn').addEventListener('click', validateCoupon);
 
 
         async function verifyPayment(payment, order) {
@@ -323,6 +365,8 @@
                 document.getElementById('selectedCity').value = city;
                 document.getElementById('selectedPincode').value = pincode;
                 document.getElementById('selectedState').value = state;
+
+
 
 
 
@@ -372,6 +416,105 @@
                 console.error('Error handling payment failure:', error);
             }
         }
+
+        var checkoutTotalInput = document.getElementById('checkout-total-input');
+        const discountValueElement = document.getElementById('discountValue');
+        const discountedValue = discountValueElement.textContent.trim().replace(/₹|-/g, '');
+        const checkoutTotalElement = document.getElementById('checkout-total');
+        const checkoutTotal = checkoutTotalElement.textContent.trim().replace('₹', '');
+        checkoutTotalInput.value = totalAmount;
+        async function validateCoupon() {
+            const couponCode = document.getElementById('couponCode').value;
+            const couponMessage = document.getElementById('couponMessage');
+
+            try {
+                const response = await fetch('/validateCoupon', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        couponCode,
+                        totalAmount,
+                        checkoutTotalInput: checkoutTotalInput.value,
+                        discountedValue,
+                        checkoutTotal
+                    }),
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    couponMessage.textContent = result.isValid ? 'Coupon is valid!' : 'Coupon is not valid or empty.';
+                    handleCouponValidationResult(result);
+                    document.getElementById("couponApplied").style.display = "block"
+
+                    document.getElementById("cancel-btn").style.display = "block"
+
+                } else {
+                    couponMessage.textContent = 'Error validating coupon.';
+                    document.getElementById("couponApplied").style.display = "none"
+
+                    document.getElementById("cancel-btn").style.display = "none"
+
+                }
+            } catch (error) {
+                console.error('Error:', error.message);
+                couponMessage.textContent = 'An error occurred while validating the coupon.';
+            }
+        }
+        function handleCouponValidationResult(result) {
+            const { isValid, discountValue, checkoutTotal } = result;
+
+            console.log(result)
+
+            const discountValueElement = document.getElementById('discountValue');
+            const checkoutTotalElement = document.getElementById('checkout-total-amt');
+
+            if (isValid) {
+                discountValueElement.textContent = `- ₹${discountValue}`;
+                checkoutTotalElement.textContent = ` ₹${checkoutTotal}`;
+            } else {
+                discountValueElement.textContent = `- ₹0`;
+                checkoutTotalElement.textContent = `₹${totalAmount}`;
+            }
+        }
+
+        document.getElementById('cancel-btn').addEventListener('click', cancelCoupon);
+        async function cancelCoupon() {
+            const discountValueElement = document.getElementById('discountValue');
+
+            const totalPriceElement = document.getElementById('checkout-total');
+            const totalAmount = totalPriceElement.textContent.trim().replace('₹', '');
+            const couponMessage = document.getElementById('couponMessage');
+            const checkoutTotalElement = document.getElementById('checkout-total-amt');
+
+
+            try {
+                // Send the original total price to the backend
+                const response = await fetch('/cancelCoupon', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        totalAmount,
+                    }),
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    couponMessage.textContent = result.message || 'Coupon canceled successfully';
+                    discountValueElement.textContent = `- ₹0`;
+                    checkoutTotalElement.textContent = `₹${totalAmount}`;
+                } else {
+                    couponMessage.textContent = 'Error canceling coupon.';
+                }
+            } catch (error) {
+                console.error('Error:', error.message);
+                couponMessage.textContent = 'An error occurred while canceling the coupon.';
+            }
+        }
+
 
 
 

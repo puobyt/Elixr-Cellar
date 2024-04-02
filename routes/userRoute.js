@@ -69,13 +69,15 @@ user_router.get('/userAddressEdit', requireLogin, userController.addAddress)
 user_router.post('/userAddressEdit', requireLogin, userController.saveEditAddress)
 user_router.post('/deleteAddress', requireLogin, userController.deleteAddress)
 user_router.post('/userAddressToCart', requireLogin, userController.addAddressToCart)
-user_router.get('/editaddress', requireLogin, userController.addAddressToCartPage)
+user_router.get('/addaddress', requireLogin, userController.addAddressToCartPage)
+user_router.get('/editaddress', requireLogin, userController.editaddress)
 //checkOut
 
 user_router.get('/userCheckout', requireLogin, userController.userCheckout)
 
-user_router.post('/applyCoupon', requireLogin, userController.applyCoupon)
 user_router.post('/userCheckout', requireLogin, userController.handleCheckOut)
+user_router.post('/validateCoupon', requireLogin, userController.validateCoupon)
+user_router.post('/cancelCoupon', requireLogin, userController.cancelCoupon)
 user_router.post('/createOrder', requireLogin, userController.createOrder)
 user_router.post('/verifyPayment',userController.verifyPayment)
 user_router.get('/userOrderPlaced', requireLogin, userController.userOrderPlaced)

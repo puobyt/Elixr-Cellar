@@ -76,6 +76,8 @@ const adminHome = async (req, res) => {
   }
 };
 
+
+
 // Admin add user page
 const addUser = (req, res) => {
   if (req.session.admin) {

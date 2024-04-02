@@ -3,7 +3,7 @@
         <div class="container">
             <div class="row mb-5 justify-content-center">
                 <div class="col-7 section-title text-center mb-5">
-                    <h2 class="d-block">Cart</h2>
+                    <h2 class="d-block">Wishlist</h2>
                 </div>
             </div>
             <div class="row mb-5">
@@ -15,6 +15,7 @@
                                     <th class="product-thumbnail">Image</th>
                                     <th class="product-name">Product</th>
                                     <th class="product-price">Price</th>
+                                    <th class="product-price">Add to Cart</th>
                                     <th class="product-remove">Remove</th>
                                 </tr>
                             </thead>
@@ -32,6 +33,10 @@
                                         </td>
                                         <td class="product-price">$<%= item.productId.price %>
                                         </td>
+                                       <a href=""></a>
+                                        <td><a href="/addToCart/<%= item.productId._id %>"  class="btn btn-primary height-auto btn-sm">Add To Cart</a>
+                                        </td>
+
 
 
                                         <td><a href="/removeFromCart/<%= item.productId._id %>"
