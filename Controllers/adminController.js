@@ -499,14 +499,17 @@ const addProductPage = async (req, res) => {
 const addProduct = async (req, res) => {
   if (req.session.admin)
     try {
-      let category = await categories.find();
+     
       const { productName, productDes, productCat, productDate, price, stock } =
         req.body;
       console.log("req.files", req.files);
       const files = req.files;
+
       const imagePaths = files.map((file) => "productImg/" + file.filename);
       console.log("image path", imagePaths);
+    
 
+     
       const newProduct = new products({
         productName: productName,
         productCategory: productCat,

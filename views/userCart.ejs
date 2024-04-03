@@ -188,108 +188,154 @@
 
 
 
-    $(document).ready(function () {
+    // $(document).ready(function () {
 
 
-      function updateQuantity(productId, newQuantity) {
-        $.ajax({
-          type: "POST",
-          url: `/updateQuantity/${productId}`,
-          data: { quantity: newQuantity },
-          success: function (response) {
+    function updateQuantity(productId, newQuantity) {
+      $.ajax({
+        type: "POST",
+        url: `/updateQuantity/${productId}`,
+        data: { quantity: newQuantity },
+        success: function (response) {
 
 
-            const input = $(`input[data-product-id="${productId}"]`);
-            input.val(newQuantity);
+          const input = $(`input[data-product-id="${productId}"]`);
+          input.val(newQuantity);
 
-            const total = newQuantity * response.updatedProduct.price;
-            console.log("newQuantity", newQuantity)
-            console.log("response.price", response.updatedProduct.price)
-            console.log("response.cartItems", response.updatedProduct.cartItems);
-            $(`td.total-productPrice[data-product-id="${productId}"]`).text(`$${total.toFixed(2)}`);
-
-
-            updateCartTotals(response.updatedProduct.cartItems);
+          const total = newQuantity * response.updatedProduct.price;
+          console.log("newQuantity", newQuantity)
+          console.log("response.price", response.updatedProduct.price)
+          console.log("response.cartItems", response.updatedProduct.cartItems);
+          $(`td.total-productPrice[data-product-id="${productId}"]`).text(`$${total.toFixed(2)}`);
 
 
-          },
-          error: function (error) {
-            console.error("Error updating quantity:", error);
-          },
-        });
-      }
+          updateCartTotals(response.updatedProduct.cartItems);
 
-      $(".js-btn-plus").on("click", function () {
-        const input = $(this).closest(".input-group").find("input");
-        const productId = input.data("product-id");
+
+        },
+        error: function (error) {
+          console.error("Error updating quantity:", error);
+        },
+      });
+    }
+
+    $(".js-btn-plus").on("click", function () {
+      const input = $(this).closest(".input-group").find("input");
+      const productId = input.data("product-id");
+
+      updateQuantity(productId, newQuantity);
+      if (newQuantity <= 5) {
         const newQuantity = parseInt(input.val()) + 1;
+        console.log("228")
         updateQuantity(productId, newQuantity);
-        if (newQuantity <= 5) {
-          updateQuantity(productId, newQuantity);
-        }
-        else {
-          console.log("Quantity cannot be updated, new quantity is greater than 5.");
-        }
-      });
+      }
+      else {
+        console.log("Quantity cannot be updated, new quantity is greater than 5.");
+      }
+    });
 
 
-      $(".js-btn-minus").on("click", function () {
-        const input = $(this).closest(".input-group").find("input");
-        const productId = input.data("product-id");
-        const newQuantity = parseInt(input.val()) - 1;
-        // Ensure quantity does not go below 1
-        if (newQuantity >= 1) {
-          updateQuantity(productId, newQuantity);
-        }
-      });
-
-
-
-
-      function updateCartTotals(cartItems) {
-        let subtotal = 0;
-
-
-        cartItems.forEach(item => {
-          const total = item.quantity * item.productId.price;
-          subtotal += total;
-        });
-        console.log(subtotal)
-
-
-        $(".totalPrice").text(`$${subtotal.toFixed(2)}`);
+    $(".js-btn-minus").on("click", function () {
+      const input = $(this).closest(".input-group").find("input");
+      const productId = input.data("product-id");
+      const newQuantity = parseInt(input.val()) - 1;
+      // Ensure quantity does not go below 1
+      if (newQuantity >= 1) {
+        updateQuantity(productId, newQuantity);
       }
     });
 
 
 
 
+    function updateCartTotals(cartItems) {
+      let subtotal = 0;
+
+
+      cartItems.forEach(item => {
+        const total = item.quantity * item.productId.price;
+        subtotal += total;
+      });
+      console.log(subtotal)
+
+
+      $(".totalPrice").text(`$${subtotal.toFixed(2)}`);
+    }
+
+
+
+
+    // function incrementQuantity(currentQuantity, productId) {
+    //   console.log("Current Quantity:", currentQuantity);
+    //   console.log("Product ID:", productId);
+    //   const maxQuantity = 5; // Maximum allowed quantity
+    //   const input = $('input[data-product-id="' + productId + '"]');
+    //   const newQuantity = parseInt(input.val()) + 1;
+
+    //   const stockQuantity = currentQuantity;
+    //   if (newQuantity <= maxQuantity && newQuantity <= stockQuantity) {
+    //     updateQuantity(productId, newQuantity);
+    //     if (newQuantity === stockQuantity) {
+    //       input.closest(".input-group").find(".js-btn-plus").prop("disabled", true);
+    //     }
+    //   } else if (newQuantity > maxQuantity) {
+    //     alert("The maximum quantity for this product is " + maxQuantity + ".");
+    //   } else if (newQuantity > stockQuantity) {
+    //     // Use SweetAlert to display an error message
+    //     showNotEnoughStockAlert();
+    //     input.closest(".input-group").find(".js-btn-plus").prop("disabled", true);
+    //     return;
+    //   }
+    // }
+
 
     function incrementQuantity(currentQuantity, productId) {
       console.log("Current Quantity:", currentQuantity);
       console.log("Product ID:", productId);
+
       const maxQuantity = 5; // Maximum allowed quantity
       const input = $('input[data-product-id="' + productId + '"]');
       const newQuantity = parseInt(input.val()) + 1;
 
       const stockQuantity = currentQuantity;
-      if (newQuantity <= maxQuantity && newQuantity <= stockQuantity) {
 
+      // Check if the new quantity is within the limits
+      if (newQuantity <= maxQuantity && newQuantity <= stockQuantity) {
+        // Update quantity if within limits
         updateQuantity(productId, newQuantity);
 
-
-        if (newQuantity === stockQuantity) {
-          input.closest(".input-group").find(".js-btn-plus").prop("disabled", true);
+        // Disable plus button if new quantity equals stock quantity or exceeds 5
+        if (newQuantity === stockQuantity || newQuantity >= maxQuantity) {
+          console.log("true308");
+          input.closest(".input-group").find(".js-btn-plus").prop("disabled", false);
+        } else {
+          console.log("false311");
+          input.closest(".input-group").find(".js-btn-plus").prop("disabled", false);
         }
-      } else if (newQuantity > maxQuantity) {
+      } else if (newQuantity >= maxQuantity) {
+        // Show alert if new quantity exceeds maximum allowed quantity
         alert("The maximum quantity for this product is " + maxQuantity + ".");
+        return; // Prevent further execution
       } else if (newQuantity > stockQuantity) {
-
-        alert("There is not enough stock for this product.");
+        // Show error message if new quantity exceeds available stock
+        showNotEnoughStockAlert();
+        console.log("321");
         input.closest(".input-group").find(".js-btn-plus").prop("disabled", true);
         return;
       }
     }
+
+    function showNotEnoughStockAlert() {
+      Swal.fire({
+        icon: 'error',
+        title: 'Not Enough Stock',
+        text: 'There is not enough stock for this product.',
+      });
+    }
+
+
+
+
 
 
   </script>
@@ -312,18 +358,21 @@
       });
 
       // Plus button click
-      $('.js-btn-plus').on('click', function () {
-        var input = $(this).closest('.input-group').find('input');
-        var value = parseInt(input.val());
-        if (value > 5) {
-          alert('you can Only add upto  5')
-        } else { input.val(value + 1); }
+      // $('.js-btn-plus').on('click', function () {
+      //   var input = $(this).closest('.input-group').find('input');
+      //   var value = parseInt(input.val());
+      //   console.log("363");
+      //   if (value < 5) {
+      //     input.val(value + 1);
+
+      //   }
+      //   updateMinusButtonState(input);
 
 
 
 
-        updateMinusButtonState(input);
-      });
+
+      // });
 
 
       function updateMinusButtonState(input) {
@@ -332,7 +381,7 @@
 
         if (value === 1) {
 
-          minusButton.prop('disabled', true);
+          minusButton.prop('disabled', false);
         } else {
 
           minusButton.prop('disabled', false);

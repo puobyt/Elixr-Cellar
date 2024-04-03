@@ -244,6 +244,10 @@ const userShop = async (req, res) => {
 
     const sortBy = req.query.sortBy;
     switch (sortBy) {
+      case "whats_new":
+        sortQuery ={
+          createdAt:-1};
+        break;
       case "price_asc":
         sortQuery = { price: 1 };
         break;
@@ -450,12 +454,14 @@ const updateQuantity = async (req, res) => {
     const userId = req.session.userId;
     const productId = req.params.productId;
     const newQuantity = req.body.quantity;
+    const product = await Product.findById(productId)
 
-    if (newQuantity < 1 || newQuantity > 5) {
+    if (newQuantity>product.totalQuantity) {
       return res.status(400).json({
-        error: "Invalid quantity. Please choose a quantity between 1 and 5.",
+        error: "Invalid quantity. Not enough Stock.",
       });
     }
+   
 
     const updatedCart = await Cart.findOneAndUpdate(
       { userId, "items.productId": productId },
@@ -481,25 +487,7 @@ const updateQuantity = async (req, res) => {
   }
 };
 
-// const applyCoupon = async (req, res) => {
-//   const couponCode = req.body.couponCode;
-//   console.log(couponCode);
-//   try {
-//     const coupon = await Coupon.findOne({ code: couponCode });
-//     if (coupon) {
-//       const totalPrice = calculateTotalPrice(
-//         req.cartItems,
-//         coupon.discountValue
-//       );
-//       res.json({ success: true, totalPrice });
-//     } else {
-//       res.json({ success: false });
-//     }
-//   } catch (error) {
-//     console.error("Error applying coupon:", error);
-//     res.json({ success: false });
-//   }
-// };
+
 
 const userCheckout = async (req, res) => {
   let userId = req.session.userId;
@@ -752,10 +740,10 @@ const createOrder = async (req, res) => {
     razorpay_signature,
   } = req.body;
   try {
-    const amount = totalAmount * 100;
+    const amount = totalAmount * 100;  // Amount in paise
     if (paymentOption === "onlinePayment") {
       const options = {
-        amount: totalAmount * 100, // Amount in paise
+        amount: totalAmount * 100,  
         currency: currency || "INR",
         receipt: "receipt_order_1",
         notes: {},

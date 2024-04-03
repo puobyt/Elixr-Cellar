@@ -71,6 +71,7 @@ user_router.post('/deleteAddress', requireLogin, userController.deleteAddress)
 user_router.post('/userAddressToCart', requireLogin, userController.addAddressToCart)
 user_router.get('/addaddress', requireLogin, userController.addAddressToCartPage)
 user_router.get('/editaddress', requireLogin, userController.editaddress)
+user_router.post('/editaddress', requireLogin, userController. saveEditAddress)
 //checkOut
 
 user_router.get('/userCheckout', requireLogin, userController.userCheckout)
