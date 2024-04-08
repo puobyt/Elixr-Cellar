@@ -47,6 +47,9 @@
                                        
                                         <div class="card mr-3 border-0" style="width: auto; margin-left: 45px;">
                                             <% userOrders.items.forEach(Product=>{%>
+                                                
+                                                    <img width="150px" height="150px" src="<%=Product.product?Product.product.image[0]:""%>" alt="">
+                                                
                                                 <p>
                                                     <span class="product-name">
                                                         <%=Product.product.productName%>

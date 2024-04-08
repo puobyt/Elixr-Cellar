@@ -245,8 +245,9 @@ const userShop = async (req, res) => {
     const sortBy = req.query.sortBy;
     switch (sortBy) {
       case "whats_new":
-        sortQuery ={
-          createdAt:-1};
+        sortQuery = {
+          createdAt: -1,
+        };
         break;
       case "price_asc":
         sortQuery = { price: 1 };
@@ -454,14 +455,13 @@ const updateQuantity = async (req, res) => {
     const userId = req.session.userId;
     const productId = req.params.productId;
     const newQuantity = req.body.quantity;
-    const product = await Product.findById(productId)
+    const product = await Product.findById(productId);
 
-    if (newQuantity>product.totalQuantity) {
+    if (newQuantity > product.totalQuantity) {
       return res.status(400).json({
         error: "Invalid quantity. Not enough Stock.",
       });
     }
-   
 
     const updatedCart = await Cart.findOneAndUpdate(
       { userId, "items.productId": productId },
@@ -487,16 +487,33 @@ const updateQuantity = async (req, res) => {
   }
 };
 
-
-
 const userCheckout = async (req, res) => {
   let userId = req.session.userId;
   const userCart = await Cart.findOne({ userId }).populate("items.productId");
   const Usercollections = await UserCollection.findById(userId);
   const coupons = await Coupons.find();
+
   const order = await orders.findOne({ customer: userId });
   const items = userCart.items || [];
-  const totalPrice = calculateTotalPrice(items);
+
+  totalPrice = calculateTotalPrice(
+    items.filter((item) => item.productId.totalQuantity > 0)
+  );
+  console.log("Total ", totalPrice);
+  req.session.updatedTotalPrice = totalPrice;
+  console.log("req.session.updatedTotalPrice",req.session.updatedTotalPrice);
+  // const totalPrice = calculateTotalPrice(items);
+  // console.log("totalPrice", totalPrice);
+
+  // const couponDiscountPercent= coupons.map(coupon => coupon.discountValue);
+  // console.log("disVal",couponDiscountPercent);
+  // const avgDiscountPercent= couponDiscountPercent.reduce((total,discount) => total + discount ,0)/couponDiscountPercent.length;
+  // console.log("average discount percent:", avgDiscountPercent);
+  // const couponDiscount= avgDiscountPercent/100;
+  // console.log("cDpercent", couponDiscount);
+  // const updatedTotalPrice= totalPrice*(1-couponDiscount);
+  // console.log("updatehere",updatedTotalPrice)
+
   let availableCoupons = [];
   let isCouponAvailable = false;
 
@@ -530,6 +547,7 @@ const userCheckout = async (req, res) => {
       console.log("coupons....", availableCoupons);
       res.render("userCheckout", {
         Usercollections,
+        // updatedTotalPrice,
         totalPrice,
         userCart,
         availableCoupons,
@@ -582,12 +600,16 @@ const validateCoupon = async (req, res) => {
       // If coupon is valid, apply the discount
       if (!isNaN(discountPercentage) && !isNaN(totalAmount)) {
         const discountValue = (discountPercentage / 100) * totalAmount;
+        console.log("Discount", discountValue);
+        console.log("Discount%", discountPercentage);
         const checkoutTotal = totalAmount - discountValue;
-
+        console.log("checkoutTotal", checkoutTotal);
         const discountedTotal = 0;
-
+console.log("req.session before",req.session)
         req.session.updatedTotalPrice = checkoutTotal;
         req.session.save();
+        console.log("req.session after",req.session)
+        console.log("coupon", req.session.updatedTotalPrice);
         res.status(200).json({
           isValid: true,
           message: "Coupon is valid. Discount applied successfully",
@@ -595,7 +617,7 @@ const validateCoupon = async (req, res) => {
           discountValue,
         });
 
-        const parsedCheckoutTotalInput = parseFloat(discountedTotal).toFixed(2);
+        const parsedCheckoutTotalInput = parseFloat(req.session.updatedTotalPrice).toFixed(2);
         console.log(parsedCheckoutTotalInput);
         console.log(discountedTotal);
 
@@ -623,14 +645,13 @@ const validateCoupon = async (req, res) => {
   }
 };
 
-const cancelCoupon = async(req,res)=>{
-  const {totalAmount}=req.body
-  req.session.updatedTotalPrice = totalAmount
+const cancelCoupon = async (req, res) => {
+  const { totalAmount } = req.body;
+  req.session.updatedTotalPrice = totalAmount;
   res.status(200).json({
-      success:true
+    success: true,
   });
-}
-
+};
 
 const handleCheckOut = async (req, res) => {
   try {
@@ -639,7 +660,7 @@ const handleCheckOut = async (req, res) => {
     const userCart = await Cart.findOne({ userId }).populate("items.productId");
     const items = userCart.items;
     const addressIndex = req.body.selectedAddress;
-
+    const updatedTotalPrice = req.session.updatedTotalPrice;
     const userAddresses = user.address[addressIndex];
     const { paymentMethod, totalPrice } = req.body;
 
@@ -649,11 +670,11 @@ const handleCheckOut = async (req, res) => {
         return res.status(400).send("Insufficient balance in wallet.");
       }
 
-      userWallet.balance -= totalPrice;
-
+      userWallet.balance -= updatedTotalPrice;
+console.log("walleatt",req.session.updatedTotalPrice);
       userWallet.transactionHistory.push({
         transaction: "Money Deducted",
-        amount: totalPrice,
+        amount: updatedTotalPrice,
       });
 
       await userWallet.save();
@@ -674,7 +695,7 @@ const handleCheckOut = async (req, res) => {
             product: item.productId._id,
             quantity: item.quantity,
           })),
-        totalAmount: totalPrice,
+        totalAmount: updatedTotalPrice,
         OrderStatus: "Order Placed",
         paymentMethod: paymentMethod,
         orderId: generateOrderId(),
@@ -706,7 +727,7 @@ const handleCheckOut = async (req, res) => {
             product: item.productId._id,
             quantity: item.quantity,
           })),
-        totalAmount: totalPrice,
+        totalAmount: updatedTotalPrice,
         OrderStatus: "Order Placed",
         paymentMethod: paymentMethod,
         orderId: generateOrderId(),
@@ -732,18 +753,20 @@ const handleCheckOut = async (req, res) => {
 
 const createOrder = async (req, res) => {
   const userId = req.session.userId;
+  
   let {
     paymentOption,
+    // updatedTotalPrice,
     totalAmount,
     currency,
     razorpay_order_id,
     razorpay_signature,
   } = req.body;
   try {
-    const amount = totalAmount * 100;  // Amount in paise
+    const amount = totalAmount * 100; // Amount in paise
     if (paymentOption === "onlinePayment") {
       const options = {
-        amount: totalAmount * 100,  
+        amount: totalAmount * 100,
         currency: currency || "INR",
         receipt: "receipt_order_1",
         notes: {},
@@ -1084,7 +1107,7 @@ const handleResetPassword = async (req, res) => {
       });
     }
     if (user.password !== currentPassword) {
-      return res.render("resetPassword", {
+      return res.render("userForgetPass", {
         message: "Current password is incorrect",
       });
     }
@@ -1429,5 +1452,5 @@ module.exports = {
   changePassword,
   changingPassword,
   validateCoupon,
-  cancelCoupon
+  cancelCoupon,
 };

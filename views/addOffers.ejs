@@ -170,8 +170,17 @@
                                                         placeholder="Enter your Offer Discount" min="0" max="70" required>
                                                 </div>
                                                 <div class="form-group">
-                                                    <input type="text" name="discountType" class="form-control"
-                                                        placeholder="Enter Discount type" required>
+                                                    <select class="form-control" name="productCat" id="productCat">
+                                                        <option value="" disabled selected>Select your Category</option>
+                                                        <%category.forEach(Category=>{%>
+                                                            <option value="<%=Category.category%>">
+                                                                <%=Category.category%>
+                                                            </option>
+                                                            <%})%>
+
+
+
+                                                    </select>
                                                 </div>
                                                 <div class="form-group">
                                                     <input type="text" name="expiry" class="form-control"

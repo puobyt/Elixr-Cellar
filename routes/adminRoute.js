@@ -1,3 +1,4 @@
+
 const express = require("express");
 
 const admin_router = express.Router();
@@ -81,7 +82,7 @@ admin_router.get("/blockUser/:userId", adminController.blockUser);
 admin_router.get("/unblockUser/:userId", adminController.unblockUser);
 
 admin_router.get("/adminOrdersDash", adminController.adminOrdersDash);
-admin_router.put("/changeOrderStatus", adminController.changeOrderStatus);
+admin_router.post("/order-management-update/:orderId", adminController.changeOrderStatus);
 
 admin_router.get(
   "/adminCouponsDiscounts",
@@ -90,6 +91,8 @@ admin_router.get(
 admin_router.get("/addCoupons", adminController.addCouponsGet);
 admin_router.get("/addCoupons", adminController.addCoupons);
 admin_router.post("/addCoupons", adminController.addCoupons);
+admin_router.get("/adminEditCoupon", adminController.editCouponsGet);
+admin_router.post("/adminEditCoupon", adminController.editCoupons);
 
 admin_router.post("/deleteCoupon", adminController.deleteCoupon);
 

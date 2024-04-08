@@ -7,6 +7,7 @@ const users = require("../Model/userModel");
 const orders = require("../Model/orderModel");
 const Coupon = require("../Model/couponModel");
 const offer= require( "../Model/offerModel") ; 
+const wallet = require('../Model/walletModel')
 const path = require("path");
 const fs = require("fs");
 
@@ -508,7 +509,7 @@ const addProduct = async (req, res) => {
       const imagePaths = files.map((file) => "productImg/" + file.filename);
       console.log("image path", imagePaths);
     
-
+      const productIn = await products.findById(prodId);
      
       const newProduct = new products({
         productName: productName,
@@ -519,6 +520,7 @@ const addProduct = async (req, res) => {
         price,
         image: imagePaths,
       });
+          
 
       let savedProd = await newProduct.save();
 
@@ -627,31 +629,55 @@ const adminOrdersDash = async (req, res) => {
 // Route to handle changing order status
 
     const changeOrderStatus = async (req, res) => {
-        try {
-            const orderId = req.body.orderId;
-            const newStatus = req.body.newStatus;
-    
-            // Update order status in the database
-            const updatedOrder = await orders.findByIdAndUpdate(orderId, { OrderStatus: newStatus }, { new: true });
-    
-            if (!updatedOrder) {
-                return res.status(404).json({ success: false, message: 'Order not found' });
-            }
-    
-            // Send response
-            res.json({ success: true, message: 'Order status updated successfully', updatedOrder });
-        } catch (error) {
-            console.log(error);
-            res.status(500).json({ success: false, message: 'Failed to update order status' });
-        }
+      const orderId = req.params.orderId;
+      const newStatus = req.body.order_status;
+  
+      console.log("new status ", newStatus)
+  
+      try {
+          let order = await orders.findById(orderId)
+          let userWallet = await wallet.findOne({userId:order.customer})
+          if(!userWallet){
+              userWallet = new wallet({
+                  userId:order.customer,
+                  balance:0,
+                  transactionHistory:[]
+              })
+              await userWallet.save();
+          }
+          console.log("after first if")
+          if(newStatus ==="Delivered"){
+              order.deliveredAt=new Date()
+              await order.save()
+          }
+          if(newStatus === "Cancelled" || newStatus ==="Returned"){
+              const orderAmount = order.totalAmount
+              userWallet.balance += orderAmount;
+              userWallet.transactionHistory.push({
+                  transaction: 'Money Added',
+                  amount: orderAmount,
+              });
+          }
+          const updatedOrder = await orders.findByIdAndUpdate(orderId, { OrderStatus: newStatus }, { new: true });
+          await userWallet.save();
+          res.redirect('/adminOrdersDash');
+      } catch (error) {
+          console.error('Error updating order status:', error);
+          res.status(500).send('Internal Server Error');
+      }
     };
 
+
+    
+
+    
 
 // admin Coupons & Discounts
 const adminCouponsDiscounts = async (req, res) => {
   if (req.session.admin)
     try {
       const coupons = await Coupon.find();
+     
       res.render("adminCouponsDiscounts", {
         coupons: coupons,
       });
@@ -718,6 +744,70 @@ const addCoupons = async (req, res) => {
   }
 };
 
+const editCouponsGet= (req, res) => {
+  if (req.session.admin)
+    try {
+      res.render("adminEditCoupon", {});
+    } catch (error) {
+      console.log("Error", error);
+      res.status(500).send("Internal Server Error");
+    }
+};
+
+const editCoupons = async (req, res) => {
+  try {
+    const couponId = req.params.id;
+    const { code, discountValue, discountType, expiry, minimumCartAmount } = req.body;
+
+    const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
+    if (existingCoupon && existingCoupon._id.toString() !== couponId) {
+      return res.render("addCoupons", { mess: "Coupon with this code already exists" });
+    }
+
+    // Form Validation
+    if (
+      isNaN(discountValue) ||
+      isNaN(minimumCartAmount) ||
+      discountValue >= 100 ||
+      minimumCartAmount <= 0 ||
+      discountValue < 0 ||
+      minimumCartAmount < 0
+    ) {
+      return res.render("addCoupons", {
+        mess: "Please enter valid discount value and cart amount.",
+      });
+    }
+
+    const updatedCoupon = await Coupon.findByIdAndUpdate(
+      couponId,
+      {
+        code: code.toUpperCase(),
+        discountValue: discountValue,
+        discountType: discountType,
+        expiry: expiry,
+        minimumCartAmount: minimumCartAmount
+      },
+      { new: true }
+    );
+
+    if (!updatedCoupon) {
+      console.log("Error updating coupon");
+      return res.status(404).send("Coupon not found");
+    }
+
+    const coupons = await Coupon.find();
+
+    res.render("adminCouponsDiscounts", {
+      coupons: coupons,
+      mess: "Coupon updated successfully",
+    });
+  } catch (error) {
+    console.log("Error", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+
 const deleteCoupon = async (req, res) => {
   try {
     const couponId = req.body.couponId;
@@ -742,10 +832,11 @@ const adminOffers = async (req, res) => {
     }
 };
 
-const addOffersGet = (req, res) => {
+const addOffersGet = async(req, res) => {
   if (req.session.admin)
     try {
-      res.render("addOffers", {});
+      let category = await categories.find();
+      res.render("addOffers", {category,mess:""});
     } catch (error) {
       console.log("Error", error);
       res.status(500).send("Internal Server Error");
@@ -754,7 +845,7 @@ const addOffersGet = (req, res) => {
 
 const addOffers = async (req, res) => {
   try {
-    const { code, discountValue, discountType, expiry, minimumCartAmount } =
+    const { code, discountValue, productCat, expiry, minimumCartAmount } =
       req.body;
 
     const existingOffer = await offer.findOne({ code: code.toUpperCase() });
@@ -779,11 +870,17 @@ const addOffers = async (req, res) => {
     const newOffer = new offer({
       code: code.toUpperCase(),
       discountValue: discountValue,
-      discountType: discountType,
+      productCategory: productCat,
       expiry: expiry,
       minimumCartAmount: minimumCartAmount,
       status: "Active",
     });
+
+    await categories.findOneAndUpdate(
+      { category: productCat },
+      { $push: { products: savedProd._id } },
+      { new: true }
+    );
 
     await newOffer.save();
 
@@ -843,6 +940,8 @@ module.exports = {
   adminCouponsDiscounts,
   addCoupons,
   addCouponsGet,
+  editCouponsGet,
+  editCoupons,
   deleteCoupon,
   adminOffers,
   addOffersGet,

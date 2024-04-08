@@ -145,7 +145,7 @@
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="dashboard_header_title">
-                                        <h3 class="f_s_30 f_w_700 text_white">Add Product</h3>
+                                        <h3 class="f_s_30 f_w_700 text_white">Edit Coupons</h3>
                                     </div>
                                 </div>
                             </div>
@@ -155,66 +155,38 @@
                         <div class="white_box mb_30">
                             <div class="row justify-content-center">
                                 <div class="col-lg-6">
-
                                     <div class="modal-content cs_modal">
                                         <div class="modal-header theme_bg_1">
-                                            <h5 class="modal-title text_white">Add Product</h5>
+                                            <h5 class="modal-title text_white">Edit Coupons</h5>
                                         </div>
                                         <div class="modal-body">
-                                            <form method="post" action="/addProduct" enctype="multipart/form-data"
-                                                onsubmit="return validation()">
-                                                <p class="text-danger">
-                                                    <%=mess%>
-                                                </p>
-                                                <div class>
-                                                    <input type="text" class="form-control" name="productName"
-                                                        id="product_name" placeholder="Enter your Product Name">
-                                                </div>
-                                                <div class>
-                                                    <input type="text" class="form-control" name="productDes"
-                                                        id="productDes" placeholder="Enter your Product Description">
+                                            <form id="editCouponForm" action="/editCoupons" method="post" action="/adminEditCoupon/<%= coupon._id %>">
+                                                <div class="form-group">
+                                                    <input type="text" name="code" class="form-control"
+                                                    value="<%= coupon.code%>" name="code"
+                                                    placeholder="Enter your Coupon Code" required>
                                                 </div>
                                                 <div class="form-group">
-                                                    <select class="form-control" name="productCat" id="productCat">
-                                                        <option value="" disabled selected>Select your Category</option>
-                                                        <%category.forEach(Category=>{%>
-                                                            <option value="<%=Category.category%>">
-                                                                <%=Category.category%>
-                                                            </option>
-                                                            <%})%>
-
-
-
-                                                    </select>
+                                                    <input type="number" name="discountValue" class="form-control"
+                                                    value="<%= coupon.discountValue%>" 
+                                                        placeholder="Enter your Coupon Discount" min="0" max="70" required>
                                                 </div>
-
-
                                                 <div class="form-group">
-                                                    <label for="productDate" class="text">Enter your Manufactured
-                                                        Date</label>
-                                                    <input type="date" class="form-control" id="productDate"
-                                                        name="productDate" placeholder="Enter your Manufactured Date">
+                                                    <input type="text" name="discountType" class="form-control"
+                                                    value="<%= coupon.discountType%>" 
+                                                        placeholder="Enter Discount type" required>
                                                 </div>
-
-
-                                                <div class>
-                                                    <input type="number" class="form-control" name="stock" id="stock"
-                                                        placeholder="Enter your Units In Stock">
+                                                <div class="form-group">
+                                                    <input type="text" name="expiry" class="form-control"
+                                                    value="<%= coupon.expiry%>"
+                                                        placeholder="Enter the Expiry" required>
                                                 </div>
-                                                <div class>
-                                                    <input type="number" class="form-control" name="price" id="price"
-                                                        placeholder="Price">
+                                                <div class="form-group">
+                                                    <input type="number" name="minimumCartAmount" class="form-control"
+                                                    value="<%= coupon.minimumCartAmount%>"
+                                                        placeholder="Enter the Minimum cart amount" min="1000" required>
                                                 </div>
-                                                <div>
-                                                    <input type="file" class="form-control" name="images" multiple id="image">
-                                                    <!-- Button to remove selected images -->
-                                                    <button type="button" class="btn btn-danger" id="removeImages">Remove Selected Images</button>
-                                                </div>
-                                                
-
-                                                    <button type="submit"
-                                                        class="btn_1 full_width text-center">Submit</button>
-
+                                                <button type="submit" class="btn_1 full_width text-center">Submit</button>
                                             </form>
                                         </div>
                                     </div>
@@ -226,18 +198,12 @@
             </div>
         </div>
 
-        </div>
-        </div>
-        </div>
-        </div>
-        </div>
-
         <div class="footer_part">
-            <div class="container-fluid">
+            <div class="container">
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="footer_iner text-center">
-                            <p>2024 © Elixr Cellar - Designed by <a href="#"> <i class="ti-heart"></i> </a><a href="#">
+                            <p>2024 © Elixr Cellars - Designed by <a href="#"> <i class="ti-heart"></i> </a><a href="#">
                                     Paul Boby T</a></p>
                         </div>
                     </div>
@@ -367,36 +333,19 @@
         </a>
     </div>
 
+
     <script>
-
-        function validation() {
-            let productName = document.getElementById('product_name').value.trim()
-            let productDescription = document.getElementById("productDes").value;
-            let productCat = document.getElementById("productCat").value;
-            let productDate = document.getElementById("productDate").value;
-            let productStock = document.getElementById("stock").value;
-            let productPrice = document.getElementById("price").value;
-            let imageUploader = document.getElementById("image")
-
-
-            if (!productName || !productDescription || !productCat || !productDate || !productStock || !productPrice || !imageUploader) {
-                alert("Please fill out all fields!");
-                return false;
-            }
-
-            if (isNaN(productStock) || productStock < 0) {
-                alert("Total quantity must be a non-negative number")
-                return false;
-            }
-
-            if (isNaN(productPrice) || productPrice < 0) {
-                alert("Price must be a non-negative number")
-                return false;
-            }
-            return true
-        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('addCouponForm');
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
     </script>
-
 
     <script src="js/jquery1-3.4.1.min.js"></script>
 

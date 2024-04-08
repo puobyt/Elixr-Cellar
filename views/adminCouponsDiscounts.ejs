@@ -165,7 +165,10 @@
                                                 <th class="border-top-0">Offer/Discount %</th>
                                                 <th class="border-top-0">Expiry Date</th>
                                                 <th class="border-top-0">Status</th>
-                                                <th class="border-top-0">Actions</th> <!-- New column for delete option -->
+                                                <th class="border-top-0">Actions</th> 
+                                                <th
+                                                class="border-top-0">Edit
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -189,6 +192,10 @@
                                                         <input type="hidden" name="couponId" value="<%= coupon.id %>">
                                                         <button type="submit" class="btn btn-danger">Delete</button>
                                                     </form>
+                                                </td>
+                                                <td>
+                                                    <a href="/adminEditCoupon/<%= coupon._id %>" type="submit" class="btn btn-primary">Edit Coupon
+                                                    </a>
                                                 </td>
                                             </tr>
                                             <% }) %>

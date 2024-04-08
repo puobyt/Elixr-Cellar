@@ -10,10 +10,9 @@ const offerSchema = new mongoose.Schema({
         type:Number,
         required:true
     },
-    discountType:{
-        type:String,
-        enum: ['Minimum Purchase','First Purchase'],
-        required:true
+    productCategory: {
+
+        type: String,
     },
     expiry: {
         type: Date,

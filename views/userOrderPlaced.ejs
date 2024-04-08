@@ -37,12 +37,21 @@
                                                     <input type="hidden" name="orderId" value="<%= order._id %>">
 
                                                     <!-- Button to submit the form and cancel the order -->
-                                                    <%if(order.OrderStatus==="Order Placed"){%>
-                                                        <button type="submit" class="btn btn-danger">Cancel
-                                                            Order</button>
-                                                        <%}else{%>
-                                                            <p class="text-danger">Order Cancelled</p>
-                                                            <%}%>
+                                                    <% if(order.OrderStatus === 'Order Placed') { %>
+                                                        <button type="submit" class="btn btn-danger">Cancel Order</button>
+                                                    <% } else if (order.OrderStatus === 'Shipped') { %>
+                                                        <button type="submit" class="btn btn-danger">Cancel Order</button>
+                                            
+                                
+                                                    <% } else if (order.OrderStatus === 'Delivered') { %>
+                                                        
+                                                    <% } else if (order.OrderStatus === 'Cancelled') { %>
+                                                       
+                                                    <% } else if (order.OrderStatus === 'Returned') { %>
+                                                       
+                                                    <% } else { %>
+                                                        <p class="text-danger">Unknown Order Status</p>
+                                                    <% } %>
                                                 </form>
                                             </td>
                                             <td>
@@ -58,16 +67,18 @@
                                             </td>
 
                                             <td>
-                                                <a href="/userOrderDetails/<%= order.orderId %>" type="submit" class="btn btn-primary">View
+                                                <a href="/userOrderDetails/<%= order.orderId %>" type="submit"
+                                                    class="btn btn-primary">View
                                                     more</a>
                                             </td>
                                         </tr>
-                                        
+
                                         </tr>
                                         <% }); %>
 
                                 </tbody>
                             </table>
+
                         </div>
                     </div>
                 </div>

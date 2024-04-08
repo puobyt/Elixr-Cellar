@@ -74,9 +74,12 @@
                         <div class="col-md-8 mb-3 mb-md-0">
                             <select name="couponCode" id="couponCode">
                                 <option value="">Select Coupon</option>
-                                <% availableCoupons.forEach(coupon => { %>
-                                    <option value="<%= coupon.code %>"><%= coupon.code %> - <%= coupon.discountType %> (<%= coupon.discountValue %>% off)</option>
-                                <% }) %>
+                                <% availableCoupons.forEach(coupon=> { %>
+                                    <option value="<%= coupon.code %>">
+                                        <%= coupon.code %> - <%= coupon.discountType %> (<%= coupon.discountValue %>%
+                                                    off)
+                                    </option>
+                                    <% }) %>
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -84,7 +87,7 @@
                             <div id="couponMessage"></div>
                         </div>
                     </div>
-                    
+
                 </div>
 
 
@@ -278,8 +281,8 @@
 
                 try {
 
-                    const totalAmountText = document.getElementById('checkout-total').value;
-                    console.log("got it money", totalAmountText)
+                    const totalAmountText = document.getElementById('checkout-total-amt').textContent.replace('₹', '');
+
                     const totalAmount = totalAmountText
 
 
