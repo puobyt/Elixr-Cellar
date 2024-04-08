@@ -879,17 +879,28 @@ const userOrderPlaced = async (req, res) => {
   try {
     if (req.session.user) {
       const userId = req.session.userId;
-      const userCart = await Cart.findOne({ userId }).populate(
-        "items.productId"
-      );
+      const page = parseInt(req.query.page) || 1; // Get page number from query parameter, default to 1 if not provided
+      const limit = 10; // Number of orders per page
+      const skip = (page - 1) * limit;
+
+      const userCart = await Cart.findOne({ userId }).populate("items.productId");
       const items = userCart.items;
 
+      const totalOrders = await orders.countDocuments({ customer: userId });
       const userOrders = await orders
         .find({ customer: userId })
         .populate("items.product")
-        .sort({ orderDate: -1 });
+        .sort({ orderDate: -1 })
+        .skip(skip)
+        .limit(limit);
 
-      res.render("userOrderPlaced", { items, userOrders, userId });
+      res.render("userOrderPlaced", {
+        items,
+        userOrders,
+        userId,
+        currentPage: page,
+        totalPages: Math.ceil(totalOrders / limit),
+      });
     } else {
       res.redirect("/");
     }
@@ -897,6 +908,7 @@ const userOrderPlaced = async (req, res) => {
     console.log(error);
   }
 };
+
 
 const orderDetails = async (req, res) => {
   try {

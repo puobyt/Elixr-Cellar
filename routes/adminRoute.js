@@ -91,8 +91,8 @@ admin_router.get(
 admin_router.get("/addCoupons", adminController.addCouponsGet);
 admin_router.get("/addCoupons", adminController.addCoupons);
 admin_router.post("/addCoupons", adminController.addCoupons);
-admin_router.get("/adminEditCoupon", adminController.editCouponsGet);
-admin_router.post("/adminEditCoupon", adminController.editCoupons);
+admin_router.get("/adminEditCoupon/:id", adminController.editCouponsGet);
+admin_router.post("/adminEditCoupon/:id", adminController.editCoupons);
 
 admin_router.post("/deleteCoupon", adminController.deleteCoupon);
 
@@ -110,6 +110,15 @@ admin_router.get("/editUser", adminController.editUser);
 admin_router.post("/editUser", adminController.editUserFunction);
 
 admin_router.get("/deleteUser", adminController.userDelete);
+
+
+
+admin_router.get('/sales-report/download/:filter/:selectedValue/pdf', adminController.generatePdfReport);
+
+// Add a route for Excel download
+admin_router.get('/sales-report/download/:filter/:selectedValue/excel', adminController.generateExcelReport);
+
+
 
 admin_router.get("/adminlogout", adminController.adminLogout);
 
