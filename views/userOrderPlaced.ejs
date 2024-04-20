@@ -221,6 +221,38 @@
                     console.error('There was a problem with the fetch operation:', error);
                 });
         }
+
+        // Client-side JavaScript (User Side)
+const sendCancelNotification = async (orderId, userId) => {
+  try {
+    const response = await fetch('/send-cancel-notification', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ orderId, userId })
+    });
+    
+    if (response.ok) {
+      // Notification sent successfully
+      console.log('Cancel notification sent to admin');
+    } else {
+      // Handle error
+      console.error('Failed to send cancel notification');
+    }
+  } catch (error) {
+    console.error('Error sending cancel notification:', error);
+  }
+};
+
+// Event listener for cancel button click
+const cancelButton = document.querySelector('.cancel-order-button');
+cancelButton.addEventListener('click', () => {
+  const orderId = 'your_order_id'; // Get the order ID dynamically
+  const userId = 'user_id'; // Get the user ID dynamically
+  sendCancelNotification(orderId, userId);
+});
+
     </script>
     </body>
 

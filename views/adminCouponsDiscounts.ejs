@@ -163,7 +163,7 @@
                                             <tr>
                                                 <th class="border-top-0">Coupon Code</th>
                                                 <th class="border-top-0">Offer/Discount %</th>
-                                                <th class="border-top-0">Expiry Date</th>
+                                                <th class="border-top-0">Date of Creation</th>
                                                 <th class="border-top-0">Status</th>
                                                 <th class="border-top-0">Actions</th> 
                                                 <th
@@ -188,9 +188,10 @@
                                                 </td>
                                                 <td>
                                                     <!-- Delete button for each coupon -->
-                                                    <form action="/deleteCoupon" method="POST">
+                                                    <form id="deleteCouponForm<%= coupon.id %>" action="/deleteCoupon" method="POST">
                                                         <input type="hidden" name="couponId" value="<%= coupon.id %>">
-                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                        <!-- Add a class or id to the button for JavaScript -->
+                                                        <button type="button" class="btn btn-danger delete-coupon-btn">Delete</button>
                                                     </form>
                                                 </td>
                                                 <td>
@@ -345,6 +346,8 @@
         </a>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src="/js/jquery1-3.4.1.min.js"></script>
 
     <script src="/js/popper1.min.js"></script>
@@ -393,6 +396,31 @@
     <script src="vendors/chart_am/animated.js"></script>
     <script src="vendors/chart_am/kelly.js"></script>
     <script src="vendors/chart_am/chart-custom.js"></script>
+    <script>
+        document.querySelectorAll('.delete-coupon-btn').forEach(button => {
+            button.addEventListener('click', function() {
+              
+                const formId = button.closest('form').id;
+                const form = document.getElementById(formId);
+    
+                // Display SweetAlert confirmation dialog
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'You will not be able to recover this coupon!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                       
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
 
     <script src="js/custom.js"></script>
     </body>

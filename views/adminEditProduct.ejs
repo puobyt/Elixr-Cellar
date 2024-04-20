@@ -181,7 +181,8 @@
                                                 </div>
                                                 <div class="form-group">
                                                     <p class="text">Enter your Manufactured Date</p>
-                                                    <input type="date" class="form-control" id="manufactureDateInput"
+                                                    <input type="text" class="form-control" 
+                                                            value="<%= productIn.ManufactureDate.toISOString().substr(0,10) %>"
                                                         name="productDate" placeholder="Enter your Manufactured Date"
                                                         required>
                                                 </div>
@@ -196,76 +197,22 @@
                                                         required>
                                                 </div>
                                                 <div class="form-group">
-
-
-
-
-                                                    <input type="hidden" id="existingImageData" name="existingImage"
-                                                        value="">
-
-
-                                                    <!-- Image 1 -->
-                                                    <div class="form-group">
-                                                        <label class="col-md-4 control-label">Image 1</label>
-                                                        <input type="hidden" name="imageIndex0" value="1" />
-                                                        <input class="input-file" type="file" name="gameImages1"
-                                                            id="imageInput1" onchange="previewImage(this, 0)" />
-                                                        <img id="imagePreview0" src="../<%= productIn.image[0]%>"
-                                                            style="width: 200px; height: 150px;" />
-                                                        <button type="button" onclick="removeImage(0)">Remove this
-                                                            image</button>
-                                                        <div id="errorImage" style="color: red;"></div>
-                                                    </div>
-
-                                                    <!-- Image 2 -->
-                                                    <div class="form-group">
-                                                        <label class="col-md-4 control-label">Image 2</label>
-                                                        <input type="hidden" name="imageIndex1" value="2" />
-                                                        <input class="input-file" type="file" name="gameImages2"
-                                                            id="imageInput2" onchange="previewImage(this, 1)" />
-                                                        <img id="imagePreview1" src="../<%= productIn.image[1]%>"
-                                                            style="width: 200px; height: 150px;" />
-                                                        <button type="button" onclick="removeImage(1)">Remove this
-                                                            image</button>
-                                                        <div id="errorImage" style="color: red;"></div>
-                                                    </div>
-
-                                                    <!-- Image 3 -->
-                                                    <div class="form-group">
-                                                        <label class="col-md-4 control-label">Image 3</label>
-                                                        <input type="hidden" name="imageIndex2" value="3" />
-                                                        <input class="input-file" type="file" name="gameImages3"
-                                                            id="imageInput3" value="<%=productIn.image[2]%>"
-                                                            onchange="previewImage(this, 2)" />
-                                                        <img id="imagePreview2" src="../<%= productIn.image[2]%>"
-                                                            style="width: 200px; height: 150px;" />
-                                                        <button type="button" onclick="removeImage(2)">Remove this
-                                                            image</button>
-                                                        <div id="errorImage" style="color: red;"></div>
-                                                    </div>
-
-                                                    <!-- Image 4 -->
-                                                    <div class="form-group">
-                                                        <label class="col-md-4 control-label">Image 4</label>
-                                                        <input type="hidden" name="imageIndex3" value="4" />
-                                                        <input class="input-file" type="file" name="gameImages4"
-                                                            id="imageInput4" value="<%=productIn.image[3]%>"
-                                                            onchange="previewImage(this, 3)" />
-                                                        <img id="imagePreview3" src="../<%= productIn.image[3]%>"
-                                                            style="width: 200px; height: 150px;" />
-                                                        <button type="button" onclick="removeImage(3)">Remove this
-                                                            image</button>
-                                                        <div id="errorImage" style="color: red;"></div>
-                                                    </div>
-
-
-
-                                                    <input type="text" name="productId" id="productId"
-                                                        value="<%=productIn._id%>" placeholder="<%=productIn._id%>">
-
-
-
+                                                    <input type="hidden" id="existingImageData" name="existingImage" value="">
+                                                    <% for (let i = 0; i < productIn.image.length; i++) { %>
+                                                        <div class="form-group">
+                                                            <label class="col-md-4 control-label">Image <%= i + 1 %></label>
+                                                            <input type="hidden" name="imageIndex<%= i %>" value="<%= i + 1 %>" />
+                                                            <input class="input-file" type="file" name="gameImages<%= i + 1 %>" id="imageInput<%= i %>"
+                                                                onchange="previewImage(this, <%= i %>)" />
+                                                            <img id="imagePreview<%= i %>" src="../<%= productIn.image[i] %>"
+                                                                style="width: 200px; height: 150px;" />
+                                                            <button type="button" onclick="removeImage(<%= i %>)">Remove this image</button>
+                                                            <div id="errorImage" style="color: red;"></div>
+                                                        </div>
+                                                    <% } %>
+                                                    <input type="text" name="productId" id="productId" value="<%= productIn._id %>" placeholder="<%= productIn._id %>">
                                                 </div>
+                                                
                                                 <input type="hidden" name="deletedImages" id="deletedImages" value="">
                                                 <button type="submit"
                                                     class="btn_1 full_width text-center">Submit</button>

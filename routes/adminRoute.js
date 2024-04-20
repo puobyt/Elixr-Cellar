@@ -83,6 +83,7 @@ admin_router.get("/unblockUser/:userId", adminController.unblockUser);
 
 admin_router.get("/adminOrdersDash", adminController.adminOrdersDash);
 admin_router.post("/order-management-update/:orderId", adminController.changeOrderStatus);
+admin_router.post('/send-cancel-notification', adminController.sendCancelNotification);
 
 admin_router.get(
   "/adminCouponsDiscounts",
@@ -100,6 +101,7 @@ admin_router.get("/adminOffers", adminController.adminOffers);
 admin_router.get("/addOffers", adminController.addOffersGet);
 admin_router.get("/addOffers", adminController.addOffers);
 admin_router.post("/addOffers", adminController.addOffers);
+admin_router.post("/deleteOffers", adminController.deleteOffers);
 
 admin_router.get("/addUser", adminController.addUser);
 

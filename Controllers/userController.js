@@ -11,6 +11,7 @@ const Coupons = require("../Model/couponModel");
 
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
+const { sortBy } = require("lodash");
 require("dotenv").config();
 const instance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -193,7 +194,7 @@ const sendOTP = (email, otp, req) => {
 
 const registerUser = (req, res) => {
   if (req.session.user) {
-    res.redirect("/home");
+    res.redirect("/login");
   } else {
     res.render("usersignup");
   }
@@ -201,53 +202,64 @@ const registerUser = (req, res) => {
 
 const userSignup = async (req, res) => {
   try {
-    let user1 = {
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-    };
+      // User data from the request body
+      let user1 = {
+          name: req.body.name,
+          email: req.body.email,
+          password: req.body.password,
+      };
 
-    const email = req.body.email;
+      // Retrieve email from request body
+      const email = req.body.email;
 
-    const userCheck = await UserCollection.findOne({ email: email });
+      // Check if a user with the provided email already exists
+      const userCheck = await UserCollection.findOne({ email: email });
 
-    if (userCheck) {
-      res.render("usersignup", {
-        regerstrationMessage: "Email Already exists",
-      });
-    } else {
-      const otp = generateOTP();
-      sendOTP(email, otp, req);
+      if (userCheck) {
+          // If the email already exists, render the usersignup page with an error message
+          res.render("usersignup", {
+              regerstrationMessage: "<span class='error-message'>Email Already exists</span>",
+          });
+      } else {
+          // Generate an OTP
+          const otp = generateOTP();
+          
+          // Display the OTP in the console
+          console.log("Generated OTP:", otp);
 
-      req.session.userData = user1;
-      req.session.otp = otp;
+          // Send the OTP to the user's email
+          sendOTP(email, otp, req);
 
-      res.redirect("/otp");
-    }
+          // Store user data and OTP in the session
+          req.session.userData = user1;
+          req.session.otp = otp;
+
+          // Redirect the user to the OTP verification page
+          res.redirect("/otp");
+      }
   } catch (error) {
-    res.render("usersignup", {
-      regerstrationMessage: "Registration Successful, please verify your email",
-    });
-    console.log(error);
+      // Handle any errors by rendering the usersignup page with an error message
+      res.render("usersignup", {
+          regerstrationMessage: "Registration failed. Please try again.",
+      });
+      console.error(error);
   }
 };
 
 const otp = (req, res) => {
   res.render("otp", { email: req.session.userData.email, errorMessage: "" });
+ 
 };
 
 const userShop = async (req, res) => {
   try {
-    console.log("Try working");
     let sortQuery = {};
     const categories = await Category.find();
 
     const sortBy = req.query.sortBy;
     switch (sortBy) {
       case "whats_new":
-        sortQuery = {
-          createdAt: -1,
-        };
+        sortQuery = { createdAt: -1 };
         break;
       case "price_asc":
         sortQuery = { price: 1 };
@@ -268,13 +280,24 @@ const userShop = async (req, res) => {
         break;
     }
 
-    const products = await Product.find().sort(sortQuery);
-    res.render("userShop", { products, categories });
+    // Pagination logic
+    const page = parseInt(req.query.page) || 1; // Current page number, default is 1
+    const limit = 9; // Number of items per page
+    const skip = (page - 1) * limit; // Number of items to skip
+
+    const count = await Product.countDocuments(); // Total number of products
+    const totalPages = Math.ceil(count / limit); // Total number of pages
+
+    const products = await Product.find().sort(sortQuery).skip(skip).limit(limit);
+
+    res.render("userShop", { products, categories, currentPage: page, totalPages, sortBy });
+    
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
   }
 };
+
 
 const categoryFilter = async (req, res) => {
   try {
@@ -284,10 +307,18 @@ const categoryFilter = async (req, res) => {
     console.log(categories.products);
 
     let categoryQuery = {};
+    const page = parseInt(req.query.page) || 1; // Current page number, default is 1
+    const limit = 9; // Number of items per page
+   
+
+    const count = await Product.countDocuments(); // Total number of products
+    const totalPages = Math.ceil(count / limit); // Total number of pages
+
+   
 
     res.render("userShop", {
       products: categories.products,
-      categories: categories.products,
+      categories: categories.products,currentPage:page,totalPages,sortBy
     });
   } catch (error) {
     console.error(error);
@@ -318,7 +349,14 @@ const searchProduct = async (req, res) => {
     }
 
     const categories = await Category.find();
-    res.render("userShop", { products, categories });
+    const page = parseInt(req.query.page) || 1; // Current page number, default is 1
+    const limit = 9; // Number of items per page
+   
+
+    const count = await Product.countDocuments(); // Total number of products
+    const totalPages = Math.ceil(count / limit); // Total number of pages
+   
+    res.render("userShop", { products, categories ,currentPage:page,totalPages,sortBy});
   } catch (error) {
     console.log(error);
   }
@@ -364,6 +402,7 @@ const userWallet = async (req, res) => {
 
     res.render("userWallet", {
       userWallet: { transactionHistory },
+      userWalletData,
       currentPage: page,
       totalPages: Math.ceil(totalTransactions / limit),
     });
@@ -501,19 +540,8 @@ const userCheckout = async (req, res) => {
   );
   console.log("Total ", totalPrice);
   req.session.updatedTotalPrice = totalPrice;
-  console.log("req.session.updatedTotalPrice",req.session.updatedTotalPrice);
-  // const totalPrice = calculateTotalPrice(items);
-  // console.log("totalPrice", totalPrice);
-
-  // const couponDiscountPercent= coupons.map(coupon => coupon.discountValue);
-  // console.log("disVal",couponDiscountPercent);
-  // const avgDiscountPercent= couponDiscountPercent.reduce((total,discount) => total + discount ,0)/couponDiscountPercent.length;
-  // console.log("average discount percent:", avgDiscountPercent);
-  // const couponDiscount= avgDiscountPercent/100;
-  // console.log("cDpercent", couponDiscount);
-  // const updatedTotalPrice= totalPrice*(1-couponDiscount);
-  // console.log("updatehere",updatedTotalPrice)
-
+  console.log("req.session.updatedTotalPrice", req.session.updatedTotalPrice);
+ 
   let availableCoupons = [];
   let isCouponAvailable = false;
 
@@ -605,11 +633,13 @@ const validateCoupon = async (req, res) => {
         const checkoutTotal = totalAmount - discountValue;
         console.log("checkoutTotal", checkoutTotal);
         const discountedTotal = 0;
-console.log("req.session before",req.session)
+        console.log("req.session before", req.session);
         req.session.updatedTotalPrice = checkoutTotal;
+        req.session.coupon = coupon._id
         req.session.save();
-        console.log("req.session after",req.session)
+        console.log("req.session after", req.session);
         console.log("coupon", req.session.updatedTotalPrice);
+        
         res.status(200).json({
           isValid: true,
           message: "Coupon is valid. Discount applied successfully",
@@ -617,7 +647,9 @@ console.log("req.session before",req.session)
           discountValue,
         });
 
-        const parsedCheckoutTotalInput = parseFloat(req.session.updatedTotalPrice).toFixed(2);
+        const parsedCheckoutTotalInput = parseFloat(
+          req.session.updatedTotalPrice
+        ).toFixed(2);
         console.log(parsedCheckoutTotalInput);
         console.log(discountedTotal);
 
@@ -648,6 +680,7 @@ console.log("req.session before",req.session)
 const cancelCoupon = async (req, res) => {
   const { totalAmount } = req.body;
   req.session.updatedTotalPrice = totalAmount;
+  delete req.session.coupon
   res.status(200).json({
     success: true,
   });
@@ -671,7 +704,7 @@ const handleCheckOut = async (req, res) => {
       }
 
       userWallet.balance -= updatedTotalPrice;
-console.log("walleatt",req.session.updatedTotalPrice);
+      console.log("walleatt", req.session.updatedTotalPrice);
       userWallet.transactionHistory.push({
         transaction: "Money Deducted",
         amount: updatedTotalPrice,
@@ -698,11 +731,17 @@ console.log("walleatt",req.session.updatedTotalPrice);
         totalAmount: updatedTotalPrice,
         OrderStatus: "Order Placed",
         paymentMethod: paymentMethod,
+        couponApplied:req.session.coupon||"",
         orderId: generateOrderId(),
       });
 
-      await newOrder.save();
-
+      if(req.session.coupon){
+        newOrder.couponApplied=req.session.coupon
+        await newOrder.save()
+        delete req.session.coupon
+      }else{
+        await newOrder.save();
+      }
       for (const item of items) {
         if (item.productId.totalQuantity > 0) {
           item.productId.totalQuantity -= item.quantity;
@@ -730,10 +769,16 @@ console.log("walleatt",req.session.updatedTotalPrice);
         totalAmount: updatedTotalPrice,
         OrderStatus: "Order Placed",
         paymentMethod: paymentMethod,
+        
         orderId: generateOrderId(),
       });
-
-      await newOrder.save();
+      if(req.session.coupon){
+        newOrder.couponApplied=req.session.coupon
+        await newOrder.save()
+        delete req.session.coupon
+      }else{
+        await newOrder.save();
+      }
 
       for (const item of items) {
         if (item.productId.totalQuantity > 0) {
@@ -753,7 +798,7 @@ console.log("walleatt",req.session.updatedTotalPrice);
 
 const createOrder = async (req, res) => {
   const userId = req.session.userId;
-  
+
   let {
     paymentOption,
     // updatedTotalPrice,
@@ -862,10 +907,16 @@ const verifyPayment = async (req, res) => {
         totalAmount: req.body.order.order.amount / 100,
         OrderStatus: "Order Placed",
         paymentMethod: paymentOption,
+        
         orderId: generateOrderId(),
       });
-      console.log("new order", newOrder);
-      await newOrder.save();
+      if(req.session.coupon){
+        newOrder.couponApplied=req.session.coupon
+        await newOrder.save()
+        delete req.session.coupon
+      }else{
+        await newOrder.save();
+      }
       console.log("verify end");
       return res.json({ status: true });
     }
@@ -886,10 +937,26 @@ const userOrderPlaced = async (req, res) => {
       const userCart = await Cart.findOne({ userId }).populate("items.productId");
       const items = userCart.items;
 
+      // Increment the popularity of each product in the items
+      for (const item of items) {
+        const productId = item.productId;
+        // Find the product by its ID
+        const product = await Product.findById(productId);
+        if (product) {
+          // Increment the popularity field
+          product.popularity += 1;
+          // Save the updated product back to the database
+          await product.save();
+        }
+      }
+
       const totalOrders = await orders.countDocuments({ customer: userId });
       const userOrders = await orders
         .find({ customer: userId })
-        .populate("items.product")
+        .populate([
+          { path: "items.product" },
+          { path: "couponApplied" } // Populate coupon details
+        ])
         .sort({ orderDate: -1 })
         .skip(skip)
         .limit(limit);
@@ -909,14 +976,16 @@ const userOrderPlaced = async (req, res) => {
   }
 };
 
-
 const orderDetails = async (req, res) => {
   try {
     const userId = req.session.userId;
     const orderId = req.params.orderId;
     const userOrders = await orders
       .findOne({ orderId })
-      .populate("items.product");
+      .populate("items.product")
+      .populate("couponApplied") // Populate coupon details
+  console.log(userOrders);
+
     const userCart = await Cart.findOne({ userId }).populate("items.productId");
     const items = userCart ? userCart.items : [];
 
@@ -930,6 +999,10 @@ const orderDetails = async (req, res) => {
     const deliveryAddress = `${firstOrder.address.houseName}, ${firstOrder.address.street}, ${firstOrder.address.city}, ${firstOrder.address.state}, ${firstOrder.address.pincode}`;
     const paymentMethod = firstOrder.paymentMethod;
     const totalAmount = userOrders.totalAmount;
+   
+
+    // Extract coupon details
+    const couponApplied = userOrders.couponApplied;
 
     res.render("userOrderDetails", {
       items,
@@ -939,6 +1012,7 @@ const orderDetails = async (req, res) => {
       deliveryAddress,
       totalAmount,
       paymentMethod,
+      couponApplied, // Pass coupon details to the view
     });
   } catch (error) {
     console.log(error);
@@ -1044,7 +1118,7 @@ const addToCart = async (req, res) => {
 
     await userCart.save();
 
-    return res.redirect("/userShop");
+    return res.redirect("/userCart");
   } catch (error) {
     console.error("Error adding product to cart:", error);
     return res.status(500).json({ error: "Internal Server Error" });
@@ -1205,7 +1279,7 @@ const addAddress = async (req, res) => {
       {
         $push: {
           address: {
-            mobile: mobile,
+            mobile: mobileNumber,
             houseName: houseName,
             street: street,
             city: city,
@@ -1398,7 +1472,7 @@ const otpVerification = async (req, res) => {
 
     req.session.userData = null;
     req.session.otp = null;
-    req.session.user = true / res.redirect("/home");
+    req.session.user = true / res.redirect("/login");
   } else {
     res.render("otp", {
       email: req.session.userData.email,

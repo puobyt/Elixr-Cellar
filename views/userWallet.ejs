@@ -14,10 +14,8 @@
                                 <center>
                                     <p style="font-size: 30px;">WALLET BALANCE</p>
                                 </center>
-                                <center>
-                                    <p style="font-size: 20px;"><%=userWallet?userWallet.balance:0%>
-                                    </p>
-                                </center>
+                                <center><p style="font-size: 20px;">₹<%=userWalletData.balance%></p></center>
+                                
 
                                 <div class="payment border-top mt-3 mb-3 border-bottom table-responsive">
 
@@ -40,7 +38,7 @@
 
                                     <% if (userWallet.transactionHistory.length> 0) { %>
 
-                                        <% userWallet.transactionHistory.forEach(data=>{%>
+                                        <% userWallet.transactionHistory.slice().reverse().forEach(data=>{%>
 
 
                                             <tbody class="table-body">

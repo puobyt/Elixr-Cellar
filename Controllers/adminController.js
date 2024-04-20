@@ -297,7 +297,7 @@ const adminInventory = async (req, res) => {
   try {
     if (req.session.admin) {
       const page = parseInt(req.query.page) || 1; // Get page number from query parameter, default to 1 if not provided
-      const limit = 10; // Number of products per page
+      const limit = 8; // Number of products per page
       const skip = (page - 1) * limit;
 
       const totalProducts = await products.countDocuments();
@@ -525,7 +525,7 @@ const addProduct = async (req, res) => {
         req.body;
       console.log("req.files", req.files);
       const files = req.files;
-
+      const prodId= req.body.productId
       const imagePaths = files.map((file) => "productImg/" + file.filename);
       console.log("image path", imagePaths);
     
@@ -615,19 +615,7 @@ const unblockUser = async (req, res) => {
   }
 };
 
-// admin Orders Dashboard
-// const adminOrdersDash = async (req, res) => {
-//     if (req.session.admin)
-//     try {
-//         const userId = req.session.userId;
-//         const userOrders = await orders.find().populate('items.product').sort({ orderDate: -1 });
 
-//         res.render('adminOrdersDash', { userOrders, userId })
-
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
 
 const adminOrdersDash = async (req, res) => {
     try {
@@ -645,6 +633,30 @@ const adminOrdersDash = async (req, res) => {
     }
 };
 
+sendCancelNotification = async (req, res) => {
+  try {
+   
+    const { orderId, userId } = req.body;
+
+
+    const order = await orders.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    
+    const notificationMessage = `Order ${orderId} has been cancelled by user ${userId}`;
+
+   
+    console.log('Cancel notification sent to admin:', notificationMessage);
+
+   
+    res.status(200).json({ message: 'Cancel notification sent to admin' });
+  } catch (error) {
+    console.error('Error sending cancel notification:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 
 // Route to handle changing order status
 
@@ -900,7 +912,7 @@ const addOffers = async (req, res) => {
 
     await categories.findOneAndUpdate(
       { category: productCat },
-      { $push: { products: savedProd._id } },
+      { $push: { products: newOffer._id } },
       { new: true }
     );
 
@@ -919,6 +931,18 @@ const addOffers = async (req, res) => {
 };
 
 
+const deleteOffers = async (req, res) => {
+  try {
+    const offerId = req.body.offerId;
+    console.log("code",offerId);
+    await offer.findByIdAndDelete(offerId);
+    console.log("Deleted")
+    res.redirect("/adminOffers"); 
+  } catch (error) {
+    console.log("Error", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
 
 
 
@@ -1000,7 +1024,7 @@ const generateExcelReport = async (req, res) => {
         const dataForExcel = salesData.map(entry => ({
             'Order ID': entry.orderId,
             'Customer': entry.customer.name,
-            'Products': entry.items.map(item => item.product?item.product.productName:"").join(', '), // assuming productName is a property of each item
+            'Products': entry.items.map(item => item.product?item.product.productName:"").join(', '), 
             'Total Amount': entry.totalAmount,
             'Order Date': entry.orderDate.toLocaleDateString()
         }));
@@ -1166,6 +1190,8 @@ module.exports = {
   adminOffers,
   addOffersGet,
   addOffers,
+  deleteOffers,
   generateExcelReport,
   generatePdfReport,
+  sendCancelNotification,
 };

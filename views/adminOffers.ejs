@@ -162,6 +162,7 @@
                                         <thead>
                                             <tr>
                                                 <th class="border-top-0">Offer Code</th>
+                                                <th class="border-top-0">Category Applied</th>
                                                 <th class="border-top-0">Offer/Discount %</th>
                                                 <th class="border-top-0">Expiry Date</th>
                                                 <th class="border-top-0">Status</th>
@@ -173,6 +174,9 @@
                                             <tr>
                                                 <td>
                                                     <%= offers.code %>
+                                                </td>
+                                                <td>
+                                                    <%= offers.productCategory %>
                                                 </td>
                                                 <td>
                                                     <%= offers.discountValue %>
