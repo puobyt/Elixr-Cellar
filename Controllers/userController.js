@@ -402,16 +402,16 @@ const userWallet = async (req, res) => {
     const limit = 10; // Number of transactions per page
     const skip = (page - 1) * limit;
 
-    const userWalletData = await wallet
-      .findOne({ userId })
-      .populate("transactionHistory");
-    const transactionHistory = userWalletData.transactionHistory.slice(
-      (page - 1) * limit,
-      page * limit
-    );
+    // Retrieve the user's wallet data and populate the transaction history
+    const userWalletData = await wallet.findOne({ userId }).populate("transactionHistory");
+    
+    // Initialize transactionHistory to an empty array if userWalletData is null
+    const transactionHistory = userWalletData ? userWalletData.transactionHistory.slice(skip, page * limit) : [];
 
-    const totalTransactions = userWalletData.transactionHistory.length;
+    // Calculate the total number of transactions
+    const totalTransactions = userWalletData ? userWalletData.transactionHistory.length : 0;
 
+    // Render the 'userWallet' view and pass the necessary data
     res.render("userWallet", {
       userWallet: { transactionHistory },
       userWalletData,
@@ -420,8 +420,11 @@ const userWallet = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    // Handle any errors and respond appropriately
+    res.status(500).send("An error occurred while processing your request.");
   }
 };
+
 
 const processPayment = async (req, res) => {
   try {
@@ -946,10 +949,11 @@ const userOrderPlaced = async (req, res) => {
       const limit = 10; // Number of orders per page
       const skip = (page - 1) * limit;
 
-      const userCart = await Cart.findOne({ userId }).populate(
-        "items.productId"
-      );
-      const items = userCart.items;
+      // Retrieve the user's cart and populate the items with product information
+      const userCart = await Cart.findOne({ userId }).populate("items.productId");
+      
+      // Initialize items to an empty array as a fallback in case userCart is null
+      const items = userCart ? userCart.items : [];
 
       // Increment the popularity of each product in the items
       for (const item of items) {
@@ -964,6 +968,7 @@ const userOrderPlaced = async (req, res) => {
         }
       }
 
+      // Retrieve the total number of orders and user orders for the current page
       const totalOrders = await orders.countDocuments({ customer: userId });
       const userOrders = await orders
         .find({ customer: userId })
@@ -975,18 +980,26 @@ const userOrderPlaced = async (req, res) => {
         .skip(skip)
         .limit(limit);
 
+      // Determine if there are no orders yet
+      const noOrdersYet = userOrders.length === 0;
+
+      // Render the 'userOrderPlaced' view and pass the necessary data
       res.render("userOrderPlaced", {
         items,
         userOrders,
         userId,
         currentPage: page,
         totalPages: Math.ceil(totalOrders / limit),
+        noOrdersYet, // Pass the flag to the template
       });
     } else {
+      // Redirect to the home page if the user is not logged in
       res.redirect("/");
     }
   } catch (error) {
     console.log(error);
+    // Handle any errors and respond appropriately
+    res.status(500).send("An error occurred while processing your request.");
   }
 };
 

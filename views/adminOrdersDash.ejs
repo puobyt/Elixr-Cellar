@@ -257,6 +257,30 @@
                                                 </tr>
                                                 <% }) %>
                                         </tbody>
+                                        <div class="pagination justify-content-center">
+                                            <nav aria-label="Page navigation">
+                                                <ul class="pagination">
+                                                    <% if (currentPage > 1) { %>
+                                                        <li class="page-item">
+                                                            <a class="page-link" href="?page=<%= currentPage - 1 %>">Previous</a>
+                                                        </li>
+                                                    <% } %>
+                                                    
+                                                    <% for (let i = 1; i <= totalPages; i++) { %>
+                                                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                                                        </li>
+                                                    <% } %>
+                                                    
+                                                    <% if (currentPage < totalPages) { %>
+                                                        <li class="page-item">
+                                                            <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+                                                        </li>
+                                                    <% } %>
+                                                </ul>
+                                            </nav>
+                                            
+                                        </div>
                                     </table>
                                 </div>
                             </div>

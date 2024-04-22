@@ -320,22 +320,35 @@ const adminInventory = async (req, res) => {
 
 const listUnlistCategory = async (req, res) => {
   try {
-    const cateId = req.params.cateId;
-    const category = await categories.findById(cateId);
+      // Retrieve the category ID from the request parameters
+      const cateId = req.params.cateId;
 
-    if (!category) {
-      return res.status(404).send("Category not found");
-    }
+      // Fetch the category from the database using the ID
+      const category = await categories.findById(cateId);
 
-    category.isListed = !category.isListed;
-    await category.save();
+      // Check if the category was found
+      if (!category) {
+          // Return a 404 status code if the category is not found
+          return res.status(404).send("Category not found");
+      }
 
-    res.redirect("/adminCategory");
+      // Toggle the isListed property (list/unlist)
+      category.isListed = !category.isListed;
+
+      // Save the updated category to the database
+      await category.save();
+
+      // Redirect to the adminCategory page after updating
+      res.redirect("/adminCategory");
   } catch (error) {
-    console.error("Error", error);
-    res.status(500).send("Internal server Error");
+      // Log the error to the console
+      console.error("Error:", error);
+
+      // Send a 500 status code for internal server error
+      res.status(500).send("Internal Server Error");
   }
 };
+
 
 const listUnlistProduct = async (req, res) => {
   try {
@@ -369,6 +382,7 @@ const adminProductDetails = async (req, res) => {
       res.status(500).send("Internal server Error");
     }
 };
+
 // Update Product
 const adminEditProduct = async (req, res) => {
   if (req.session.admin)
@@ -566,15 +580,24 @@ const addProduct = async (req, res) => {
     }
 };
 
-// Customer Dashboard
 const customerDashBoard = async (req, res) => {
-  if (req.session.admin)
-    try {
-      let User = await users.find();
-      res.render("adminCustomerDash", { User });
-    } catch (error) {
-      console.log(error);
-    }
+  if (req.session.admin) {
+      try {
+          const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1
+          const limit = 8; // Items per page
+          const skip = (page - 1) * limit; // Number of items to skip
+          const count = await users.countDocuments(); // Total number of documents
+          const totalPages = Math.ceil(count / limit); // Total number of pages
+
+          // Query the database with pagination
+          let User = await users.find().skip(skip).limit(limit);
+
+          // Render the view with pagination data
+          res.render("adminCustomerDash", { User, currentPage: page, totalPages });
+      } catch (error) {
+          console.log(error);
+      }
+  }
 };
 
 const blockUser = async (req, res) => {
@@ -618,20 +641,37 @@ const unblockUser = async (req, res) => {
 
 
 const adminOrdersDash = async (req, res) => {
-    try {
-        if (!req.session.admin) {
-            return res.redirect('/login'); // Redirect to login page if not logged in as admin
-        }
+  try {
+      if (!req.session.admin) {
+          return res.redirect('/login'); // Redirect to login page if not logged in as admin
+      }
+      
+      const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1
+      const limit = 8; // Items per page
+      const skip = (page - 1) * limit; // Number of items to skip
+      const count = await orders.countDocuments(); // Total number of orders
+      const totalPages = Math.ceil(count / limit); // Total number of pages
+      
+      // Query the database for the current page orders
+      const userOrders = await orders
+          .find()
+          .skip(skip)
+          .limit(limit)
+          .populate('items.product')
+          .sort({ orderDate: -1 });
 
-        const userId = req.session.userId;
-        const userOrders = await orders.find().populate('items.product').sort({ orderDate: -1 });
-        
-        res.render('adminOrdersDash', { userOrders, userId });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send("Internal Server Error");
-    }
+      // Render the view with pagination data
+      res.render('adminOrdersDash', {
+          userOrders,
+          currentPage: page,
+          totalPages
+      });
+  } catch (error) {
+      console.log(error);
+      res.status(500).send("Internal Server Error");
+  }
 };
+
 
 sendCancelNotification = async (req, res) => {
   try {

@@ -14,7 +14,12 @@
                                 <center>
                                     <p style="font-size: 30px;">WALLET BALANCE</p>
                                 </center>
-                                <center><p style="font-size: 20px;">₹<%=userWalletData.balance%></p></center>
+                                <% if (userWalletData && userWalletData.balance !== undefined) { %>
+                                    <center><p style="font-size: 20px;">₹<%= userWalletData.balance %></p></center>
+                                <% } else { %>
+                                    <center><p style="font-size: 20px;">₹0</p></center> <!-- Fallback value or message -->
+                                <% } %>
+                                
                                 
 
                                 <div class="payment border-top mt-3 mb-3 border-bottom table-responsive">
