@@ -47,7 +47,7 @@
                                         <% userOrders.items.forEach(Product => { %>
                                             <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
                                                 <div class="card mr-3 border-0" style="width: 100%;">
-                                                    <img width="150px" height="150px" src="<%=Product.product ? Product.product.image[0] : '' %>" alt="">
+                                                    <img width="150px" height="150px" src="../<%=Product.product ? Product.product.image[0] : '' %>" alt="">
                                                     <p>
                                                         <span class="product-name">
                                                             <%=Product.product.productName%>

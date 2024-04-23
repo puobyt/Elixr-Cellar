@@ -160,39 +160,64 @@
                                             <h5 class="modal-title text_white">Add Offers</h5>
                                         </div>
                                         <div class="modal-body">
-                                            <form id="addCouponForm" action="/addOffers" method="post">
-                                                <div class="form-group">
-                                                    <input type="text" name="code" class="form-control"
-                                                        placeholder="Enter your Offer Code" required>
+                                            <form action="/addOffers" method="post" onsubmit="return validate()" id="add-offer">
+                                                <div class="container">
+                                                    <div class="custom-form">
+                                                        <h2 class="mb-4">Offer Management</h2>
+        
+                                                        <div class="bg-danger" id="error-message-container">
+                                                            <%=message%>
+                                                        </div>
+                                                        
+                                                        <div class="form-group">
+                                                            <label for="offerName">Offer Name:</label>
+                                                            <input type="text" name="offerName" id="offerName" class="form-control">
+                                                        </div>
+                                                        
+                                                        <div class="form-group">
+                                                            <label for="discountOn">Discount On:</label>
+                                                            <select id="discountOn" name="discountOn" class="form-control">
+                                                                <option value="category">Category</option>
+                                                                <option value="product">Product</option>
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div class="form-group">
+                                                            <label for="discountValue">Discount Value (in %):</label>
+                                                            <input type="number" name="discountValue" id="discountValue" class="form-control">
+                                                        </div>
+                                                        
+                                                        <div class="form-group">
+                                                            <label for="startDate">Start Date:</label>
+                                                            <input type="date" name="startDate" id="startDate" class="form-control">
+                                                        </div>
+                                                        
+                                                        <div class="form-group">
+                                                            <label for="endDate">End Date:</label>
+                                                            <input type="date" name="endDate" id="endDate" class="form-control">
+                                                        </div>
+                                                        
+                                                        <div class="form-group" id="categorySelector">
+                                                            <label for="selectedCategory">Category Select:</label>
+                                                            <select id="selectedCategory" name="selectedCategory" class="form-control">
+                                                                <%categories.forEach(category => {%>
+                                                                <option value="<%= category._id %>"><%= category.category %></option>
+                                                                <%})%>
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div class="form-group" style="display: none;" id="productSelector">
+                                                            <label for="selectedProducts">Product Select:</label>
+                                                            <select id="selectedProducts" name="selectedProducts" class="form-control">
+                                                                <%products.forEach(product => {%>
+                                                                <option value="<%= product._id %>"><%= product.productName %></option>
+                                                                <%})%>
+                                                            </select>
+                                                        </div>
+        
+                                                        <button type="submit" class="btn btn-primary">Add</button>
+                                                    </div>
                                                 </div>
-                                                <div class="form-group">
-                                                    <input type="number" name="discountValue" class="form-control"
-                                                        placeholder="Enter your Offer Discount" min="0" max="70" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <select class="form-control" name="productCat" id="productCat">
-                                                        <option value="" disabled selected>Select your Category</option>
-                                                        <%category.forEach(Category=>{%>
-                                                            <option value="<%=Category.category%>">
-                                                                <%=Category.category%>
-                                                            </option>
-                                                            <%})%>
-
-
-
-                                                    </select>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="expiryDate" class="text">Enter Offer Expiry
-                                                        Date</label>
-                                                    <input type="date" name="expiry" class="form-control"
-                                                        placeholder="Enter the Expiry" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <input type="number" name="minimumCartAmount" class="form-control"
-                                                        placeholder="Enter the Minimum cart amount" min="1000" required>
-                                                </div>
-                                                <button type="submit" class="btn_1 full_width text-center">Submit</button>
                                             </form>
                                         </div>
                                     </div>
@@ -203,6 +228,7 @@
                 </div>
             </div>
         </div>
+        
 
         <div class="footer_part">
             <div class="container">
@@ -352,6 +378,129 @@
             }, false);
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var form = document.getElementById('add-offer');
+            var discountOnSelect = document.getElementById('discountOn');
+             var categorySelector = document.getElementById('categorySelector');
+             var productSelector = document.getElementById('productSelector');
+     
+     
+             discountOnSelect.addEventListener('change', function() {
+                 // Check the selected value
+                 var selectedValue = discountOnSelect.value;
+     
+                 // Show/hide the categorySelector and productSelector based on the selected value
+                 if (selectedValue === 'category') {
+                     categorySelector.style.display = 'block';
+                     productSelector.style.display = 'none';
+                     productSelector.value =""
+                 } else if (selectedValue === 'product') {
+                     categorySelector.style.display = 'none';
+                     categorySelector.value=""
+                     productSelector.style.display = 'block';
+                 } else {
+                     // Hide both if neither category nor product is selected
+                     productSelector.style.display = 'none';
+                 }
+             });
+     
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+     
+                    // Validate the form
+                    if (validate()) {
+                        // SweetAlert for successful validation
+                        // Swal.fire({
+                        //     icon: 'success',
+                        //     title: 'Offer Inserted',
+                        //     text: 'New Offer has been successfully inserted.',
+                        // }).then((result) => {
+                        //     if (result.isConfirmed) {
+                        //         form.submit();
+                        //     }
+                        // });
+                        form.submit();
+                    }
+                });
+            }
+        });
+     
+        function validate() {
+         let offerName = document.getElementById("offerName");
+         let discountValue = document.getElementById("discountValue");
+     
+         const errorMessageContainer = document.getElementById("error-message-container");
+     
+         var startDateInput = document.getElementById('startDate');
+         var endDateInput = document.getElementById('endDate');
+     
+         // Get the current date
+         var currentDate = new Date();
+     
+         // Get the selected dates
+         var startDate = new Date(startDateInput.value);
+         var endDate = new Date(endDateInput.value);
+     
+         let trimmedDiscountValue = discountValue.value.trim();
+         let trimmedOfferName = offerName.value.trim()
+         let expression = /^[0-9]+$/;
+         let alphabets = /^[a-zA-Z\s]+$/;
+     
+         errorMessageContainer.innerText = "";
+     
+         if (trimmedDiscountValue === "" && trimmedOfferName === "") {
+             errorMessageContainer.innerText = "Please fill all the fields";
+             return false;
+         }
+     
+         if (trimmedOfferName === "") {
+             errorMessageContainer.innerText = "Please fill the offerName field";
+             return false;
+         }
+     
+         if (!alphabets.test(trimmedOfferName)) {
+             errorMessageContainer.innerText = "Offer name should contain alphabets only";
+             return false;
+         }
+     
+         if (!expression.test(trimmedDiscountValue)) {
+             errorMessageContainer.innerText = "Type positive numbers only";
+             return false;
+         }
+     
+         if (parseInt(trimmedDiscountValue, 10) >= 100) {
+             errorMessageContainer.textContent = "Enter a value less than 100%";
+             return false;
+         }
+     
+         if (parseInt(trimmedDiscountValue, 10) <= 0) {
+             errorMessageContainer.textContent = "Enter a value greater than 0%";
+             return false;
+         }
+     
+         // Check if minimumCartAmount is defined (assuming it's part of your form)
+         let minimumCartAmount = document.getElementById("minimumCartAmount");
+         if (minimumCartAmount && minimumCartAmount.value <= 0) {
+             errorMessageContainer.textContent = "Enter a value greater than 0";
+             return false;
+         }
+     
+         if (endDate <= currentDate) {
+             errorMessageContainer.textContent = 'End Date must be in the future.';
+             return false;
+         }
+     
+         // Check if End Date is after Start Date
+         if (endDate <= startDate) {
+             errorMessageContainer.textContent = 'End Date must be after Start Date.';
+             return false;
+         }
+     
+         return true;
+     }
+     </script>
 
     <script src="js/jquery1-3.4.1.min.js"></script>
 

@@ -173,24 +173,25 @@
                                             <% offer.forEach(offers => { %>
                                             <tr>
                                                 <td>
-                                                    <%= offers.code %>
+                                                    <%= offers.offerName %>
                                                 </td>
                                                 <td>
-                                                    <%= offers.productCategory %>
+                                                    <%= offers.discountOn %>
                                                 </td>
                                                 <td>
                                                     <%= offers.discountValue %>
                                                 </td>
                                                 <td>
-                                                    <%= offers.expiry.toLocaleDateString() %>
+                                                    <%= offers.
+                                                    endDate.toDateString()%>
                                                 </td>
                                                 <td>
-                                                    <%= offers.status %>
+                                                    <%= offers.isActive %>
                                                 </td>
                                                 <td>
                                                     <!-- Delete button for each coupon -->
                                                     <form action="/deleteOffers" method="POST">
-                                                        <input type="hidden" name="couponId" value="<%= offer.id %>">
+                                                        <input type="hidden" name="offerId" value="<%= offer.id %>">
                                                         <button type="submit" class="btn btn-danger">Delete</button>
                                                     </form>
                                                 </td>

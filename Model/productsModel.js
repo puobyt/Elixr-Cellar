@@ -15,7 +15,12 @@ const productSchema = new mongoose.Schema({
     },
     description: String,
     ManufactureDate: Date,
-    price: Number,
+    originalPrice:Number,
+    price:Number,
+    discount: {
+        type: Number,
+        default: 0
+      },    
     image: [{
         type: String,
     }],

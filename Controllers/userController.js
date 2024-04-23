@@ -9,6 +9,7 @@ const Category = require("../Model/categoryModel");
 const mongoose = require("mongoose");
 const Coupons = require("../Model/couponModel");
 
+
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const { sortBy } = require("lodash");
@@ -1507,6 +1508,71 @@ const otpVerification = async (req, res) => {
   }
 };
 
+
+
+
+const checkAndExpireOffers = async () => {
+  try {
+      console.log("in checking expirty")
+      const expiredOffers = await offerSchema.find({
+          isActive: true,
+          endDate: { $lte: new Date() },
+      });
+      console.log('expiredOffers',expiredOffers)
+
+      for (const offer of expiredOffers) {
+          offer.isActive = false;
+          await offer.save();
+
+          if (offer.discountOn === 'category' && offer.selectedCategory) {
+              const categoryId = offer.selectedCategory;
+              const productsInCategory = await productSchema.find({ productCategory: categoryId });
+              console.log("productsInCategory",productsInCategory)
+
+              for (const product of productsInCategory) {
+                  product.price = product.originalPrice;
+                  product.originalPrice = 0;
+                  product.discount = 0;
+                  await product.save();
+              }
+          } else if (offer.discountOn === 'product' && offer.selectedProducts) {
+              const productId = offer.selectedProducts;
+              const product = await productSchema.findOne({ _id: productId });
+
+              product.price = product.originalPrice;
+              product.originalPrice = 0;
+              product.discount = 0;
+              await product.save();
+          }
+      }
+  } catch (error) {
+      console.error('Error checking and expiring offers:', error);
+  }
+};
+
+const showOffers = async (req,res)=>{
+  const allOffers = await offerSchema.find().populate('selectedCategory').populate('selectedProducts')
+  let updateMessage = req.query.successMessage || ""
+  try {
+      await offerManagementController.checkAndExpireOffers();
+      res.render('Admin/offerManagement',{allOffers,message:"",updateMessage})
+  } catch (error) {
+      console.error("Error during coupon showing:", error);
+  res.status(500).send('Internal Server Error');
+}
+  
+}
+
+
+
+
+
+
+
+
+
+
+
 const userLogout = (req, res) => {
   req.session.user = false;
   console.log(" user session ends");
@@ -1565,4 +1631,5 @@ module.exports = {
   changingPassword,
   validateCoupon,
   cancelCoupon,
+  checkAndExpireOffers
 };

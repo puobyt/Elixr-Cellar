@@ -210,8 +210,16 @@
                                                             <div id="errorImage" style="color: red;"></div>
                                                         </div>
                                                     <% } %>
+                                                
+                                                    <!-- Section for adding new images -->
+                                                    <div id="newImagesSection">
+                                                        <label class="col-md-4 control-label">Add New Images:</label>
+                                                        <button type="button" id="addNewImageBtn" onclick="addNewImageField()">Add New Image</button>
+                                                    </div>
+                                                
                                                     <input type="text" name="productId" id="productId" value="<%= productIn._id %>" placeholder="<%= productIn._id %>">
                                                 </div>
+                                                
                                                 
                                                 <input type="hidden" name="deletedImages" id="deletedImages" value="">
                                                 <button type="submit"
@@ -374,6 +382,35 @@
             <i class="ti-angle-up"></i>
         </a>
     </div>
+
+    <script>
+        let newImageIndex = <%= productIn.image.length %>;
+    
+        function addNewImageField() {
+            // Create a new div for the new image input
+            const newImageDiv = document.createElement('div');
+            newImageDiv.classList.add('form-group');
+            
+            // Create label for the new image input
+            const newImageLabel = document.createElement('label');
+            newImageLabel.classList.add('col-md-4', 'control-label');
+            newImageLabel.innerText = `New Image ${newImageIndex + 1}`;
+            newImageDiv.appendChild(newImageLabel);
+            
+            // Create file input for the new image
+            const newImageInput = document.createElement('input');
+            newImageInput.type = 'file';
+            newImageInput.classList.add('input-file');
+            newImageInput.name = `newGameImage${newImageIndex + 1}`;
+            newImageDiv.appendChild(newImageInput);
+            
+            // Append the new image div to the newImagesSection
+            document.getElementById('newImagesSection').appendChild(newImageDiv);
+            
+            // Increment the newImageIndex
+            newImageIndex++;
+        }
+    </script>
 
     <script>
         // Get the input element

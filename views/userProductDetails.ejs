@@ -15,12 +15,47 @@
 }
 
 </style>
+
+<style>
+  /* Styling for the secondary images container */
+  .secondary-images {
+    display: flex; /* Use flexbox layout */
+    justify-content: center; /* Center the images */
+    align-items: center; /* Align images vertically */
+    gap: 10px; /* Space between images */
+    margin-top: 20px; /* Space between primary and secondary images */
+  }
+
+  /* Styling for the individual secondary images */
+  .secondary-image {
+    width: 100px; /* Width of each image */
+    height: 100px; /* Height of each image */
+    border-radius: 5px; /* Optional: rounded corners */
+    object-fit: cover; /* Ensure images fit within their containers */
+    cursor: pointer; /* Optional: pointer cursor for hover */
+    transition: transform 0.2s ease; /* Optional: transition effect on hover */
+  }
+
+  /* Hover effect on secondary images */
+  .secondary-image:hover {
+    transform: scale(1.05); /* Slightly enlarge the image on hover */
+  }
+</style>
+
+
   <div class="main_content_iner overly_inner ">
     <div class="container-fluid p-0 mt-5">
       <div class="row mt-4">
         <div class="col-lg-6 align-self-center text-center">
           <img id="zoomImage" src="../<%=product.image[0]%>" alt class="mx-auto d-block sm_w_100" height="300" />
+          <div class="secondary-images">
+            <% product.image.slice(1).forEach(function(img) { %>
+              <img src="../<%= img %>" alt="Product secondary image" class="secondary-image">
+            <% }); %>
+          </div>
+          
         </div>
+      
         <div class="col-lg-6 align-self-center">
           <div class="white_card position-relative mb_20">
             <div class="card-body d-flex flex-column justify-content-between">

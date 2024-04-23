@@ -1,4 +1,4 @@
- const UserCollection = require("../Model/userModel");
+const UserCollection = require("../Model/userModel");
 const AdminCollection = require("../Model/adminModel");
 
 const categories = require("../Model/categoryModel");
@@ -6,15 +6,14 @@ const products = require("../Model/productsModel");
 const users = require("../Model/userModel");
 const orders = require("../Model/orderModel");
 const Coupon = require("../Model/couponModel");
-const offer= require( "../Model/offerModel") ; 
-const wallet = require('../Model/walletModel')
+const offer = require("../Model/offerModel");
+const wallet = require("../Model/walletModel");
 const path = require("path");
 const fs = require("fs");
-const PDFDocument = require('pdfkit');
-const XLSX = require('xlsx');
-
+const PDFDocument = require("pdfkit");
+const XLSX = require("xlsx");
 const multer = require("multer");
-
+const mongoose = require("mongoose");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "public/productImg");
@@ -78,12 +77,6 @@ const adminHome = async (req, res) => {
     res.redirect("/admin");
   }
 };
-
-
-
-
-
-
 
 // Admin add user page
 const addUser = (req, res) => {
@@ -317,38 +310,36 @@ const adminInventory = async (req, res) => {
   }
 };
 
-
 const listUnlistCategory = async (req, res) => {
   try {
-      // Retrieve the category ID from the request parameters
-      const cateId = req.params.cateId;
+    // Retrieve the category ID from the request parameters
+    const cateId = req.params.cateId;
 
-      // Fetch the category from the database using the ID
-      const category = await categories.findById(cateId);
+    // Fetch the category from the database using the ID
+    const category = await categories.findById(cateId);
 
-      // Check if the category was found
-      if (!category) {
-          // Return a 404 status code if the category is not found
-          return res.status(404).send("Category not found");
-      }
+    // Check if the category was found
+    if (!category) {
+      // Return a 404 status code if the category is not found
+      return res.status(404).send("Category not found");
+    }
 
-      // Toggle the isListed property (list/unlist)
-      category.isListed = !category.isListed;
+    // Toggle the isListed property (list/unlist)
+    category.isListed = !category.isListed;
 
-      // Save the updated category to the database
-      await category.save();
+    // Save the updated category to the database
+    await category.save();
 
-      // Redirect to the adminCategory page after updating
-      res.redirect("/adminCategory");
+    // Redirect to the adminCategory page after updating
+    res.redirect("/adminCategory");
   } catch (error) {
-      // Log the error to the console
-      console.error("Error:", error);
+    // Log the error to the console
+    console.error("Error:", error);
 
-      // Send a 500 status code for internal server error
-      res.status(500).send("Internal Server Error");
+    // Send a 500 status code for internal server error
+    res.status(500).send("Internal Server Error");
   }
 };
-
 
 const listUnlistProduct = async (req, res) => {
   try {
@@ -509,11 +500,9 @@ const removeImage = async (req, res) => {
       console.log("Invalid image index provided.");
     }
 
-    res
-      .status(400)
-      .json({
-        error: "Image removal failed. Invalid index or file not found.",
-      });
+    res.status(400).json({
+      error: "Image removal failed. Invalid index or file not found.",
+    });
   } catch (err) {
     console.error("Error removing image:", err);
     res.status(500).json({ error: "Internal Server Error" });
@@ -534,17 +523,16 @@ const addProductPage = async (req, res) => {
 const addProduct = async (req, res) => {
   if (req.session.admin)
     try {
-     
       const { productName, productDes, productCat, productDate, price, stock } =
         req.body;
       console.log("req.files", req.files);
       const files = req.files;
-      const prodId= req.body.productId
+      const prodId = req.body.productId;
       const imagePaths = files.map((file) => "productImg/" + file.filename);
       console.log("image path", imagePaths);
-    
+
       const productIn = await products.findById(prodId);
-     
+
       const newProduct = new products({
         productName: productName,
         productCategory: productCat,
@@ -554,7 +542,6 @@ const addProduct = async (req, res) => {
         price,
         image: imagePaths,
       });
-          
 
       let savedProd = await newProduct.save();
 
@@ -582,21 +569,21 @@ const addProduct = async (req, res) => {
 
 const customerDashBoard = async (req, res) => {
   if (req.session.admin) {
-      try {
-          const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1
-          const limit = 8; // Items per page
-          const skip = (page - 1) * limit; // Number of items to skip
-          const count = await users.countDocuments(); // Total number of documents
-          const totalPages = Math.ceil(count / limit); // Total number of pages
+    try {
+      const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1
+      const limit = 8; // Items per page
+      const skip = (page - 1) * limit; // Number of items to skip
+      const count = await users.countDocuments(); // Total number of documents
+      const totalPages = Math.ceil(count / limit); // Total number of pages
 
-          // Query the database with pagination
-          let User = await users.find().skip(skip).limit(limit);
+      // Query the database with pagination
+      let User = await users.find().skip(skip).limit(limit);
 
-          // Render the view with pagination data
-          res.render("adminCustomerDash", { User, currentPage: page, totalPages });
-      } catch (error) {
-          console.log(error);
-      }
+      // Render the view with pagination data
+      res.render("adminCustomerDash", { User, currentPage: page, totalPages });
+    } catch (error) {
+      console.log(error);
+    }
   }
 };
 
@@ -638,118 +625,109 @@ const unblockUser = async (req, res) => {
   }
 };
 
-
-
 const adminOrdersDash = async (req, res) => {
   try {
-      if (!req.session.admin) {
-          return res.redirect('/login'); // Redirect to login page if not logged in as admin
-      }
-      
-      const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1
-      const limit = 8; // Items per page
-      const skip = (page - 1) * limit; // Number of items to skip
-      const count = await orders.countDocuments(); // Total number of orders
-      const totalPages = Math.ceil(count / limit); // Total number of pages
-      
-      // Query the database for the current page orders
-      const userOrders = await orders
-          .find()
-          .skip(skip)
-          .limit(limit)
-          .populate('items.product')
-          .sort({ orderDate: -1 });
+    if (!req.session.admin) {
+      return res.redirect("/login"); // Redirect to login page if not logged in as admin
+    }
 
-      // Render the view with pagination data
-      res.render('adminOrdersDash', {
-          userOrders,
-          currentPage: page,
-          totalPages
-      });
+    const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1
+    const limit = 8; // Items per page
+    const skip = (page - 1) * limit; // Number of items to skip
+    const count = await orders.countDocuments(); // Total number of orders
+    const totalPages = Math.ceil(count / limit); // Total number of pages
+
+    // Query the database for the current page orders
+    const userOrders = await orders
+      .find()
+      .skip(skip)
+      .limit(limit)
+      .populate("items.product")
+      .sort({ orderDate: -1 });
+
+    // Render the view with pagination data
+    res.render("adminOrdersDash", {
+      userOrders,
+      currentPage: page,
+      totalPages,
+    });
   } catch (error) {
-      console.log(error);
-      res.status(500).send("Internal Server Error");
+    console.log(error);
+    res.status(500).send("Internal Server Error");
   }
 };
 
-
 sendCancelNotification = async (req, res) => {
   try {
-   
     const { orderId, userId } = req.body;
-
 
     const order = await orders.findById(orderId);
     if (!order) {
-      return res.status(404).json({ error: 'Order not found' });
+      return res.status(404).json({ error: "Order not found" });
     }
 
-    
     const notificationMessage = `Order ${orderId} has been cancelled by user ${userId}`;
 
-   
-    console.log('Cancel notification sent to admin:', notificationMessage);
+    console.log("Cancel notification sent to admin:", notificationMessage);
 
-   
-    res.status(200).json({ message: 'Cancel notification sent to admin' });
+    res.status(200).json({ message: "Cancel notification sent to admin" });
   } catch (error) {
-    console.error('Error sending cancel notification:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error sending cancel notification:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 // Route to handle changing order status
 
-    const changeOrderStatus = async (req, res) => {
-      const orderId = req.params.orderId;
-      const newStatus = req.body.order_status;
-  
-      console.log("new status ", newStatus)
-  
-      try {
-          let order = await orders.findById(orderId)
-          let userWallet = await wallet.findOne({userId:order.customer})
-          if(!userWallet){
-              userWallet = new wallet({
-                  userId:order.customer,
-                  balance:0,
-                  transactionHistory:[]
-              })
-              await userWallet.save();
-          }
-          console.log("after first if")
-          if(newStatus ==="Delivered"){
-              order.deliveredAt=new Date()
-              await order.save()
-          }
-          if(newStatus === "Cancelled" || newStatus ==="Returned"){
-              const orderAmount = order.totalAmount
-              userWallet.balance += orderAmount;
-              userWallet.transactionHistory.push({
-                  transaction: 'Money Added',
-                  amount: orderAmount,
-              });
-          }
-          const updatedOrder = await orders.findByIdAndUpdate(orderId, { OrderStatus: newStatus }, { new: true });
-          await userWallet.save();
-          res.redirect('/adminOrdersDash');
-      } catch (error) {
-          console.error('Error updating order status:', error);
-          res.status(500).send('Internal Server Error');
-      }
-    };
+const changeOrderStatus = async (req, res) => {
+  const orderId = req.params.orderId;
+  const newStatus = req.body.order_status;
 
+  console.log("new status ", newStatus);
 
-    
-
-    
+  try {
+    let order = await orders.findById(orderId);
+    let userWallet = await wallet.findOne({ userId: order.customer });
+    if (!userWallet) {
+      userWallet = new wallet({
+        userId: order.customer,
+        balance: 0,
+        transactionHistory: [],
+      });
+      await userWallet.save();
+    }
+    console.log("after first if");
+    if (newStatus === "Delivered") {
+      order.deliveredAt = new Date();
+      await order.save();
+    }
+    if (newStatus === "Cancelled" || newStatus === "Returned") {
+      const orderAmount = order.totalAmount;
+      userWallet.balance += orderAmount;
+      userWallet.transactionHistory.push({
+        transaction: "Money Added",
+        amount: orderAmount,
+      });
+    }
+    const updatedOrder = await orders.findByIdAndUpdate(
+      orderId,
+      { OrderStatus: newStatus },
+      { new: true }
+    );
+    await userWallet.save();
+    res.redirect("/adminOrdersDash");
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
 
 // admin Coupons & Discounts
 const adminCouponsDiscounts = async (req, res) => {
   if (req.session.admin)
     try {
       const coupons = await Coupon.find();
-     
+
       res.render("adminCouponsDiscounts", {
         coupons: coupons,
       });
@@ -816,12 +794,12 @@ const addCoupons = async (req, res) => {
   }
 };
 
-const editCouponsGet= async(req, res) => {
+const editCouponsGet = async (req, res) => {
   if (req.session.admin)
     try {
-      const couponId = req.params.id
+      const couponId = req.params.id;
       const coupon = await Coupon.findById(couponId);
-      res.render("adminEditCoupon", {coupon});
+      res.render("adminEditCoupon", { coupon });
     } catch (error) {
       console.log("Error", error);
       res.status(500).send("Internal Server Error");
@@ -831,11 +809,14 @@ const editCouponsGet= async(req, res) => {
 const editCoupons = async (req, res) => {
   try {
     const couponId = req.params.id;
-    const { code, discountValue, discountType, expiry, minimumCartAmount } = req.body;
+    const { code, discountValue, discountType, expiry, minimumCartAmount } =
+      req.body;
 
     const existingCoupon = await Coupon.findOne({ code: code.toUpperCase() });
     if (existingCoupon && existingCoupon._id.toString() !== couponId) {
-      return res.render("addCoupons", { mess: "Coupon with this code already exists" });
+      return res.render("addCoupons", {
+        mess: "Coupon with this code already exists",
+      });
     }
 
     // Form Validation
@@ -859,7 +840,7 @@ const editCoupons = async (req, res) => {
         discountValue: discountValue,
         discountType: discountType,
         expiry: expiry,
-        minimumCartAmount: minimumCartAmount
+        minimumCartAmount: minimumCartAmount,
       },
       { new: true }
     );
@@ -880,7 +861,6 @@ const editCoupons = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-
 
 const deleteCoupon = async (req, res) => {
   try {
@@ -906,281 +886,430 @@ const adminOffers = async (req, res) => {
     }
 };
 
-const addOffersGet = async(req, res) => {
-  if (req.session.admin)
-    try {
-      let category = await categories.find();
-      res.render("addOffers", {category,mess:""});
-    } catch (error) {
-      console.log("Error", error);
-      res.status(500).send("Internal Server Error");
-    }
+// const addOffersGet = async(req, res) => {
+//   if (req.session.admin)
+//     try {
+//       let category = await categories.find();
+//       res.render("addOffers", {category,mess:""});
+//     } catch (error) {
+//       console.log("Error", error);
+//       res.status(500).send("Internal Server Error");
+//     }
+// };
+
+const addOffersGet = async (req, res) => {
+  const Products = await products.find();
+  const Categories = await categories.find();
+  res.render("addOffers", {
+    products: Products,
+    categories: Categories,
+    message: "",
+  });
 };
 
-const addOffers = async (req, res) => {
-  try {
-    const { code, discountValue, productCat, expiry, minimumCartAmount } =
-      req.body;
+// const addOffers = async (req, res) => {
+//   try {
+//     const { code, discountValue, productCat, expiry, minimumCartAmount } =
+//       req.body;
 
-    const existingOffer = await offer.findOne({ code: code.toUpperCase() });
-    if (existingOffer) {
-      return res.render("addOffers", { mess: "Offer already exists" });
+//     const existingOffer = await offer.findOne({ code: code.toUpperCase() });
+//     if (existingOffer) {
+//       return res.render("addOffers", { mess: "Offer already exists" });
+//     }
+
+//     // Form Validation
+//     if (
+//       isNaN(discountValue) ||
+//       isNaN(minimumCartAmount) ||
+//       discountValue >= 100 ||
+//       minimumCartAmount <= 0 ||
+//       discountValue < 0 ||
+//       minimumCartAmount < 0
+//     ) {
+//       return res.render("addOffers", {
+//         mess: "Please enter valid discount value and cart amount.",
+//       });
+//     }
+
+//     const newOffer = new offer({
+//       code: code.toUpperCase(),
+//       discountValue: discountValue,
+//       productCategory: productCat,
+//       expiry: expiry,
+//       minimumCartAmount: minimumCartAmount,
+//       status: "Active",
+//     });
+
+//     await categories.findOneAndUpdate(
+//       { category: productCat },
+//       { $push: { products: newOffer._id } },
+//       { new: true }
+//     );
+
+//     await newOffer.save();
+
+//     const offers = await offer.find();
+
+//     res.render("adminOffers", {
+//       offer: offers,
+//       mess: "Offer added successfully",
+//     });
+//   } catch (error) {
+//     console.log("Error", error);
+//     res.status(500).send("Internal Server Error");
+//   }
+// };
+
+const addOffers = async (req, res) => {
+  const Products = await products.find();
+  const Offer = await offer.find();
+  const Categories = await categories.find();
+
+  console.log("inside handle data");
+  const {
+    offerName,
+    discountOn,
+    discountValue,
+    startDate,
+    endDate,
+    selectedCategory,
+    selectedProducts,
+  } = req.body;
+  console.log(req.body);
+  try {
+    const existingNameOffer = await offer.findOne({ offerName });
+    const existingCategoryOffer = await offer.findOne({ selectedCategory });
+    let existingProductOffer;
+    if (discountOn === "product") {
+      existingProductOffer = await offer.findOne({ selectedProducts });
+    } else {
+      existingProductOffer = null;
     }
 
-    // Form Validation
-    if (
-      isNaN(discountValue) ||
-      isNaN(minimumCartAmount) ||
-      discountValue >= 100 ||
-      minimumCartAmount <= 0 ||
-      discountValue < 0 ||
-      minimumCartAmount < 0
-    ) {
+    console.log("existingNameOffer", existingNameOffer);
+    console.log("existingCategoryOffer", existingCategoryOffer);
+    console.log("existingProductOffer", existingProductOffer);
+
+    if (existingNameOffer) {
       return res.render("addOffers", {
-        mess: "Please enter valid discount value and cart amount.",
+        products: Products,
+        categories: Categories,
+        message: "Duplicate Discount Name not allowed.",
       });
     }
 
+    if (selectedCategory && existingCategoryOffer) {
+      return res.render("addOffers", {
+        products: Products,
+        categories: Categories,
+        message: "An offer for this category already exists.",
+      });
+    }
+
+    if (selectedProducts && existingProductOffer) {
+      return res.render("addOffers", {
+        products: Products,
+        categories: Categories,
+        message: "An offer for this product already exists.",
+      });
+    }
+    let modifiedSelectedCategory = selectedCategory;
+    let modifiedSelectedProducts = selectedProducts;
+
+    if (discountOn === "category") {
+      // Initialize the selected category and products variables
+      modifiedSelectedProducts = null;
+
+      // Use the provided category ID directly for querying products
+      modifiedSelectedCategory = selectedCategory;
+
+      console.log("Selected category ID:", modifiedSelectedCategory);
+
+      // Find all products that belong to the selected category
+      const productsInCategory = await products.find({
+        productCategory: modifiedSelectedCategory,
+      });
+
+      console.log("Products in category:", productsInCategory);
+
+      // Update prices and discounts for each product in the selected category
+      for (const product of productsInCategory) {
+        const originalPrice = product.price;
+
+        // Calculate the discounted price
+        const discountedPrice =
+          originalPrice - (originalPrice * discountValue) / 100;
+
+        // Update product properties
+        product.originalPrice = originalPrice;
+        product.discount = discountValue;
+        product.price = discountedPrice;
+
+        // Save the updated product
+        await product.save();
+
+        // Log the update for debugging
+        console.log(
+          `Updated product ${product._id}: original price ${originalPrice}, discounted price ${discountedPrice}`
+        );
+      }
+
+      console.log("Products in category updated successfully");
+    } else if (discountOn === "product") {
+      modifiedSelectedCategory = null;
+      modifiedSelectedProducts = selectedProducts;
+      const product = await products.findOne({ _id: modifiedSelectedProducts });
+      if (product) {
+        const discountedPrice =
+          product.price - (product.price * discountValue) / 100;
+        console.log("inside for 2");
+        product.originalPrice = product.price;
+        product.discount = discountValue;
+        product.price = discountedPrice;
+
+        await product.save();
+        console.log("After save");
+      }
+    }
+    console.log("before new");
+
     const newOffer = new offer({
-      code: code.toUpperCase(),
-      discountValue: discountValue,
-      productCategory: productCat,
-      expiry: expiry,
-      minimumCartAmount: minimumCartAmount,
-      status: "Active",
+      offerName,
+      discountOn,
+      discountValue,
+      startDate,
+      endDate,
+      selectedCategory: modifiedSelectedCategory,
+      selectedProducts: modifiedSelectedProducts,
     });
 
-    await categories.findOneAndUpdate(
-      { category: productCat },
-      { $push: { products: newOffer._id } },
-      { new: true }
-    );
-
-    await newOffer.save();
-
-    const offers = await offer.find();
-
-    res.render("adminOffers", {
-      offer: offers,
-      mess: "Offer added successfully",
-    });
+    console.log("Save before");
+    const savedOffer = await newOffer.save();
+    console.log(savedOffer);
+    res.redirect("/adminOffers");
   } catch (error) {
-    console.log("Error", error);
+    console.error("Error during coupon creation:", error);
     res.status(500).send("Internal Server Error");
   }
 };
-
 
 const deleteOffers = async (req, res) => {
+  
   try {
+    console.log("Request body:", req.body);
+
     const offerId = req.body.offerId;
-    console.log("code",offerId);
+    if (!offerId || !mongoose.Types.ObjectId.isValid(offerId)) {
+      console.log("Invalid or missing offer ID");
+      return res.status(400).send("Invalid offer ID");
+  }
+  
+    console.log("code", offerId);
     await offer.findByIdAndDelete(offerId);
-    console.log("Deleted")
-    res.redirect("/adminOffers"); 
+    console.log("Deleted");
+    res.redirect("/adminOffers");
   } catch (error) {
     console.log("Error", error);
     res.status(500).send("Internal Server Error");
   }
 };
 
-
-
-
-
-
-
-
- 
-
 const generatePdfReport = async (req, res) => {
-    try {
-        const { filter, selectedValue } = req.params;
-        const [year, month] = selectedValue.split('-');
-        const salesData = await fetchSalesData(filter, selectedValue);
+  try {
+    const { filter, selectedValue } = req.params;
+    const [year, month] = selectedValue.split("-");
+    const salesData = await fetchSalesData(filter, selectedValue);
 
-        console.log("Dataa",salesData);
+    console.log("Dataa", salesData);
 
-        if (!salesData || salesData.length === 0) {
-            return res.status(404).json({ error: "No data found for the selected filter and value" });
-        }
-
-        const pdfDoc = new PDFDocument();
-
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=sales-report-${filter}-${selectedValue}.pdf`);
-
-        pdfDoc.pipe(res);
-        pdfDoc.fontSize(12);
-        let title = `Sales Report - ${filter}`;
-
-        if (filter === 'daily') {
-            title += ` (${selectedValue})`;
-        } else if (filter === 'monthly') {
-            title += ` (${year}-${month})`;
-        } else if (filter === 'yearly') {
-            title += ` (${year})`;
-        }
-
-        pdfDoc.text(title, { align: 'center', underline: true });
-        pdfDoc.moveDown();
-        let totalOrders = 0;
-        let totalAmount = 0;
-        salesData.forEach(entry => {
-            pdfDoc.moveDown();
-            pdfDoc.text(`Order ID: ${entry.orderId}`);
-            pdfDoc.text(`Customer: ${entry.customer.name}`);
-            entry.items.forEach((item, itemIndex) => {
-                pdfDoc.text(`Product${itemIndex + 1}: ${item.product?item.product.productName:""}`);
-            });
-            pdfDoc.text(`Total Amount: Rs:${entry.totalAmount}`);
-            pdfDoc.text(`Order Date: ${entry.orderDate.toLocaleDateString()}`);
-            totalOrders += 1;
-            totalAmount += entry.totalAmount;
-        });
-        pdfDoc.moveDown();
-        pdfDoc.moveDown();
-        pdfDoc.moveDown();
-        pdfDoc.text(`Total Orders: ${totalOrders}`);
-        pdfDoc.text(`Total Amount: Rs:${totalAmount}`);
-        pdfDoc.end();
-    } catch (error) {
-        console.error("Error generating PDF report:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+    if (!salesData || salesData.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "No data found for the selected filter and value" });
     }
-};
 
+    const pdfDoc = new PDFDocument();
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=sales-report-${filter}-${selectedValue}.pdf`
+    );
+
+    pdfDoc.pipe(res);
+    pdfDoc.fontSize(12);
+    let title = `Sales Report - ${filter}`;
+
+    if (filter === "daily") {
+      title += ` (${selectedValue})`;
+    } else if (filter === "monthly") {
+      title += ` (${year}-${month})`;
+    } else if (filter === "yearly") {
+      title += ` (${year})`;
+    }
+
+    pdfDoc.text(title, { align: "center", underline: true });
+    pdfDoc.moveDown();
+    let totalOrders = 0;
+    let totalAmount = 0;
+    salesData.forEach((entry) => {
+      pdfDoc.moveDown();
+      pdfDoc.text(`Order ID: ${entry.orderId}`);
+      pdfDoc.text(`Customer: ${entry.customer.name}`);
+      entry.items.forEach((item, itemIndex) => {
+        pdfDoc.text(
+          `Product${itemIndex + 1}: ${
+            item.product ? item.product.productName : ""
+          }`
+        );
+      });
+      pdfDoc.text(`Total Amount: Rs:${entry.totalAmount}`);
+      pdfDoc.text(`Order Date: ${entry.orderDate.toLocaleDateString()}`);
+      totalOrders += 1;
+      totalAmount += entry.totalAmount;
+    });
+    pdfDoc.moveDown();
+    pdfDoc.moveDown();
+    pdfDoc.moveDown();
+    pdfDoc.text(`Total Orders: ${totalOrders}`);
+    pdfDoc.text(`Total Amount: Rs:${totalAmount}`);
+    pdfDoc.end();
+  } catch (error) {
+    console.error("Error generating PDF report:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 const generateExcelReport = async (req, res) => {
-    const { filter, selectedValue } = req.params;
-    try {
-        const salesData = await fetchSalesData(filter, selectedValue);
+  const { filter, selectedValue } = req.params;
+  try {
+    const salesData = await fetchSalesData(filter, selectedValue);
 
-        if (!salesData || salesData.length === 0) {
-            return res.status(404).json({ error: "No data found for the selected filter and value" });
-        }
-
-        // Convert the data to an array of objects
-        const dataForExcel = salesData.map(entry => ({
-            'Order ID': entry.orderId,
-            'Customer': entry.customer.name,
-            'Products': entry.items.map(item => item.product?item.product.productName:"").join(', '), 
-            'Total Amount': entry.totalAmount,
-            'Order Date': entry.orderDate.toLocaleDateString()
-        }));
-        
-
-        // Calculate total orders and total amount
-        let totalOrders = 0;
-        let totalAmount = 0;
-
-        salesData.forEach(entry => {
-            totalOrders += 1;
-            totalAmount += entry.totalAmount;
-        });
-
-        // Append a row with totals to the data for Excel
-        const totalsRow = {
-            'Order ID': 'Total Orders:',
-            'Customer': totalOrders,
-            'Total Amount': totalAmount,
-            'Order Date': '',
-        };
-
-        dataForExcel.push(totalsRow);
-
-        // Create a workbook
-        const workbook = XLSX.utils.book_new();
-        const worksheet = XLSX.utils.json_to_sheet(dataForExcel, {
-            header: ['Order ID', 'Customer', 'Total Amount', 'Order Date'],
-        });
-
-        const headerCellStyle = { font: { bold: true }, fill: { fgColor: { rgb: 'FFFF00' } } };
-        Object.keys(worksheet).forEach(key => {
-            if (key.startsWith('A1')) {
-                worksheet[key].s = headerCellStyle;
-            }
-        });
-
-        // Enable Shared Strings Table for styling
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sales Report');
-
-        // Enable Shared Strings Table for styling
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer', bookSST: true });
-
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.setHeader('Content-Disposition', `attachment; filename=sales-report-${filter}-${selectedValue}.xlsx`);
-
-        // Send the buffer as the response
-        res.end(excelBuffer);
-    } catch (error) {
-        console.error("Error generating Excel report:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+    if (!salesData || salesData.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "No data found for the selected filter and value" });
     }
+
+    // Convert the data to an array of objects
+    const dataForExcel = salesData.map((entry) => ({
+      "Order ID": entry.orderId,
+      Customer: entry.customer.name,
+      Products: entry.items
+        .map((item) => (item.product ? item.product.productName : ""))
+        .join(", "),
+      "Total Amount": entry.totalAmount,
+      "Order Date": entry.orderDate.toLocaleDateString(),
+    }));
+
+    // Calculate total orders and total amount
+    let totalOrders = 0;
+    let totalAmount = 0;
+
+    salesData.forEach((entry) => {
+      totalOrders += 1;
+      totalAmount += entry.totalAmount;
+    });
+
+    // Append a row with totals to the data for Excel
+    const totalsRow = {
+      "Order ID": "Total Orders:",
+      Customer: totalOrders,
+      "Total Amount": totalAmount,
+      "Order Date": "",
+    };
+
+    dataForExcel.push(totalsRow);
+
+    // Create a workbook
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(dataForExcel, {
+      header: ["Order ID", "Customer", "Total Amount", "Order Date"],
+    });
+
+    const headerCellStyle = {
+      font: { bold: true },
+      fill: { fgColor: { rgb: "FFFF00" } },
+    };
+    Object.keys(worksheet).forEach((key) => {
+      if (key.startsWith("A1")) {
+        worksheet[key].s = headerCellStyle;
+      }
+    });
+
+    // Enable Shared Strings Table for styling
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Report");
+
+    // Enable Shared Strings Table for styling
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "buffer",
+      bookSST: true,
+    });
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=sales-report-${filter}-${selectedValue}.xlsx`
+    );
+
+    // Send the buffer as the response
+    res.end(excelBuffer);
+  } catch (error) {
+    console.error("Error generating Excel report:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
-
 async function fetchSalesData(filter, selectedValue) {
-    try {
-        let Orders;
+  try {
+    let Orders;
 
-        if (filter === 'daily') {
-            const startDate = new Date(selectedValue);
-            const endDate = new Date(selectedValue);
-            endDate.setDate(endDate.getDate() + 1); 
-        
-            Orders = await orders.find({
-                orderDate: { $gte: startDate, $lt: endDate },
-            }).populate('customer').populate('items.product');
-        } else if (filter === 'monthly') {
-            const [year, month] = selectedValue.split('-');
-            Orders = await orders.find({
-                orderDate: {
-                    $gte: new Date(year, month - 1, 1),
-                    $lt: new Date(year, month, 1)
-                }
-            }).populate('customer').populate('items.product');
-        } else if (filter === 'yearly') {
-          Orders = await orders.find({
-                orderDate: {
-                    $gte: new Date(selectedValue, 0, 1),
-                    $lt: new Date(Number(selectedValue) + 1, 0, 1)
-                }
-            }).populate('customer').populate('items.product');
+    if (filter === "daily") {
+      const startDate = new Date(selectedValue);
+      const endDate = new Date(selectedValue);
+      endDate.setDate(endDate.getDate() + 1);
 
-            console.log("Orders",Orders)
-        }
+      Orders = await orders
+        .find({
+          orderDate: { $gte: startDate, $lt: endDate },
+        })
+        .populate("customer")
+        .populate("items.product");
+    } else if (filter === "monthly") {
+      const [year, month] = selectedValue.split("-");
+      Orders = await orders
+        .find({
+          orderDate: {
+            $gte: new Date(year, month - 1, 1),
+            $lt: new Date(year, month, 1),
+          },
+        })
+        .populate("customer")
+        .populate("items.product");
+    } else if (filter === "yearly") {
+      Orders = await orders
+        .find({
+          orderDate: {
+            $gte: new Date(selectedValue, 0, 1),
+            $lt: new Date(Number(selectedValue) + 1, 0, 1),
+          },
+        })
+        .populate("customer")
+        .populate("items.product");
 
-
-        return Orders;
-    } catch (error) {
-        console.error("Error fetching sales data:", error);
-        throw error;
+      console.log("Orders", Orders);
     }
+
+    return Orders;
+  } catch (error) {
+    console.error("Error fetching sales data:", error);
+    throw error;
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Admin Logout
 const adminLogout = (req, res) => {
