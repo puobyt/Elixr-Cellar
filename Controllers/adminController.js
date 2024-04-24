@@ -57,26 +57,36 @@ const adminVerification = async (req, res) => {
 // Admin HomePage
 const adminHome = async (req, res) => {
   if (req.session.admin) {
-    try {
-      let search = "";
-      if (req.query.search) {
-        search = req.query.search;
+      try {
+          let search = "";
+          if (req.query.search) {
+              search = req.query.search;
+          }
+          
+          // Fetch user data based on search query
+          const userData = await UserCollection.find({
+              $or: [
+                  { name: { $regex: "^" + search + ".*", $options: "i" } },
+                  { email: { $regex: "^" + search + ".*", $options: "i" } },
+              ],
+          });
+          
+          // Fetch popular products
+          const popular = await products.find({ isListed: true })
+              .sort({ popularity: -1 })
+              .limit(5);
+          
+          // Render the view with both user data and popular products
+          res.render("adminhome", { details: userData, popular: popular });
+      } catch (error) {
+          console.log(error.message);
+          res.status(500).send("Internal server error");
       }
-      const userData = await UserCollection.find({
-        $or: [
-          { name: { $regex: "^" + search + ".*", $options: "i" } },
-          { email: { $regex: "^" + search + ".*", $options: "i" } },
-        ],
-      });
-
-      res.render("adminhome", { details: userData });
-    } catch (error) {
-      console.log(error.message);
-    }
   } else {
-    res.redirect("/admin");
+      res.redirect("/admin");
   }
 };
+
 
 // Admin add user page
 const addUser = (req, res) => {
@@ -410,32 +420,28 @@ const adminEditProductPost = async (req, res) => {
   }
 
   existingImages.forEach((existingImagePath) => {
-    console.log("Stuck in deleting existing image");
-    console.log(existingImagePath);
-    const fullPath = path.join(
-      "C:\\Users\\puoby\\OneDrive\\Wine .Co First week project\\public\\",
-      existingImagePath
-    );
+    if (typeof existingImagePath === 'string' && existingImagePath.trim() !== '') {
+        console.log("Processing existing image path:", existingImagePath);
 
-    if (typeof existingImagePath === "string") {
-      try {
-        if (fs.existsSync(fullPath)) {
-          fs.unlinkSync(fullPath);
-          console.log(`Deleted file: ${fullPath}`);
-        } else {
-          console.log(`File not found: ${fullPath}`);
+        const fullPath = path.join(
+            "C:\\Users\\puoby\\OneDrive\\Wine .Co First week project\\public\\",
+            existingImagePath
+        );
+
+        try {
+            if (fs.existsSync(fullPath)) {
+                fs.unlinkSync(fullPath);
+                console.log(`Deleted file: ${fullPath}`);
+            } else {
+                console.log(`File not found: ${fullPath}`);
+            }
+        } catch (err) {
+            console.error(`Error deleting file: ${fullPath}`, err);
         }
-      } catch (err) {
-        console.error(`Error deleting file: ${fullPath}`, err);
-      }
     } else {
-      console.error("Image path is not a string. Unable to remove image.");
-      res
-        .status(400)
-        .json({ error: "Image removal failed. Image path is not a string." });
+        console.warn(`Skipping invalid image path: ${existingImagePath}`);
     }
-  });
-
+});
   const updatedProduct = await products.findByIdAndUpdate(
     prodId,
     {
@@ -1045,14 +1051,14 @@ const addOffers = async (req, res) => {
         product.discount = discountValue;
         product.price = discountedPrice;
 
-        // Save the updated product
-        await product.save();
-
-        // Log the update for debugging
-        console.log(
-          `Updated product ${product._id}: original price ${originalPrice}, discounted price ${discountedPrice}`
-        );
-      }
+          // Save the updated product
+  try {
+    await product.save();
+    console.log(`Updated product ${product._id}: original price ${originalPrice}, discounted price ${discountedPrice}`);
+  } catch (error) {
+    console.error(`Error saving product ${product._id}:`, error);
+  }
+}
 
       console.log("Products in category updated successfully");
     } else if (discountOn === "product") {
@@ -1094,25 +1100,18 @@ const addOffers = async (req, res) => {
 };
 
 const deleteOffers = async (req, res) => {
-  
   try {
-    console.log("Request body:", req.body);
-
     const offerId = req.body.offerId;
-    if (!offerId || !mongoose.Types.ObjectId.isValid(offerId)) {
-      console.log("Invalid or missing offer ID");
-      return res.status(400).send("Invalid offer ID");
-  }
-  
-    console.log("code", offerId);
     await offer.findByIdAndDelete(offerId);
-    console.log("Deleted");
-    res.redirect("/adminOffers");
+    res.redirect("/adminOffers"); // Redirect to Offers page after deletion
   } catch (error) {
     console.log("Error", error);
     res.status(500).send("Internal Server Error");
   }
 };
+
+
+
 
 const generatePdfReport = async (req, res) => {
   try {
@@ -1310,6 +1309,22 @@ async function fetchSalesData(filter, selectedValue) {
     throw error;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Admin Logout
 const adminLogout = (req, res) => {

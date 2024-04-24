@@ -34,10 +34,17 @@
                     <!-- Checkout -->
                     <div class="card shadow-0 border">
                         <div class="p-4">
-
-                            <h5 class="order-details card-title mb-3 ">Order Details</h5>
+                            <div class="d-flex justify-content-between">
+                                <h5 class="order-details card-title mb-3">Order Details</h5>
+                                <% if (userOrders.OrderStatus === 'Delivered') { %>
+                                    <a href="/generate-invoice/<%= orderId %>" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                                        Invoice Download
+                                    </a>
+                                <% } %>
+                            </div>
+                            
+                            </div>
                             <hr class="my-4" />
-
                             <div>
                              
 
@@ -47,7 +54,7 @@
                                         <% userOrders.items.forEach(Product => { %>
                                             <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
                                                 <div class="card mr-3 border-0" style="width: 100%;">
-                                                    <img width="150px" height="150px" src="../<%=Product.product ? Product.product.image[0] : '' %>" alt="">
+                                                    <img width="150px" height="200px" src="../<%=Product.product ? Product.product.image[0] : '' %>" alt="">
                                                     <p>
                                                         <span class="product-name">
                                                             <%=Product.product.productName%>
@@ -118,9 +125,10 @@
                                                     <p class="mb-2">Total: ₹<%= totalAmount %></p>
                                                 </div>
                                                 <div class="payment-method d-flex justify-content-between">
-                                                    <p class="mb-2 bg-secondary text-white" style="width: 100%;">
+                                                    <p class="mb-2  text-black" style="width: 100%;">
                                                         Payment Method: <%= paymentMethod %>
                                                     </p>
+                                                   
                                                 </div>
                                             </div>
                                         </div>

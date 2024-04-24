@@ -205,19 +205,19 @@
                                                             <input class="input-file" type="file" name="gameImages<%= i + 1 %>" id="imageInput<%= i %>"
                                                                 onchange="previewImage(this, <%= i %>)" />
                                                             <img id="imagePreview<%= i %>" src="../<%= productIn.image[i] %>"
-                                                                style="width: 200px; height: 150px;" />
+                                                                style="width: 150px; height: 200px;" />
                                                             <button type="button" onclick="removeImage(<%= i %>)">Remove this image</button>
                                                             <div id="errorImage" style="color: red;"></div>
                                                         </div>
                                                     <% } %>
                                                 
                                                     <!-- Section for adding new images -->
-                                                    <div id="newImagesSection">
+                                                    <!-- <div id="newImagesSection">
                                                         <label class="col-md-4 control-label">Add New Images:</label>
                                                         <button type="button" id="addNewImageBtn" onclick="addNewImageField()">Add New Image</button>
                                                     </div>
-                                                
-                                                    <input type="text" name="productId" id="productId" value="<%= productIn._id %>" placeholder="<%= productIn._id %>">
+                                                 -->
+                                                    
                                                 </div>
                                                 
                                                 
@@ -433,15 +433,14 @@
         function deleteImage(index) {
 
 
-            // Assuming you have a hidden input field with the name "deletedImages"
+           
             const deletedImagesInput = document.getElementById('deletedImages');
             const currentValue = deletedImagesInput.value;
 
             // Add the index to the list of deleted images
             deletedImagesInput.value = currentValue ? currentValue + ',' + index : index.toString();
 
-            // Optionally, you can also hide or remove the image from the UI
-            // (This won't actually delete the image until the form is submitted and processed on the server)
+      
             const imageItem = document.querySelector(`.image-item:nth-child(${index + 1})`);
             imageItem.style.display = 'none';
         }

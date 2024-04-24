@@ -47,14 +47,14 @@
     <div class="container-fluid p-0 mt-5">
       <div class="row mt-4">
         <div class="col-lg-6 align-self-center text-center">
-          <img id="zoomImage" src="../<%=product.image[0]%>" alt class="mx-auto d-block sm_w_100" height="300" />
+          <img id="zoomImage" class="zoom-img" src="../<%=product.image[0]%>" alt class="mx-auto d-block sm_w_100" height="300" />
           <div class="secondary-images">
-            <% product.image.slice(1).forEach(function(img) { %>
-              <img src="../<%= img %>" alt="Product secondary image" class="secondary-image">
-            <% }); %>
+              <% product.image.slice(1).forEach(function(img) { %>
+                  <img src="../<%= img %>" alt="Product secondary image" class="zoom-img secondary-image">
+              <% }); %>
           </div>
-          
-        </div>
+      </div>
+      
       
         <div class="col-lg-6 align-self-center">
           <div class="white_card position-relative mb_20">
@@ -137,21 +137,24 @@
   <script src="js/jquery.sticky.js"></script>
   <script src="js/jquery.mb.YTPlayer.min.js"></script>
   <script src="js/main.js"></script>
-  
-// <script src="path/to/zoomify.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="node_modules/jquery-zoom/jquery.zoom.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-zoom/1.7.21/jquery.zoom.min.js"></script>
 
-// <script>
-//     window.onload = function() {
-//         new Zoomify('zoomImage');
-//     };
-// </script>
+<!-- 
 <script>
     $(document).ready(function() {
         $('.zoom-img').zoom();
     });
+</script> -->
+
+<script>
+  $(document).ready(function() {
+      $('.zoom-img').zoom();
+  });
 </script>
+
 
 
 
@@ -163,6 +166,8 @@
 
     gtag('config', 'UA-23581568-13');
   </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-zoom/1.7.21/jquery.zoom.min.js"></script>
+
   <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v84a3a4012de94ce1a686ba8c167c359c1696973893317"
     integrity="sha512-euoFGowhlaLqXsPWQ48qSkBSCFs3DPRyiwVu3FjR96cMPx+Fr+gpWRhIafcHwqwCqWS42RZhIudOvEI+Ckf6MA=="
     data-cf-beacon='{"rayId":"831badfbec2fa3da","b":1,"version":"2023.10.0","token":"cd0b4b3a733644fc843ef0b185f98241"}'

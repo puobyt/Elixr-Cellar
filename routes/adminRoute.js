@@ -1,5 +1,7 @@
 
 const express = require("express");
+const app = express();
+app.use(express.urlencoded({ extended: true }));
 
 const admin_router = express.Router();
 const adminController = require("../Controllers/adminController");
@@ -22,6 +24,7 @@ admin_router.get("/admin", adminController.adminLogin);
 admin_router.post("/admin", adminController.adminVerification);
 
 admin_router.get("/adminhome", adminController.adminHome);
+
 
 admin_router.get("/adminDashboard", adminController.adminDashboard);
 

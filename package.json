@@ -18,6 +18,7 @@
     "express": "^4.18.2",
     "express-session": "^1.17.3",
     "formidable": "^3.5.1",
+    "jquery-zoom": "^1.7.21",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "mongoose": "^6.7.5",

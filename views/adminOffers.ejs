@@ -179,19 +179,23 @@
                                                     <%= offers.discountOn %>
                                                 </td>
                                                 <td>
-                                                    <%= offers.discountValue %>
+                                                    <%= offers.discountValue %> %
                                                 </td>
                                                 <td>
                                                     <%= offers.
                                                     endDate.toDateString()%>
                                                 </td>
                                                 <td>
-                                                    <%= offers.isActive %>
+                                                    <% if (offers.isActive){ %>
+                                                        Active
+                                                        <% } else { %>
+                                                            Inactive
+                                                            <% } %>
                                                 </td>
                                                 <td>
                                                     <!-- Delete button for each coupon -->
                                                     <form action="/deleteOffers" method="POST">
-                                                        <input type="hidden" name="offerId" value="<%= offer.id %>">
+                                                        <input type="hidden" name="offerId" value="<%= offers.id %>">
                                                         <button type="submit" class="btn btn-danger">Delete</button>
                                                     </form>
                                                 </td>

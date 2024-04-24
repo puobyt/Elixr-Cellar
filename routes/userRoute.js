@@ -85,6 +85,7 @@ user_router.get('/userOrderPlaced', requireLogin, userController.userOrderPlaced
 
 user_router.get('/userOrderDetails/:orderId', requireLogin,userController.orderDetails)
 user_router.post('/cancelOrder', requireLogin, userController.cancelOrder);
+user_router.get('/generate-invoice/:orderId',userController.generateInvoice);
 user_router.get('/userWallet', requireLogin, userController.userWallet);
 
 user_router.get('/removeFromCart/:productId', requireLogin, userController.removeFromCart);
