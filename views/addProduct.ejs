@@ -1,4 +1,7 @@
 <%-include('adminHeader.ejs')%>
+    <link href="https://unpkg.com/cropperjs/dist/cropper.css" rel="stylesheet" />
+
+
     <section class="main_content dashboard_part large_header_bg">
 
         <div class="container-fluid g-0">
@@ -205,15 +208,22 @@
                                                     <input type="number" class="form-control" name="price" id="price"
                                                         placeholder="Price">
                                                 </div>
-                                                <div>
-                                                    <input type="file" class="form-control" name="images" multiple id="image">
-                                                    <!-- Button to remove selected images -->
-                                                    <button type="button" class="btn btn-danger" id="removeImages">Remove Selected Images</button>
-                                                </div>
-                                                
 
-                                                    <button type="submit"
-                                                        class="btn_1 full_width text-center">Submit</button>
+
+                                                <div class="form-group">
+                                                    <input type="file" class="form-control" name="newImages" multiple
+                                                        id="newImageInput" onchange="handleFileSelect(event)">
+                                                </div>
+                                                <div id="imagePreviewContainer">
+                                                    <!-- Image previews and remove buttons will be added here dynamically -->
+                                                </div>
+                                                <!-- Hidden input to hold cropped image data -->
+                                                <input type="hidden" name="croppedImages" id="croppedImages">
+
+
+
+                                                <button type="submit"
+                                                    class="btn_1 full_width text-center">Submit</button>
 
                                             </form>
                                         </div>
@@ -370,31 +380,165 @@
     <script>
 
         function validation() {
-            let productName = document.getElementById('product_name').value.trim()
-            let productDescription = document.getElementById("productDes").value;
-            let productCat = document.getElementById("productCat").value;
+            // Get form input values
+            let productName = document.getElementById('product_name').value.trim();
+            let productDescription = document.getElementById("productDes").value.trim();
+            let productCat = document.getElementById("productCat").value.trim();
             let productDate = document.getElementById("productDate").value;
-            let productStock = document.getElementById("stock").value;
-            let productPrice = document.getElementById("price").value;
-            let imageUploader = document.getElementById("image")
+            let productStock = document.getElementById("stock").value.trim();
+            let productPrice = document.getElementById("price").value.trim();
 
+            // Get the hidden input for cropped images
+            let croppedImages = document.getElementById("croppedImages").value.trim();
 
-            if (!productName || !productDescription || !productCat || !productDate || !productStock || !productPrice || !imageUploader) {
+            // Validate if all input fields are filled
+            if (!productName || !productDescription || !productCat || !productDate || !productStock || !productPrice) {
                 alert("Please fill out all fields!");
                 return false;
             }
 
+            // Validate stock and price are non-negative numbers
             if (isNaN(productStock) || productStock < 0) {
-                alert("Total quantity must be a non-negative number")
+                alert("Total quantity must be a non-negative number");
                 return false;
             }
 
             if (isNaN(productPrice) || productPrice < 0) {
-                alert("Price must be a non-negative number")
+                alert("Price must be a non-negative number");
                 return false;
             }
-            return true
+
+            // Validate that cropped images exist
+            if (!croppedImages) {
+                alert("Please crop and save an image before submitting!");
+                return false;
+            }
+
+            return true;
         }
+
+
+    </script>
+    <script src="https://unpkg.com/cropperjs"></script>
+    <script>
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            const container = document.getElementById('imagePreviewContainer');
+
+            // Clear existing previews
+            container.innerHTML = '';
+
+            // Process each file
+            Array.from(files).forEach((file, index) => {
+                // Create a div to hold the image and buttons
+                const div = document.createElement('div');
+                div.className = 'image-preview-item';
+
+                // Create an image element
+                const img = document.createElement('img');
+                img.className = 'image-to-crop';
+                img.src = URL.createObjectURL(file);
+                img.style.width = '150px';
+                img.style.height = '150px';
+
+                // Append the image to the div
+                div.appendChild(img);
+
+                // Initialize Cropper.js on the image
+                const cropper = new Cropper(img, {
+                    aspectRatio: 1, // Define aspect ratio (1:1 for square)
+                    viewMode: 1
+                });
+
+                // Create a button for cropping and saving the image
+                const cropButton = document.createElement('button');
+                cropButton.type = 'button';
+                cropButton.innerText = 'Crop & Save';
+                cropButton.onclick = () => {
+                    // Crop the image and convert the cropped image data to base64
+                    cropper.getCroppedCanvas().toBlob((blob) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                            document.getElementById('croppedImages').value += reader.result + ';';
+                        };
+                        reader.readAsDataURL(blob);
+
+                        // Update the image source with the cropped image
+                        img.src = URL.createObjectURL(blob);
+                    });
+
+                    // Destroy the cropper instance
+                    cropper.destroy();
+                };
+
+                // Create a button for previewing the cropped image
+                const previewButton = document.createElement('button');
+                previewButton.type = 'button';
+                previewButton.innerText = 'Preview';
+                previewButton.onclick = () => {
+                    // Open the cropped image in a new window or tab
+                    const base64Image = img.src;
+                    const newWindow = window.open();
+                    const imgTag = newWindow.document.createElement('img');
+                    imgTag.src = base64Image;
+                    newWindow.document.body.appendChild(imgTag);
+                };
+
+                // Create a button for removing the image
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.innerText = 'Remove';
+                removeButton.onclick = () => {
+                    // Remove the image and update the file input
+                    removeImage(index, div, cropper);
+                };
+
+                // Append buttons to the div
+                div.appendChild(cropButton);
+                div.appendChild(previewButton);
+                div.appendChild(removeButton);
+
+                // Append the div to the container
+                container.appendChild(div);
+            });
+        }
+
+        function removeImage(index, previewDiv, cropper) {
+            const fileInput = document.getElementById('newImageInput');
+            const container = document.getElementById('imagePreviewContainer');
+            const files = Array.from(fileInput.files);
+
+            // Create a DataTransfer object to manage file list
+            const dataTransfer = new DataTransfer();
+
+            // Add files to DataTransfer object excluding the one to remove
+            files.forEach((file, idx) => {
+                if (idx !== index) {
+                    dataTransfer.items.add(file);
+                }
+            });
+
+            // Update file input
+            fileInput.files = dataTransfer.files;
+
+            // Remove the preview div from the container
+            container.removeChild(previewDiv);
+
+            // Destroy the Cropper instance
+            cropper.destroy();
+        }
+
+        // Add a button to allow the user to add more images if necessary
+        const addButton = document.createElement('button');
+        addButton.type = 'button';
+        addButton.innerText = 'Add More Images';
+        addButton.onclick = () => {
+            // Trigger the file input click event to open the file picker
+            document.getElementById('newImageInput').click();
+        };
+        document.getElementById('imagePreviewContainer').appendChild(addButton);
+
+
     </script>
 
 

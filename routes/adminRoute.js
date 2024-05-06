@@ -76,7 +76,7 @@ admin_router.get("/addProduct", adminController.addProductPage);
 
 admin_router.post(
   "/addProduct",
-  adminController.upload.array("images", 4),
+  adminController.upload.array("newImages", 4),
   adminController.addProduct
 );
 

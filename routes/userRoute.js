@@ -38,6 +38,7 @@ user_router.post('/otp', userController.otpVerification);
 user_router.get('/resetPassword', userController.resetPassword);
 user_router.post('/postResetPassword',userController.postResetPassword)
 user_router.get('/resetOtp', userController.resetOtp);
+user_router.post('/resendOtp', userController.resendOtp);
 user_router.post('/verifyOtp', userController.verifyOtp);
 user_router.get('/changePassword', userController.changePassword);
 user_router.post('/changingPassword', userController.changingPassword);
@@ -81,6 +82,8 @@ user_router.post('/validateCoupon', requireLogin, userController.validateCoupon)
 user_router.post('/cancelCoupon', requireLogin, userController.cancelCoupon)
 user_router.post('/createOrder', requireLogin, userController.createOrder)
 user_router.post('/verifyPayment',userController.verifyPayment)
+user_router.get('/retryPayment',requireLogin,userController.retryPayment)
+user_router.post('/retryPayment',requireLogin,userController.retryPayment)
 user_router.get('/userOrderPlaced', requireLogin, userController.userOrderPlaced)
 
 user_router.get('/userOrderDetails/:orderId', requireLogin,userController.orderDetails)

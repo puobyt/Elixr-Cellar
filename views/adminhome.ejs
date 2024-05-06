@@ -89,6 +89,7 @@
                             
                         </div>
                         
+                        
                         </div>
                     </div>
                         
@@ -136,6 +137,47 @@
                            
                         </div>
                     </div>
+                    <div class="white_card_body QA_section">
+                        <div class="QA_table ">
+                         
+                            <table class="table lms_table_active2 p-0">
+                                <div class="main-title">
+                                    <h3 class="m-0">Popular Product</h3>
+                                </div>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Product</th>
+                                        <th scope="col">Price</th>
+                                        <th scope="col">Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                   
+                                    <% popular.forEach(product => { %>
+                                    <tr>
+                                        <td>
+                                            <div class="customer d-flex align-items-center">
+                                                <div class="thumb_62 mr_15 mt-0">
+                                                  
+                                                    <img class="img-fluid radius_50" src="<%= product.image[0] %>" alt="Product Image">
+                                                </div>
+                                                
+                                                <span class="f_s_20 f_w_400 color_text_3"><%= product.productName %></span>
+                                            </div>
+                                        </td>
+                                       
+                                        
+                                        <td class="f_s_14 f_w_400 color_text_3">₹<%= product.price %></td>
+                                        
+                                        <td class="f_s_14 f_w_400 text_3"><a href="#" class="badge_btn_1"><%= product.  totalQuantity %></a></td>
+                                    </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                            <a href="adminInventory" class="badge_btn_semi mt_30 ml_15">View All</a>
+                        </div>
+                    </div>
+                    
                     <div class="col-lg-12">
                         <div class="white_card card_height_100 mb_20">
                             <div class="white_card_header">
@@ -283,42 +325,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="white_card_body QA_section">
-                        <div class="QA_table ">
-                            <table class="table lms_table_active2 p-0">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Product</th>
-                                        <th scope="col">Price</th>
-                                        <th scope="col">Stock</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Loop through the popular products and render each product in a row -->
-                                    <% popular.forEach(product => { %>
-                                    <tr>
-                                        <td>
-                                            <div class="customer d-flex align-items-center">
-                                                <div class="thumb_62 mr_15 mt-0">
-                                                    <!-- Display the product image -->
-                                                    <img class="img-fluid radius_50" src="<%= product.image[0] %>" alt="Product Image">
-                                                </div>
-                                                <!-- Display the product name -->
-                                                <span class="f_s_20 f_w_400 color_text_3"><%= product.productName %></span>
-                                            </div>
-                                        </td>
-                                       
-                                        <!-- Display the product price -->
-                                        <td class="f_s_14 f_w_400 color_text_3">₹<%= product.price %></td>
-                                        <!-- Display the product stock (you may need to add a field for this in your model) -->
-                                        <td class="f_s_14 f_w_400 text_3"><a href="#" class="badge_btn_1"><%= product.  totalQuantity %></a></td>
-                                    </tr>
-                                    <% }); %>
-                                </tbody>
-                            </table>
-                            <a href="adminInventory" class="badge_btn_semi mt_30 ml_15">View All</a>
                         </div>
                     </div>
                     

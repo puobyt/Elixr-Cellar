@@ -12,8 +12,14 @@ const path = require("path");
 const fs = require("fs");
 const PDFDocument = require("pdfkit");
 const XLSX = require("xlsx");
-const multer = require("multer");
+const sharp = require('sharp');
+
+
+
+
+
 const mongoose = require("mongoose");
+const multer = require("multer");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "public/productImg");
@@ -23,7 +29,14 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage, field: "image" });
+const upload = multer({ 
+  storage: storage,
+  limits: {
+      fieldSize: 1024 * 1024 * 10 // Adjust the field size limit as needed (e.g., 10 MB)
+  }
+});
+
+
 
 // Admin Login
 const adminLogin = (req, res) => {
@@ -526,51 +539,76 @@ const addProductPage = async (req, res) => {
   }
 };
 
+
 const addProduct = async (req, res) => {
-  if (req.session.admin)
-    try {
-      const { productName, productDes, productCat, productDate, price, stock } =
-        req.body;
-      console.log("req.files", req.files);
-      const files = req.files;
-      const prodId = req.body.productId;
-      const imagePaths = files.map((file) => "productImg/" + file.filename);
-      console.log("image path", imagePaths);
+  if (req.session.admin) {
+      try {
+          const { productName, productDes, productCat, productDate, price, stock } = req.body;
 
-      const productIn = await products.findById(prodId);
+          // Array to hold paths of cropped images
+          const imagePaths = [];
 
-      const newProduct = new products({
-        productName: productName,
-        productCategory: productCat,
-        description: productDes,
-        ManufactureDate: productDate,
-        totalQuantity: stock,
-        price,
-        image: imagePaths,
-      });
+          // Process each file
+          if (req.files && req.files.length > 0) {
+              for (const file of req.files) {
+                  const originalPath = file.path; // The original file path
+                  const croppedImagePath = path.join('public/productImg', `cropped_${file.filename}`);
+                  
+                  // Crop and resize the image using sharp
+                  await sharp(originalPath)
+                      .resize(300, 300, {
+                          fit: sharp.fit.cover, // Use 'cover' fit strategy
+                          position: sharp.strategy.attention // Focus attention-based cropping
+                      })
+                      .toFile(croppedImagePath);
+                  
+                  // Add the cropped image path to the array
+                  imagePaths.push(croppedImagePath);
+              }
+          }
 
-      let savedProd = await newProduct.save();
+          // Create a new product object
+          const newProduct = new products({
+              productName,
+              productCategory: productCat,
+              description: productDes,
+              manufactureDate: productDate,
+              totalQuantity: stock,
+              price,
+              image: imagePaths,
+          });
 
-      await categories.findOneAndUpdate(
-        { category: productCat },
-        { $push: { products: savedProd._id } },
-        { new: true }
-      );
+          // Save the new product to the database
+          let savedProd = await newProduct.save();
 
-      res.redirect("/adminInventory");
-    } catch (error) {
-      if (error.code === 11000) {
-        console.error("Product already exists");
-        let category = await categories.find();
-        return res.render("addProduct", {
-          category,
-          mess: "Product already exists",
-        });
+          // Update the category with the new product ID
+          await categories.findOneAndUpdate(
+              { category: productCat },
+              { $push: { products: savedProd._id } },
+              { new: true }
+          );
+
+          // Redirect to admin inventory page
+          res.redirect("/adminInventory");
+      } catch (error) {
+          // Handle duplicate key error
+          if (error.code === 11000) {
+              console.error("Product already exists");
+              let category = await categories.find();
+              return res.render("addProduct", {
+                  category,
+                  mess: "Product already exists",
+              });
+          }
+
+          // Log and respond with internal server error
+          console.error(error);
+          res.status(500).send("Internal Server Error");
       }
-
-      console.error(error);
-      res.status(500).send("Internal Server Error");
-    }
+  } else {
+      // If not logged in as admin, redirect to login page
+      res.redirect("/adminLogin");
+  }
 };
 
 const customerDashBoard = async (req, res) => {

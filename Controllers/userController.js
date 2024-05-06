@@ -8,6 +8,7 @@ const wallet = require("../Model/walletModel");
 const Category = require("../Model/categoryModel");
 const mongoose = require("mongoose");
 const Coupons = require("../Model/couponModel");
+const offer = require("../Model/offerModel");
 const PDFDocument= require('pdfkit');
 
 
@@ -192,6 +193,19 @@ const sendOTP = (email, otp, req) => {
       console.log("Email sent: " + info.response);
     }
   });
+};
+
+// Resend Otp
+
+const resendOtp = async(req,res)=>{
+  const email =req.body.email;
+  if(!email){
+    return res.status(400).send("Invalid request.");
+  }
+  const otp= generateOTP();
+  req.session.otp = otp;
+  sendOTP(email, otp, req);
+  res.status(200).send("OTP resent successfull")
 };
 
 const registerUser = (req, res) => {
@@ -943,6 +957,24 @@ const verifyPayment = async (req, res) => {
   }
 };
 
+const retryPayment = async (req, res) => {
+  try {
+      // Retrieve the order ID from the request parameters
+      const orderId = req.params.orderId;
+
+      // Render the retryPayment view and pass the orderId to the template
+      res.render("retryPayment", { orderId });
+  } catch (error) {
+      console.log(error);
+      res.status(500).send("Internal Server Error");
+  }
+}
+
+
+
+   
+
+
 const userOrderPlaced = async (req, res) => {
   try {
     if (req.session.user) {
@@ -1569,7 +1601,7 @@ const showOffers = async (req,res)=>{
 const generateInvoice = async (req, res) => {
   try {
     const orderId = req.params.orderId; // Order ID is received as a string
-    const invoiceData = await orders.findOne({ orderId }).populate('customer').populate("items.product");
+    const invoiceData = await orders.findOne({ orderId }).populate('customer').populate("items.product").populate('couponApplied');
 
     if (!invoiceData) {
       throw new Error('Order not found');
@@ -1626,11 +1658,20 @@ const generateInvoice = async (req, res) => {
       doc.moveUp();
     });
 
+    // Coupon Details
+    doc.fontSize(14).font('Helvetica');
+    doc.moveDown()
+    doc.moveDown()
+    doc.moveDown()
+    doc.text(`Coupon Applied: ${invoiceData.couponApplied.code}`);
+    doc.text(`Discount Value: ${invoiceData.couponApplied.discountValue} %`);
+
     // Invoice Total
     doc.fontSize(14).font('Helvetica-Bold');
     doc.moveDown()
     doc.moveDown()
     doc.moveDown()
+   
     doc.text(`Total Amount: Rs.${invoiceData.totalAmount.toFixed(2)}`);
 
     // Invoice Footer
@@ -1697,9 +1738,11 @@ module.exports = {
   registerUser,
   otp,
   otpVerification,
+  resendOtp,
   userLogout,
   searchProduct,
   handleCheckOut,
+  retryPayment,
   userOrderPlaced,
   orderDetails,
   userSuccess,
@@ -1712,5 +1755,7 @@ module.exports = {
   validateCoupon,
   cancelCoupon,
   checkAndExpireOffers,
-  generateInvoice
+  showOffers,
+  generateInvoice,
+
 };

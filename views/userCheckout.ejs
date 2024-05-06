@@ -130,7 +130,8 @@
                                                     <p class="font-weight-bold mb-1">
                                                         <%= item.productId.productName %>
                                                     </p>
-                                                    <p class="text-muted mb-0">₹<%= item.productId.price %>
+                                                    <p class="text-muted mb-0">
+                                                        ₹<%= item.productId.price %> x <%= item.quantity %> 
                                                     </p>
                                                 </div>
                                             </div>
@@ -146,8 +147,10 @@
                                         <strong class="text-black">₹<%=totalPrice%></strong>
                                         <input id="checkout-total" type="hidden" value="<%=totalPrice%>"
                                             name="totalPrice">
-                                        <p id="checkout-total-amt" name="totalPrice">
-                                            <%=totalPrice%>
+                                            <p id="checkout-total-amt" name="totalPrice" class="font-weight-bold">
+                                                <%= totalPrice %>
+                                            </p>
+                                            
                                         </p>
                                         <input type="hidden" id="checkout-total-input" name="checkoutTotalInput">
                                     </div>
@@ -410,15 +413,66 @@
 
 
 
-        async function paymentFailed(data) {
-            try {
-                console.log('Payment failed or window closed:', data);
-                alert('Payment failed. Please try again.');
-                window.location.href = '/userCheckout';
-            } catch (error) {
-                console.error('Error handling payment failure:', error);
-            }
+        async function startNewPayment() {
+    try {
+        // Defining the payment data required to start a new payment session.
+        var selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+        var mobile = selectedAddress.getAttribute('data-mobile');
+        var houseName = selectedAddress.getAttribute('data-houseName');
+        var street = selectedAddress.getAttribute('data-street');
+        var city = selectedAddress.getAttribute('data-city');
+        var pincode = selectedAddress.getAttribute('data-pincode');
+        var state = selectedAddress.getAttribute('data-state');
+        const paymentOption = document.querySelector('input[name="paymentMethod"]:checked').value;
+        const paymentData = {
+            order: order, // Include the order ID or other order details.
+            payment: payment, // Include any payment method data or identifiers.
+            paymentOption: paymentOption, // Include the selected payment option.
+            selectedMobile: mobile,
+            selectedHouseName: houseName,
+            selectedStreet: street,
+            selectedCity: city,
+            selectedPincode: pincode,
+            selectedState: state,
+        };
+
+        // Send a request to the server to initiate a new payment session.
+        const response = await fetch('/startNewPayment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(paymentData),
+        });
+
+        // Parse the response from the server.
+        const responseData = await response.json();
+
+        if (responseData.status) {
+            // Redirect the user to the new payment session URL or perform any other necessary actions.
+            window.location.href = '/retryPayment';
+        } else {
+            // Handle case when starting a new payment session fails.
+            alert('Failed to reinitiate payment. Please try again later.');
         }
+    } catch (error) {
+        console.error('Error initiating new payment:', error);
+        alert('Error initiating new payment. Please try again.');
+    }
+}
+
+async function paymentFailed(data) {
+    try {
+        console.log('Payment failed or window closed:', data);
+        alert('Payment failed. Please try again.');
+        // Redirect the user to the '/retryPayment' route
+        window.location.href = '/retryPayment';
+    } catch (error) {
+        console.error('Error handling payment failure:', error);
+        alert('An error occurred while handling the payment failure. Please try again later.');
+    }
+}
+
 
         var checkoutTotalInput = document.getElementById('checkout-total-input');
         const discountValueElement = document.getElementById('discountValue');

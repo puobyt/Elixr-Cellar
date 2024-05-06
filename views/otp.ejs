@@ -11,6 +11,13 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/User/userlogin.css">
 </head>
+<style>
+span.time {
+  margin-left: 45px;
+  
+}
+</style>
+
 
 <body>
   <main class="d-flex align-items-center min-vh-100 py-3 py-md-0">
@@ -29,13 +36,23 @@
               </p>
               <p class="login-card-description">Enter OTP</p>
               <form action="/otp" method="POST">
-
                 <div class="form-group mb-4">
-                  <label for="password" class="sr-only">Password</label>
-                  <input type="text" name="otp" id="password" class="form-control" placeholder="Verify OTP">
+                    <label for="otp" class="sr-only">OTP</label>
+                    <input type="text" name="otp" id="otp" class="form-control" placeholder="Verify OTP">
                 </div>
                 <button name="login" id="login" class="btn btn-block login-btn mb-4 bg-danger">Login</button>
-              </form>
+                <button type="button" id="resendOtp" class="btn btn-secondary mb-4" >Resend OTP</button>
+                
+                  <div>
+                    <span class="time"></span>
+                  </div>
+                 
+                
+               
+                
+               
+            </form>
+            
 
 
               </nav>
@@ -58,3 +75,120 @@
 </body>
 
 </html>
+
+<script>
+   function timer(n) {
+        document.getElementById("resendOtp").disabled = true;
+        const interval = setInterval(() => {
+          if (n == 0) {
+            clearInterval(interval);
+            document.getElementById("resendOtp").disabled = false;
+          }
+          document.querySelector(".time").innerHTML = n;
+          n = n - 1;
+        }, 1000);
+      }
+      timer(10);
+      document.getElementById("resend").onclick = function () {
+        timer(10);
+      };
+      document.getElementById("resendOtp").onclick = function () {
+    // Fetch request to resend the OTP
+    const email = document.querySelector('input[name="email"]').value; // Assuming you have an input field with name="email"
+    fetch("/resendOtp", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+    })
+    .then(response => {
+        if (response.ok) {
+            timer(10); // Start the timer when the OTP is successfully sent
+            alert("OTP sent successfully.");
+        } else {
+            alert("Failed to resend OTP.");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Failed to resend OTP.");
+    });
+};
+document.addEventListener("DOMContentLoaded", () => {
+    // Get references to the resend button and the timer display elements
+    const resendButton = document.getElementById("resendOtp");
+    const timerDisplay = document.getElementById("timer");
+
+    // Check if the button and timer display exist
+    if (!resendButton || !timerDisplay) {
+        console.error("Resend button or timer display not found in the DOM");
+        return;
+    }
+
+    // Initialize countdown variable and interval variable
+    let countdown = 10;
+    let interval;
+
+    // Function to format seconds into a time string (mm:ss)
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+    }
+
+    // Function to start the countdown
+    function startCountdown() {
+        // Reset countdown to 10 seconds
+        countdown = 10;
+        
+        // Disable the resend button during the countdown
+        resendButton.disabled = true;
+
+        // Start the countdown
+        interval = setInterval(() => {
+            // Decrement countdown
+            countdown--;
+
+            // Update the timer display with the formatted remaining time
+            timerDisplay.textContent = `Resend in: ${formatTime(countdown)}`;
+
+            // When the countdown reaches zero, stop the countdown and enable the resend button
+            if (countdown <= 0) {
+                clearInterval(interval);
+                resendButton.disabled = false;
+                timerDisplay.textContent = "Resend in: --:--";
+            }
+        }, 1000); // Update every second
+    }
+
+    // Add an event listener to the "Resend OTP" button
+    resendButton.addEventListener("click", () => {
+        // Fetch request to resend OTP
+        fetch("/resendOtp", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: document.querySelector("#otp").value }),
+        })
+        .then(response => {
+            // Check if the request was successful
+            if (response.ok) {
+                console.log("OTP resent successfully");
+                // Start the countdown if the OTP was resent successfully
+                startCountdown();
+            } else {
+                alert("Failed to resend OTP.");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Failed to resend OTP.");
+        });
+    });
+});
+
+
+
+</script>
