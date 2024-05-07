@@ -47,6 +47,8 @@ const adminLogin = (req, res) => {
   }
 };
 
+
+
 // Admin validation
 const adminVerification = async (req, res) => {
   try {
@@ -194,11 +196,104 @@ const userDelete = async (req, res) => {
     res.redirect("/admin");
   }
 };
+const customerDashBoard = async (req, res) => {
+  if (req.session.admin) {
+    try {
+      const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1
+      const limit = 8; // Items per page
+      const skip = (page - 1) * limit; // Number of items to skip
+      const count = await users.countDocuments(); // Total number of documents
+      const totalPages = Math.ceil(count / limit); // Total number of pages
+
+      // Query the database with pagination
+      let User = await users.find().skip(skip).limit(limit);
+
+      // Render the view with pagination data
+      res.render("adminCustomerDash", { User, currentPage: page, totalPages });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+};
+
+const blockUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await users.findById(userId);
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    user.isBlocked = true;
+    await user.save();
+
+    res.redirect("/customerDashBoard");
+  } catch (error) {
+    console.error("Error", error);
+    res.status(500).send("Internal server Error");
+  }
+};
+
+const unblockUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await users.findById(userId);
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    user.isBlocked = false;
+    await user.save();
+
+    res.redirect("/customerDashBoard");
+  } catch (error) {
+    console.error("Error", error);
+    res.status(500).send("Internal server Error");
+  }
+};
+
+const adminOrdersDash = async (req, res) => {
+  try {
+    if (!req.session.admin) {
+      return res.redirect("/login"); // Redirect to login page if not logged in as admin
+    }
+
+    const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1
+    const limit = 8; // Items per page
+    const skip = (page - 1) * limit; // Number of items to skip
+    const count = await orders.countDocuments(); // Total number of orders
+    const totalPages = Math.ceil(count / limit); // Total number of pages
+
+    // Query the database for the current page orders
+    const userOrders = await orders
+      .find()
+      .skip(skip)
+      .limit(limit)
+      .populate("items.product")
+      .sort({ orderDate: -1 });
+
+    // Render the view with pagination data
+    res.render("adminOrdersDash", {
+      userOrders,
+      currentPage: page,
+      totalPages,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+
 
 // Dashboard
 const adminDashboard = async (req, res) => {
   res.render("adminDashboard");
 };
+
+
 
 // Category
 const adminCategory = async (req, res) => {
@@ -307,6 +402,8 @@ const adminEditCategoryPost = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
+
 
 // Inventory
 const adminInventory = async (req, res) => {
@@ -611,95 +708,9 @@ const addProduct = async (req, res) => {
   }
 };
 
-const customerDashBoard = async (req, res) => {
-  if (req.session.admin) {
-    try {
-      const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1
-      const limit = 8; // Items per page
-      const skip = (page - 1) * limit; // Number of items to skip
-      const count = await users.countDocuments(); // Total number of documents
-      const totalPages = Math.ceil(count / limit); // Total number of pages
 
-      // Query the database with pagination
-      let User = await users.find().skip(skip).limit(limit);
 
-      // Render the view with pagination data
-      res.render("adminCustomerDash", { User, currentPage: page, totalPages });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-};
 
-const blockUser = async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    const user = await users.findById(userId);
-
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    user.isBlocked = true;
-    await user.save();
-
-    res.redirect("/customerDashBoard");
-  } catch (error) {
-    console.error("Error", error);
-    res.status(500).send("Internal server Error");
-  }
-};
-
-const unblockUser = async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    const user = await users.findById(userId);
-
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    user.isBlocked = false;
-    await user.save();
-
-    res.redirect("/customerDashBoard");
-  } catch (error) {
-    console.error("Error", error);
-    res.status(500).send("Internal server Error");
-  }
-};
-
-const adminOrdersDash = async (req, res) => {
-  try {
-    if (!req.session.admin) {
-      return res.redirect("/login"); // Redirect to login page if not logged in as admin
-    }
-
-    const page = parseInt(req.query.page) || 1; // Current page number, defaulting to 1
-    const limit = 8; // Items per page
-    const skip = (page - 1) * limit; // Number of items to skip
-    const count = await orders.countDocuments(); // Total number of orders
-    const totalPages = Math.ceil(count / limit); // Total number of pages
-
-    // Query the database for the current page orders
-    const userOrders = await orders
-      .find()
-      .skip(skip)
-      .limit(limit)
-      .populate("items.product")
-      .sort({ orderDate: -1 });
-
-    // Render the view with pagination data
-    res.render("adminOrdersDash", {
-      userOrders,
-      currentPage: page,
-      totalPages,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send("Internal Server Error");
-  }
-};
 
 sendCancelNotification = async (req, res) => {
   try {
@@ -930,16 +941,6 @@ const adminOffers = async (req, res) => {
     }
 };
 
-// const addOffersGet = async(req, res) => {
-//   if (req.session.admin)
-//     try {
-//       let category = await categories.find();
-//       res.render("addOffers", {category,mess:""});
-//     } catch (error) {
-//       console.log("Error", error);
-//       res.status(500).send("Internal Server Error");
-//     }
-// };
 
 const addOffersGet = async (req, res) => {
   const Products = await products.find();
@@ -951,58 +952,7 @@ const addOffersGet = async (req, res) => {
   });
 };
 
-// const addOffers = async (req, res) => {
-//   try {
-//     const { code, discountValue, productCat, expiry, minimumCartAmount } =
-//       req.body;
 
-//     const existingOffer = await offer.findOne({ code: code.toUpperCase() });
-//     if (existingOffer) {
-//       return res.render("addOffers", { mess: "Offer already exists" });
-//     }
-
-//     // Form Validation
-//     if (
-//       isNaN(discountValue) ||
-//       isNaN(minimumCartAmount) ||
-//       discountValue >= 100 ||
-//       minimumCartAmount <= 0 ||
-//       discountValue < 0 ||
-//       minimumCartAmount < 0
-//     ) {
-//       return res.render("addOffers", {
-//         mess: "Please enter valid discount value and cart amount.",
-//       });
-//     }
-
-//     const newOffer = new offer({
-//       code: code.toUpperCase(),
-//       discountValue: discountValue,
-//       productCategory: productCat,
-//       expiry: expiry,
-//       minimumCartAmount: minimumCartAmount,
-//       status: "Active",
-//     });
-
-//     await categories.findOneAndUpdate(
-//       { category: productCat },
-//       { $push: { products: newOffer._id } },
-//       { new: true }
-//     );
-
-//     await newOffer.save();
-
-//     const offers = await offer.find();
-
-//     res.render("adminOffers", {
-//       offer: offers,
-//       mess: "Offer added successfully",
-//     });
-//   } catch (error) {
-//     console.log("Error", error);
-//     res.status(500).send("Internal Server Error");
-//   }
-// };
 
 const addOffers = async (req, res) => {
   const Products = await products.find();
@@ -1372,48 +1322,66 @@ const adminLogout = (req, res) => {
 };
 
 module.exports = {
-  upload,
+
+  // login
   adminLogin,
   adminVerification,
   adminHome,
   adminLogout,
+// add user
   addUser,
   addUserFunction,
   editUser,
   editUserFunction,
   userDelete,
+  blockUser,
+  unblockUser,
+// category
   adminCategory,
   removeCategory,
   adminEditCategory,
+  addCategoryPage,
+  addCategory,
   adminEditCategoryPost,
-  adminDashboard,
-  adminInventory,
   listUnlistCategory,
+  // dash
+  adminDashboard,
+  customerDashBoard,
+
+// Products
+  adminInventory,
   listUnlistProduct,
   adminProductDetails,
   adminEditProduct,
+  upload,
   removeImage,
   adminEditProductPost,
   addProductPage,
   addProduct,
-  customerDashBoard,
-  blockUser,
-  unblockUser,
-  addCategoryPage,
-  addCategory,
-  adminOrdersDash,
+  // Orders
   changeOrderStatus,
+  adminOrdersDash,
+  sendCancelNotification,
+  // Coupons
   adminCouponsDiscounts,
   addCoupons,
   addCouponsGet,
   editCouponsGet,
   editCoupons,
   deleteCoupon,
+  // Offers
   adminOffers,
   addOffersGet,
   addOffers,
   deleteOffers,
+  // Sales Report
   generateExcelReport,
   generatePdfReport,
-  sendCancelNotification,
+ 
+
+
+
+
+
+
 };

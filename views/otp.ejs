@@ -41,7 +41,7 @@ span.time {
                     <input type="text" name="otp" id="otp" class="form-control" placeholder="Verify OTP">
                 </div>
                 <button name="login" id="login" class="btn btn-block login-btn mb-4 bg-danger">Login</button>
-                <button type="button" id="resendOtp" class="btn btn-secondary mb-4" >Resend OTP</button>
+                <button type="button" id="resendOtp" class="btn btn-secondary mb-4" onclick="">Resend OTP</button>
                 
                   <div>
                     <span class="time"></span>
@@ -89,18 +89,18 @@ span.time {
         }, 1000);
       }
       timer(10);
-      document.getElementById("resend").onclick = function () {
+      document.getElementById("resendOtp").onclick = function () {
         timer(10);
       };
       document.getElementById("resendOtp").onclick = function () {
     // Fetch request to resend the OTP
-    const email = document.querySelector('input[name="email"]').value; // Assuming you have an input field with name="email"
+    console.log("RESEND ")
     fetch("/resendOtp", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email }),
+
     })
     .then(response => {
         if (response.ok) {

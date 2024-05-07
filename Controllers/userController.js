@@ -160,7 +160,7 @@ const userAbout = (req, res) => {
 };
 
 // Generate OTP
-const generateOTP = () => {
+const generateOTP = (email) => {
   return randomstring.generate({
     length: 6,
     charset: "numeric",
@@ -179,6 +179,9 @@ const transporter = nodemailer.createTransport({
 // Send OTP via email
 
 const sendOTP = (email, otp, req) => {
+  console.log("req.session",req.session)
+  console.log("email otp",email)
+  
   const mailOptions = {
     from: "puobyt@gmail.com",
     to: email,
@@ -198,11 +201,12 @@ const sendOTP = (email, otp, req) => {
 // Resend Otp
 
 const resendOtp = async(req,res)=>{
-  const email =req.body.email;
+  const email =req.session.email;
+  console.log("Resend email",email)
   if(!email){
     return res.status(400).send("Invalid request.");
   }
-  const otp= generateOTP();
+  const otp= generateOTP(email);
   req.session.otp = otp;
   sendOTP(email, otp, req);
   res.status(200).send("OTP resent successfull")
@@ -220,13 +224,15 @@ const userSignup = async (req, res) => {
   try {
     // User data from the request body
     let user1 = {
-      name: req.body.name,
-      email: req.body.email,
+      name: req.body.Name,
+      email: req.body.Email,
       password: req.body.password,
     };
+    req.session.email = user1.email
+    console.log("req.body",req.body)
 
     // Retrieve email from request body
-    const email = req.body.email;
+    const email = req.body.Email;
 
     // Check if a user with the provided email already exists
     const userCheck = await UserCollection.findOne({ email: email });
@@ -243,7 +249,7 @@ const userSignup = async (req, res) => {
 
       // Display the OTP in the console
       console.log("Generated OTP:", otp);
-
+      console.log("Emailll",email)
       // Send the OTP to the user's email
       sendOTP(email, otp, req);
 
@@ -1663,8 +1669,19 @@ const generateInvoice = async (req, res) => {
     doc.moveDown()
     doc.moveDown()
     doc.moveDown()
-    doc.text(`Coupon Applied: ${invoiceData.couponApplied.code}`);
-    doc.text(`Discount Value: ${invoiceData.couponApplied.discountValue} %`);
+    
+// Check if a coupon was applied
+if (invoiceData.couponApplied) {
+  // Add text to the PDF with the coupon code
+  doc.text(`Coupon Applied: ${invoiceData.couponApplied.code}`);
+}
+if (invoiceData.couponApplied) {
+  // Add text to the PDF with the coupon code
+  doc.text(`Coupon Applied: ${invoiceData.couponApplied.discountValue}`);
+}
+      
+      
+    
 
     // Invoice Total
     doc.fontSize(14).font('Helvetica-Bold');
@@ -1701,61 +1718,95 @@ const userLogout = (req, res) => {
 };
 
 module.exports = {
-  addToCart,
+  // Login & Signup
   userLoginData,
-  userContact,
-  userCart,
-
-  addAddressToCart,
-  addAddressToCartPage,
-  updateQuantity,
-  removeFromCart,
-  userCheckout,
-  createOrder,
-  verifyPayment,
-  userProfile,
-  showChangePassword,
-  handleResetPassword,
   registerPass,
-  addAddressPage,
-  addAddress,
-  userAddress,
-  userProfileEdit,
-  editaddress,
-  saveEditAddress,
-  deleteAddress,
-  userShop,
-  categoryFilter,
   userLogin,
   resetPassword,
   resetOtp,
   verifyOtp,
   postResetPassword,
   userSignup,
-  userHome,
-  userProductDetails,
-  userAbout,
+  showChangePassword,
+  handleResetPassword,
+  changePassword,
+  changingPassword,
   registerUser,
   otp,
   otpVerification,
   resendOtp,
   userLogout,
+  // Home & Shop
+  userHome,
+  userContact,
+  userAbout,
+  userProfile,
+  userProfileEdit,
+  
+  addAddressToCart,
+  addAddressToCartPage,
+  addAddressPage,
+  addAddress,
+  userAddress,
+  editaddress,
+  saveEditAddress,
+  deleteAddress,
+  // Shop
   searchProduct,
+  createOrder,
+  categoryFilter,
+  wishlistCart,
+  userShop,
+  userProductDetails,
+  addToCart,
+  userCart,
+  updateQuantity,
+  removeFromCart,
+  // Checkout
+  userCheckout,
+  verifyPayment,
   handleCheckOut,
+  userWallet,
+  processPayment,
   retryPayment,
   userOrderPlaced,
   orderDetails,
   userSuccess,
   cancelOrder,
-  userWallet,
-  processPayment,
-  wishlistCart,
-  changePassword,
-  changingPassword,
+  // Coupon
   validateCoupon,
   cancelCoupon,
+  // Offers
   checkAndExpireOffers,
   showOffers,
+  // Report
+  
   generateInvoice,
 
+
 };
+
+
+
+
+
+
+
+ 
+ 
+
+
+
+
+ 
+
+ 
+
+
+
+
+
+
+
+
+
