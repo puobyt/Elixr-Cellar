@@ -1677,7 +1677,7 @@ if (invoiceData.couponApplied) {
 }
 if (invoiceData.couponApplied) {
   // Add text to the PDF with the coupon code
-  doc.text(`Coupon Applied: ${invoiceData.couponApplied.discountValue}`);
+  doc.text(`Discount Applied: ${invoiceData.couponApplied.discountValue}`);
 }
       
       
